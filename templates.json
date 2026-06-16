@@ -9,7 +9,7 @@
       "note": "Rode no manager. A rede overlay publica precisa existir: `docker network create --driver overlay --attachable web`. HTTP_AUTH_BASIC no formato usuario:hash (use `htpasswd -nbB`).",
       "categories": ["proxy", "networking"],
       "platform": "linux",
-      "logo": "https://raw.githubusercontent.com/traefik/traefik/master/docs/content/assets/img/traefik.logo.png",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/traefik.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
         "stackfile": "balancer/docker-compose.yml"
@@ -30,7 +30,7 @@
       "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. Para LDAP, requer a rede `ldap` e a stack account.",
       "categories": ["storage", "productivity"],
       "platform": "linux",
-      "logo": "https://owncloud.org/wp-content/themes/owncloudorgnew/assets/img/common/owncloud-logo.svg",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/owncloud.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
         "stackfile": "drive/docker-compose.yml"
@@ -56,7 +56,7 @@
       "note": "PRE-REQUISITO: crie antes os Docker configs do self-service-password (`docker config create account_ssp_config_v1 ...` e `account_ssp_css_custom_v1 ...`). Veja o README da stack.",
       "categories": ["authentication", "ldap"],
       "platform": "linux",
-      "logo": "https://www.ldap-account-manager.org/lamcms/sites/default/files/lam_logo.png",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/ldap-account-manager.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
         "stackfile": "account/docker-compose.yml"
@@ -81,7 +81,7 @@
       "note": "Requer a rede `web` (stack balancer). Para acessar bancos de outras stacks, anexe a rede correspondente ao servico.",
       "categories": ["database", "tools"],
       "platform": "linux",
-      "logo": "https://www.phpmyadmin.net/static/images/logo_right.png",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/phpmyadmin.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
         "stackfile": "tools/docker-compose.yml"
