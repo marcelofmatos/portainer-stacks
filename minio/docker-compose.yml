@@ -1,0 +1,59 @@
+# Stack "minio" — MinIO (object storage compatível com S3) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+#
+# Dois roteadores Traefik:
+#   - API S3   (porta 9000) em MINIO_S3_FQDN      → router/service `minio-s3`
+#   - Console  (porta 9001) em MINIO_CONSOLE_FQDN → router/service `minio-console`
+#
+# Toda customização é feita por variáveis de ambiente (ver README e bloco abaixo).
+# Obrigatórias: MINIO_S3_FQDN, MINIO_CONSOLE_FQDN, MINIO_ROOT_USER, MINIO_ROOT_PASSWORD.
+#
+# NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster com mais de um worker,
+# fixe o serviço com volume definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+services:
+  minio:
+    image: minio/minio:${MINIO_IMAGE_TAG:-latest}
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MINIO_BROWSER_REDIRECT_URL=https://${MINIO_CONSOLE_FQDN}
+    volumes:
+      - minio-data:/data
+    networks:
+      - default
+      - web
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        # API S3 (porta 9000)
+        - traefik.http.routers.minio-s3.rule=Host(`${MINIO_S3_FQDN}`)
+        - traefik.http.routers.minio-s3.entrypoints=websecure
+        - traefik.http.routers.minio-s3.tls=true
+        - traefik.http.routers.minio-s3.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.minio-s3.service=minio-s3
+        - traefik.http.services.minio-s3.loadbalancer.server.port=9000
+        # Console (porta 9001)
+        - traefik.http.routers.minio-console.rule=Host(`${MINIO_CONSOLE_FQDN}`)
+        - traefik.http.routers.minio-console.entrypoints=websecure
+        - traefik.http.routers.minio-console.tls=true
+        - traefik.http.routers.minio-console.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.minio-console.service=minio-console
+        - traefik.http.services.minio-console.loadbalancer.server.port=9001
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay
+
+volumes:
+  minio-data:
+    driver: local

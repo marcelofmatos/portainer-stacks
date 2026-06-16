@@ -1,0 +1,53 @@
+# Stack "litellm" — LiteLLM Proxy (Docker Swarm)
+# Gateway OpenAI-compatible para vários provedores de LLM (OpenAI, Anthropic, Azure, etc.).
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+#
+# Toda customização é feita por variáveis de ambiente (ver README e bloco abaixo).
+# Obrigatórias: LITELLM_FQDN, LITELLM_MASTER_KEY, LITELLM_SALT_KEY.
+#
+# PRÉ-REQUISITO: o serviço usa 1 Docker config EXTERNO (nome configurável em LITELLM_CONFIG_NAME):
+#   <LITELLM_CONFIG_NAME> -> /app/config.yaml  (model_list; ver config/config.yaml)
+# Crie-o antes do deploy (instruções no README).
+#
+# Serviço stateless (worker, sem volume).
+configs:
+  litellm_config:
+    name: ${LITELLM_CONFIG_NAME:-litellm_config_v1}
+    external: true
+
+services:
+  proxy:
+    image: ghcr.io/berriai/litellm:${LITELLM_IMAGE_TAG:-main-stable}
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    environment:
+      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY}
+      - LITELLM_SALT_KEY=${LITELLM_SALT_KEY}
+      - DATABASE_URL=${DATABASE_URL:-}
+      # Chaves dos provedores referenciadas pelo config.yaml via os.environ/<VAR>:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    configs:
+      - source: litellm_config
+        target: /app/config.yaml
+    networks:
+      - default
+      - web
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.litellm.rule=Host(`${LITELLM_FQDN}`)
+        - traefik.http.routers.litellm.entrypoints=websecure
+        - traefik.http.routers.litellm.tls=true
+        - traefik.http.routers.litellm.tls.certresolver=letsencryptresolver
+        - traefik.http.services.litellm.loadbalancer.server.port=4000
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay

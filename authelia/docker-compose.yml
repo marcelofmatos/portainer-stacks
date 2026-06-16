@@ -1,0 +1,77 @@
+# Stack "authelia" — Authelia (autenticação/2FA, forward-auth do Traefik) + Redis (Docker Swarm)
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Authelia atua como portal de login e provedor de forward-auth para proteger outras stacks.
+#
+# Toda customização é feita por variáveis de ambiente (ver README e bloco abaixo).
+# Obrigatórias: AUTHELIA_FQDN, AUTHELIA_JWT_SECRET, AUTHELIA_SESSION_SECRET,
+#               AUTHELIA_STORAGE_ENCRYPTION_KEY.
+#
+# PRÉ-REQUISITO: o serviço `authelia` usa 1 Docker config EXTERNO
+# (nome configurável em AUTHELIA_CONFIG_NAME):
+#   <AUTHELIA_CONFIG_NAME> -> /config/configuration.yml  (ver config/configuration.yml)
+# Crie-o antes do deploy (instruções no README).
+#
+# NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster com mais de um worker,
+# fixe os serviços com volume definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+configs:
+  authelia_config:
+    name: ${AUTHELIA_CONFIG_NAME:-authelia_config_v1}
+    external: true
+
+services:
+
+  authelia:
+    image: authelia/authelia:${AUTHELIA_IMAGE_TAG:-latest}
+    configs:
+      - source: authelia_config
+        target: /config/configuration.yml
+    environment:
+      - AUTHELIA_JWT_SECRET=${AUTHELIA_JWT_SECRET}
+      - AUTHELIA_SESSION_SECRET=${AUTHELIA_SESSION_SECRET}
+      - AUTHELIA_STORAGE_ENCRYPTION_KEY=${AUTHELIA_STORAGE_ENCRYPTION_KEY}
+    networks:
+      - default
+      - web
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.authelia.rule=Host(`${AUTHELIA_FQDN}`)
+        - traefik.http.routers.authelia.entrypoints=websecure
+        - traefik.http.routers.authelia.tls=true
+        - traefik.http.routers.authelia.tls.certresolver=letsencryptresolver
+        - traefik.http.services.authelia.loadbalancer.server.port=9091
+        # Middleware forward-auth reutilizável por outras stacks: `authelia@swarm`
+        - traefik.http.middlewares.authelia.forwardauth.address=http://authelia:9091/api/verify?rd=https://${AUTHELIA_FQDN}
+        - traefik.http.middlewares.authelia.forwardauth.trustForwardHeader=true
+        - traefik.http.middlewares.authelia.forwardauth.authResponseHeaders=Remote-User,Remote-Groups,Remote-Name,Remote-Email
+
+  redis:
+    image: redis:${REDIS_IMAGE_TAG:-alpine}
+    command: ["redis-server", "--save", "60", "1"]
+    networks:
+      - default
+    volumes:
+      - redis:/data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay
+
+volumes:
+  redis:
+    driver: local

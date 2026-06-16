@@ -1,0 +1,52 @@
+# Stack "chromadb" — ChromaDB (Docker Swarm)
+# Banco de dados vetorial publicado via Traefik v3 com TLS Let's Encrypt
+# (certresolver=letsencryptresolver) na rede externa `web`.
+#
+# Toda customização é feita por variáveis de ambiente (ver README e bloco abaixo).
+# Obrigatórias: CHROMA_FQDN.
+#
+# AUTENTICAÇÃO: por padrão a API fica ABERTA. Defina CHROMA_AUTH_TOKEN para habilitar
+# autenticação por token (header Authorization: Bearer <token>) e/ou proteja via Traefik.
+#
+# NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster com mais de um worker,
+# fixe o serviço definindo WORKER_HOSTNAME e descomentando o constraint de hostname,
+# senão o dado pode "sumir" ao reagendar o container em outro nó.
+services:
+  chroma:
+    image: chromadb/chroma:${CHROMA_IMAGE_TAG:-latest}
+    environment:
+      # Autenticação por token: defina CHROMA_AUTH_TOKEN (e mantenha o provider de token)
+      # para exigir "Authorization: Bearer <token>". Sem token, a API fica ABERTA.
+      - CHROMA_SERVER_AUTHN_CREDENTIALS=${CHROMA_AUTH_TOKEN:-}
+      - CHROMA_SERVER_AUTHN_PROVIDER=${CHROMA_AUTH_PROVIDER:-}
+      - ANONYMIZED_TELEMETRY=${CHROMA_ANONYMIZED_TELEMETRY:-FALSE}
+    volumes:
+      - chroma-data:/data
+    networks:
+      - default
+      - web
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.chromadb.rule=Host(`${CHROMA_FQDN}`)
+        - traefik.http.routers.chromadb.entrypoints=websecure
+        - traefik.http.routers.chromadb.tls=true
+        - traefik.http.routers.chromadb.tls.certresolver=letsencryptresolver
+        - traefik.http.services.chromadb.loadbalancer.server.port=8000
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay
+
+volumes:
+  chroma-data:
+    driver: local

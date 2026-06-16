@@ -1,0 +1,73 @@
+# Stack "workflows" — n8n (Docker Swarm)
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# n8n (automação de workflows) + PostgreSQL como banco.
+#
+# Toda customização é feita por variáveis de ambiente (ver README e bloco abaixo).
+# Obrigatórias: N8N_FQDN, N8N_ENCRYPTION_KEY, N8N_DB_PASSWORD.
+#
+# NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster com mais de um worker,
+# fixe os serviços com volume definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+services:
+  n8n:
+    image: n8nio/n8n:${N8N_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+    environment:
+      - N8N_HOST=${N8N_FQDN}
+      - N8N_PROTOCOL=https
+      - N8N_PORT=5678
+      - WEBHOOK_URL=https://${N8N_FQDN}/
+      - N8N_EDITOR_BASE_URL=https://${N8N_FQDN}/
+      - GENERIC_TIMEZONE=${TZ:-America/Sao_Paulo}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=db
+      - DB_POSTGRESDB_DATABASE=${N8N_DB_NAME:-n8n}
+      - DB_POSTGRESDB_USER=${N8N_DB_USER:-n8n}
+      - DB_POSTGRESDB_PASSWORD=${N8N_DB_PASSWORD}
+    volumes:
+      - n8n_data:/home/node/.n8n
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.workflows.rule=Host(`${N8N_FQDN}`)
+        - traefik.http.routers.workflows.entrypoints=websecure
+        - traefik.http.routers.workflows.tls=true
+        - traefik.http.routers.workflows.tls.certresolver=letsencryptresolver
+        - traefik.http.services.workflows.loadbalancer.server.port=5678
+
+  db:
+    image: postgres:${POSTGRES_IMAGE_TAG:-16-alpine}
+    environment:
+      - POSTGRES_DB=${N8N_DB_NAME:-n8n}
+      - POSTGRES_USER=${N8N_DB_USER:-n8n}
+      - POSTGRES_PASSWORD=${N8N_DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - default
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay
+
+volumes:
+  n8n_data:
+    driver: local
+  db_data:
+    driver: local

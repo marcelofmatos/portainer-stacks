@@ -10,10 +10,7 @@
       "categories": ["proxy", "networking"],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/traefik.png",
-      "repository": {
-        "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "balancer/docker-compose.yml"
-      },
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "balancer/docker-compose.yml" },
       "env": [
         { "name": "DOMAIN", "label": "Dominio base", "description": "Dashboard fica em traefik.balancer.<DOMAIN>" },
         { "name": "ACME_EMAIL", "label": "E-mail Let's Encrypt", "description": "Contato para os certificados" },
@@ -31,10 +28,7 @@
       "categories": ["storage", "productivity"],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/owncloud.png",
-      "repository": {
-        "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "drive/docker-compose.yml"
-      },
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "drive/docker-compose.yml" },
       "env": [
         { "name": "DRIVE_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: drive.exemplo.com" },
         { "name": "OWNCLOUD_ADMIN_PASSWORD", "label": "Senha do admin", "description": "Senha do admin inicial do ownCloud" },
@@ -57,10 +51,7 @@
       "categories": ["authentication", "ldap"],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/ldap-account-manager.png",
-      "repository": {
-        "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "account/docker-compose.yml"
-      },
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "account/docker-compose.yml" },
       "env": [
         { "name": "LAM_FQDN", "label": "Dominio do LAM", "description": "Ex.: account.exemplo.com" },
         { "name": "SSP_FQDN", "label": "Dominio do self-service-password", "description": "Ex.: senha.exemplo.com" },
@@ -82,13 +73,281 @@
       "categories": ["database", "tools"],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/phpmyadmin.png",
-      "repository": {
-        "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "tools/docker-compose.yml"
-      },
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "tools/docker-compose.yml" },
       "env": [
         { "name": "PMA_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: pma.exemplo.com" },
         { "name": "PMA_UPLOAD_LIMIT", "label": "Limite de upload", "default": "256M" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "error-pages — paginas de erro do Traefik",
+      "name": "error-pages",
+      "description": "Paginas de erro customizadas para o Traefik (tarampampam/error-pages). Funciona como middleware `errors` que captura respostas 4xx/5xx das outras stacks.",
+      "note": "Apos o deploy, aplique nas outras stacks o middleware: traefik.http.routers.<r>.middlewares=error-pages@swarm",
+      "categories": ["proxy", "tools"],
+      "platform": "linux",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "error-pages/docker-compose.yml" },
+      "env": [
+        { "name": "ERRORPAGES_TEMPLATE", "label": "Template visual", "default": "ghost", "description": "ghost, l7-dark, matrix, etc." },
+        { "name": "ERRORPAGES_FQDN", "label": "Dominio de preview (opcional)", "description": "Ex.: errors.exemplo.com" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "keycloak — IAM/SSO",
+      "name": "keycloak",
+      "description": "Keycloak (identidade, SSO, OIDC/SAML) com PostgreSQL, publicado via Traefik v3 com TLS.",
+      "note": "Requer a rede `web`. Configure os realms apos o primeiro acesso com o admin bootstrap.",
+      "categories": ["authentication", "identity"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/keycloak.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "keycloak/docker-compose.yml" },
+      "env": [
+        { "name": "KEYCLOAK_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: auth.exemplo.com" },
+        { "name": "KEYCLOAK_ADMIN_PASSWORD", "label": "Senha do admin", "description": "Senha do admin bootstrap" },
+        { "name": "KEYCLOAK_DB_PASSWORD", "label": "Senha do banco", "description": "Senha do PostgreSQL" },
+        { "name": "KEYCLOAK_ADMIN", "label": "Usuario admin", "default": "admin" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "pgadmin4 — admin PostgreSQL",
+      "name": "pgadmin4",
+      "description": "pgAdmin 4 publicado via Traefik v3 com TLS, para administrar bancos PostgreSQL do cluster.",
+      "note": "Requer a rede `web`. Informe o host do banco ao adicionar um server no pgAdmin.",
+      "categories": ["database", "tools"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/pgadmin.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "pgadmin4/docker-compose.yml" },
+      "env": [
+        { "name": "PGADMIN_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: pgadmin.exemplo.com" },
+        { "name": "PGADMIN_EMAIL", "label": "E-mail do admin", "description": "Login do administrador" },
+        { "name": "PGADMIN_PASSWORD", "label": "Senha do admin", "description": "Senha do administrador" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "stirlingpdf — ferramentas de PDF",
+      "name": "stirlingpdf",
+      "description": "Stirling-PDF: suite de ferramentas de PDF (merge, split, OCR, conversao...) self-hosted, via Traefik v3 com TLS.",
+      "categories": ["documents", "tools"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/stirling-pdf.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "stirlingpdf/docker-compose.yml" },
+      "env": [
+        { "name": "STIRLING_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: pdf.exemplo.com" },
+        { "name": "STIRLING_ENABLE_SECURITY", "label": "Habilitar login", "default": "false" },
+        { "name": "STIRLING_LANGS", "label": "Idiomas", "default": "pt_BR,en_US" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "swarmprom — monitoramento Swarm",
+      "name": "swarmprom",
+      "description": "Monitoramento nativo de Docker Swarm: Prometheus, Grafana, Alertmanager, node-exporter e cAdvisor. Expoe o Grafana via Traefik v3.",
+      "note": "node-exporter e cAdvisor rodam em modo global. Prometheus/Grafana podem exigir configuracao adicional (datasources/dashboards) - veja o README.",
+      "categories": ["monitoring"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/grafana.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "swarmprom/docker-compose.yml" },
+      "env": [
+        { "name": "SWARMPROM_GRAFANA_FQDN", "label": "Dominio do Grafana", "description": "Ex.: grafana.exemplo.com" },
+        { "name": "GRAFANA_ADMIN_PASSWORD", "label": "Senha admin Grafana", "description": "Senha do admin do Grafana" },
+        { "name": "GRAFANA_ADMIN_USER", "label": "Usuario admin Grafana", "default": "admin" },
+        { "name": "PROMETHEUS_RETENTION", "label": "Retencao Prometheus", "default": "15d" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "workflows — n8n",
+      "name": "workflows",
+      "description": "n8n (automacao de workflows low-code) com PostgreSQL, publicado via Traefik v3 com TLS.",
+      "note": "Requer a rede `web`. Gere a N8N_ENCRYPTION_KEY com `openssl rand -hex 32` (nao altere depois).",
+      "categories": ["automation"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/n8n.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "workflows/docker-compose.yml" },
+      "env": [
+        { "name": "N8N_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: workflows.exemplo.com" },
+        { "name": "N8N_ENCRYPTION_KEY", "label": "Encryption key", "description": "openssl rand -hex 32" },
+        { "name": "N8N_DB_PASSWORD", "label": "Senha do banco", "description": "Senha do PostgreSQL" },
+        { "name": "TZ", "label": "Timezone", "default": "America/Sao_Paulo" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "ollama — runtime de LLMs",
+      "name": "ollama",
+      "description": "Ollama: executa modelos de linguagem (LLMs) localmente. Exposicao via Traefik opcional.",
+      "note": "ATENCAO: o Ollama nao tem autenticacao nativa. Proteja com basicauth no Traefik ou nao exponha publicamente. GPU NVIDIA opcional (ver README).",
+      "categories": ["ai"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/ollama.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "ollama/docker-compose.yml" },
+      "env": [
+        { "name": "OLLAMA_FQDN", "label": "Dominio (opcional)", "description": "Deixe vazio para nao expor publicamente" },
+        { "name": "OLLAMA_KEEP_ALIVE", "label": "Keep-alive do modelo", "default": "5m" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "authelia — autenticacao/2FA",
+      "name": "authelia",
+      "description": "Authelia: portal de autenticacao e 2FA (forward-auth) para proteger servicos atras do Traefik. Inclui Redis.",
+      "note": "PRE-REQUISITO: crie o Docker config `authelia_config_v1` a partir de config/configuration.yml. Aplique nas stacks o middleware authelia@swarm. Veja o README.",
+      "categories": ["authentication", "security"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/authelia.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "authelia/docker-compose.yml" },
+      "env": [
+        { "name": "AUTHELIA_FQDN", "label": "Dominio do portal", "description": "Ex.: auth.exemplo.com" },
+        { "name": "AUTHELIA_JWT_SECRET", "label": "JWT secret", "description": "Segredo para assinar JWTs" },
+        { "name": "AUTHELIA_SESSION_SECRET", "label": "Session secret", "description": "Segredo das sessoes" },
+        { "name": "AUTHELIA_STORAGE_ENCRYPTION_KEY", "label": "Storage key", "description": "Chave de storage (min. 20 chars)" },
+        { "name": "AUTHELIA_CONFIG_NAME", "label": "Docker config", "default": "authelia_config_v1" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "rocketchat — chat de equipe",
+      "name": "rocketchat",
+      "description": "Rocket.Chat (mensageria de equipe) com MongoDB (replica set), publicado via Traefik v3 com TLS.",
+      "note": "Na primeira vez e preciso inicializar o replica set do MongoDB (`rs.initiate()`) - veja o README.",
+      "categories": ["communication"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/rocket-chat.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "rocketchat/docker-compose.yml" },
+      "env": [
+        { "name": "ROCKETCHAT_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: chat.exemplo.com" },
+        { "name": "ROCKETCHAT_DB_NAME", "label": "Nome do banco", "default": "rocketchat" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "minio — object storage S3",
+      "name": "minio",
+      "description": "MinIO: armazenamento de objetos compativel com S3, com console web. Dois dominios (API e console) via Traefik v3.",
+      "note": "Requer a rede `web` e DNS para os dois FQDNs (API S3 e console).",
+      "categories": ["storage"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/minio.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "minio/docker-compose.yml" },
+      "env": [
+        { "name": "MINIO_S3_FQDN", "label": "Dominio API S3", "description": "Ex.: s3.exemplo.com" },
+        { "name": "MINIO_CONSOLE_FQDN", "label": "Dominio do console", "description": "Ex.: minio.exemplo.com" },
+        { "name": "MINIO_ROOT_USER", "label": "Usuario root", "description": "Usuario admin inicial" },
+        { "name": "MINIO_ROOT_PASSWORD", "label": "Senha root", "description": "Senha do root (min. 8 chars)" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "litellm — gateway de LLMs",
+      "name": "litellm",
+      "description": "LiteLLM Proxy: gateway OpenAI-compativel para varios provedores de LLM, publicado via Traefik v3 com TLS.",
+      "note": "PRE-REQUISITO: crie o Docker config `litellm_config_v1` a partir de config/config.yaml (lista de modelos). Veja o README.",
+      "categories": ["ai"],
+      "platform": "linux",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "litellm/docker-compose.yml" },
+      "env": [
+        { "name": "LITELLM_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: llm.exemplo.com" },
+        { "name": "LITELLM_MASTER_KEY", "label": "Master key", "description": "Chave mestra (sk-...)" },
+        { "name": "LITELLM_SALT_KEY", "label": "Salt key", "description": "Salt de criptografia (nao alterar depois)" },
+        { "name": "OPENAI_API_KEY", "label": "OpenAI API key (opcional)", "description": "Usada pelo config.yaml" },
+        { "name": "LITELLM_CONFIG_NAME", "label": "Docker config", "default": "litellm_config_v1" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "chromadb — vector database",
+      "name": "chromadb",
+      "description": "ChromaDB: banco de dados vetorial para IA/RAG, publicado via Traefik v3 com TLS.",
+      "note": "ATENCAO: sem token a API fica aberta. Defina CHROMA_AUTH_TOKEN (e o provider) ou proteja via Traefik.",
+      "categories": ["ai", "database"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/chroma.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "chromadb/docker-compose.yml" },
+      "env": [
+        { "name": "CHROMA_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: chroma.exemplo.com" },
+        { "name": "CHROMA_AUTH_TOKEN", "label": "Token de auth (opcional)", "description": "Se definido, exige Bearer token" },
+        { "name": "CHROMA_AUTH_PROVIDER", "label": "Provider de auth", "description": "Para token: chromadb.auth.token_authn.TokenAuthenticationServerProvider" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "openspeedtest — teste de velocidade",
+      "name": "openspeedtest",
+      "description": "OpenSpeedTest: teste de velocidade de rede self-hosted (HTML5), publicado via Traefik v3 com TLS.",
+      "categories": ["network", "tools"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/openspeedtest.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "openspeedtest/docker-compose.yml" },
+      "env": [
+        { "name": "OPENSPEEDTEST_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: speedtest.exemplo.com" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "joomla — CMS",
+      "name": "joomla",
+      "description": "Joomla (CMS) com MySQL, publicado via Traefik v3 com TLS.",
+      "note": "Requer a rede `web` e DNS do FQDN apontando para o host.",
+      "categories": ["cms"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/joomla.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "joomla/docker-compose.yml" },
+      "env": [
+        { "name": "JOOMLA_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: joomla.exemplo.com" },
+        { "name": "JOOMLA_DB_PASSWORD", "label": "Senha do banco", "description": "Senha do usuario do banco" },
+        { "name": "MYSQL_ROOT_PASSWORD", "label": "Senha root MySQL", "description": "Senha root do MySQL" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "moodle — LMS",
+      "name": "moodle",
+      "description": "Moodle (ambiente de ensino a distancia) com MariaDB, imagens Bitnami, publicado via Traefik v3 com TLS.",
+      "note": "Requer a rede `web` e DNS do FQDN. O primeiro boot pode demorar (instalacao do Moodle).",
+      "categories": ["education", "cms"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/moodle.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "moodle/docker-compose.yml" },
+      "env": [
+        { "name": "MOODLE_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: moodle.exemplo.com" },
+        { "name": "MOODLE_DB_PASSWORD", "label": "Senha do banco", "description": "Senha do usuario do banco" },
+        { "name": "MOODLE_ADMIN_PASSWORD", "label": "Senha admin Moodle", "description": "Senha do administrador" },
+        { "name": "MARIADB_ROOT_PASSWORD", "label": "Senha root MariaDB", "description": "Senha root do MariaDB" },
+        { "name": "MOODLE_ADMIN_USER", "label": "Usuario admin", "default": "admin" },
+        { "name": "MOODLE_ADMIN_EMAIL", "label": "E-mail admin", "default": "admin@example.com" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "excalidraw — quadro branco",
+      "name": "excalidraw",
+      "description": "Excalidraw: quadro branco / desenho colaborativo (imagem oficial), publicado via Traefik v3 com TLS.",
+      "categories": ["productivity", "tools"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/excalidraw.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "excalidraw/docker-compose.yml" },
+      "env": [
+        { "name": "EXCALIDRAW_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: draw.exemplo.com" },
         { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
       ]
     }

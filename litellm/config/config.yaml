@@ -1,0 +1,29 @@
+# TEMPLATE — config.yaml do LiteLLM Proxy (conteudo do Docker config externo litellm_config_v1).
+# Lista de modelos expostos pelo gateway. As chaves dos provedores NAO ficam aqui:
+# use os.environ/<VAR> e injete a variavel no ambiente do servico (ver docker-compose.yml).
+#
+# NAO versione este arquivo com chaves reais — crie o Docker config diretamente no Swarm.
+# Docs: https://docs.litellm.ai/docs/proxy/configs
+
+model_list:
+  - model_name: gpt-4o
+    litellm_params:
+      model: openai/gpt-4o
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: gpt-4o-mini
+    litellm_params:
+      model: openai/gpt-4o-mini
+      api_key: os.environ/OPENAI_API_KEY
+
+# Exemplo de outro provedor (adicione a env var correspondente no docker-compose.yml):
+#  - model_name: claude-sonnet
+#    litellm_params:
+#      model: anthropic/claude-3-5-sonnet-latest
+#      api_key: os.environ/ANTHROPIC_API_KEY
+
+litellm_settings:
+  drop_params: true
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY

@@ -1,0 +1,33 @@
+# Stack "excalidraw" — Excalidraw (Docker Swarm)
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Quadro branco / desenho colaborativo. Imagem oficial pré-construída, porta interna 80.
+#
+# Serviço único e STATELESS: sem volume, sem banco, sem segredos.
+# Toda customização é feita por variáveis de ambiente (ver README).
+# Obrigatória: EXCALIDRAW_FQDN.
+services:
+  excalidraw:
+    image: excalidraw/excalidraw:${EXCALIDRAW_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+    deploy:
+      mode: replicated
+      replicas: ${EXCALIDRAW_REPLICAS:-1}
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.excalidraw.rule=Host(`${EXCALIDRAW_FQDN}`)
+        - traefik.http.routers.excalidraw.entrypoints=websecure
+        - traefik.http.routers.excalidraw.tls=true
+        - traefik.http.routers.excalidraw.tls.certresolver=letsencryptresolver
+        - traefik.http.services.excalidraw.loadbalancer.server.port=80
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay

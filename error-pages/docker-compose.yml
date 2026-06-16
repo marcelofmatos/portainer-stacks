@@ -1,0 +1,42 @@
+# Stack "error-pages" — páginas de erro customizadas (Docker Swarm)
+# App: tarampampam/error-pages — backend de um middleware Traefik `errors` que captura
+# respostas 4xx/5xx das OUTRAS stacks e serve uma página de erro bonita no lugar.
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+#
+# Serviço stateless: sem volume, roda em qualquer worker.
+# Toda customização é feita por variáveis de ambiente (ver README).
+#
+# Como outra stack usa este middleware (referência via provider swarm):
+#   - traefik.http.routers.<r>.middlewares=error-pages@swarm
+services:
+  error-pages:
+    image: ghcr.io/tarampampam/error-pages:${ERRORPAGES_IMAGE_TAG:-3}
+    environment:
+      - TEMPLATE_NAME=${ERRORPAGES_TEMPLATE:-ghost}
+    networks:
+      - web
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        # Serviço backend do middleware (porta interna do error-pages)
+        - traefik.http.services.error-pages.loadbalancer.server.port=8080
+        # Middleware `errors`: captura 4xx/5xx e busca a página /{status}.html neste serviço
+        - traefik.http.middlewares.error-pages.errors.status=400-599
+        - traefik.http.middlewares.error-pages.errors.service=error-pages
+        - traefik.http.middlewares.error-pages.errors.query=/{status}.html
+        # Router de preview (opcional): só efetivo se ERRORPAGES_FQDN for definido
+        - traefik.http.routers.error-pages.rule=Host(`${ERRORPAGES_FQDN:-error-pages.invalid}`)
+        - traefik.http.routers.error-pages.entrypoints=websecure
+        - traefik.http.routers.error-pages.tls=true
+        - traefik.http.routers.error-pages.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.error-pages.service=error-pages
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}

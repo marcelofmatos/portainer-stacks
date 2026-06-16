@@ -1,0 +1,76 @@
+# Stack "moodle" — Moodle LMS (Bitnami) + MariaDB (Docker Swarm)
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+#
+# Toda customização é feita por variáveis de ambiente (ver README e bloco abaixo).
+# Obrigatórias: MOODLE_FQDN, MOODLE_DB_PASSWORD, MOODLE_ADMIN_PASSWORD, MARIADB_ROOT_PASSWORD.
+#
+# NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster com mais de um worker,
+# fixe os serviços com volume definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+services:
+  moodle:
+    image: bitnami/moodle:${MOODLE_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.moodle.rule=Host(`${MOODLE_FQDN}`)
+        - traefik.http.routers.moodle.entrypoints=websecure
+        - traefik.http.routers.moodle.tls=true
+        - traefik.http.routers.moodle.tls.certresolver=letsencryptresolver
+        - traefik.http.services.moodle.loadbalancer.server.port=8080
+    environment:
+      - MOODLE_DATABASE_HOST=db
+      - MOODLE_DATABASE_PORT_NUMBER=3306
+      - MOODLE_DATABASE_NAME=${MOODLE_DB_NAME:-moodle}
+      - MOODLE_DATABASE_USER=${MOODLE_DB_USER:-moodle}
+      - MOODLE_DATABASE_PASSWORD=${MOODLE_DB_PASSWORD}
+      - MOODLE_USERNAME=${MOODLE_ADMIN_USER:-admin}
+      - MOODLE_PASSWORD=${MOODLE_ADMIN_PASSWORD}
+      - MOODLE_EMAIL=${MOODLE_ADMIN_EMAIL:-admin@example.com}
+      - MOODLE_HOST=${MOODLE_FQDN}
+      - MOODLE_REVERSEPROXY=yes
+      - MOODLE_SSLPROXY=yes
+    volumes:
+      - moodle:/bitnami/moodle
+      - moodledata:/bitnami/moodledata
+
+  db:
+    image: bitnami/mariadb:${MARIADB_IMAGE_TAG:-latest}
+    environment:
+      - MARIADB_USER=${MOODLE_DB_USER:-moodle}
+      - MARIADB_DATABASE=${MOODLE_DB_NAME:-moodle}
+      - MARIADB_PASSWORD=${MOODLE_DB_PASSWORD}
+      - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      - ALLOW_EMPTY_PASSWORD=no
+    volumes:
+      - mariadb:/bitnami/mariadb
+    networks:
+      - default
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay
+
+volumes:
+  moodle:
+    driver: local
+  moodledata:
+    driver: local
+  mariadb:
+    driver: local

@@ -9,14 +9,43 @@ fica no repositório.
 
 ## Stacks
 
+### Infra / proxy
 | Stack | Descrição | Doc |
 |---|---|---|
 | [`balancer`](balancer/) | Reverse proxy Traefik v3 + TLS Let's Encrypt | [README](balancer/README.md) |
-| [`drive`](drive/) | ownCloud (arquivos) + MySQL + Redis | [README](drive/README.md) |
-| [`account`](account/) | OpenLDAP + LAM + self-service-password | [README](account/README.md) |
-| [`tools`](tools/) | phpMyAdmin | [README](tools/README.md) |
+| [`error-pages`](error-pages/) | Páginas de erro customizadas (middleware do Traefik) | [README](error-pages/README.md) |
+| [`swarmprom`](swarmprom/) | Monitoramento Swarm (Prometheus/Grafana/cAdvisor/node-exporter) | [README](swarmprom/README.md) |
 
-> Ordem sugerida de deploy: **balancer** → (account) → **drive** / **tools**.
+### Identidade / acesso
+| Stack | Descrição | Doc |
+|---|---|---|
+| [`account`](account/) | OpenLDAP + LAM + self-service-password | [README](account/README.md) |
+| [`keycloak`](keycloak/) | IAM/SSO (OIDC/SAML) + PostgreSQL | [README](keycloak/README.md) |
+| [`authelia`](authelia/) | Autenticação/2FA (forward-auth) + Redis | [README](authelia/README.md) |
+
+### Apps / dados / ferramentas
+| Stack | Descrição | Doc |
+|---|---|---|
+| [`drive`](drive/) | ownCloud (arquivos) + MySQL + Redis | [README](drive/README.md) |
+| [`minio`](minio/) | Object storage S3 + console | [README](minio/README.md) |
+| [`tools`](tools/) | phpMyAdmin | [README](tools/README.md) |
+| [`pgadmin4`](pgadmin4/) | Admin de PostgreSQL | [README](pgadmin4/README.md) |
+| [`stirlingpdf`](stirlingpdf/) | Ferramentas de PDF | [README](stirlingpdf/README.md) |
+| [`excalidraw`](excalidraw/) | Quadro branco / desenho | [README](excalidraw/README.md) |
+| [`openspeedtest`](openspeedtest/) | Teste de velocidade de rede | [README](openspeedtest/README.md) |
+| [`workflows`](workflows/) | n8n (automação) + PostgreSQL | [README](workflows/README.md) |
+| [`rocketchat`](rocketchat/) | Chat de equipe + MongoDB | [README](rocketchat/README.md) |
+| [`joomla`](joomla/) | CMS Joomla + MySQL | [README](joomla/README.md) |
+| [`moodle`](moodle/) | LMS Moodle + MariaDB | [README](moodle/README.md) |
+
+### IA
+| Stack | Descrição | Doc |
+|---|---|---|
+| [`ollama`](ollama/) | Runtime de LLMs | [README](ollama/README.md) |
+| [`litellm`](litellm/) | Gateway OpenAI-compatible para LLMs | [README](litellm/README.md) |
+| [`chromadb`](chromadb/) | Vector database (RAG) | [README](chromadb/README.md) |
+
+> Ordem sugerida de deploy: **balancer** primeiro (cria o ponto de entrada). Depois as demais em qualquer ordem; `error-pages`/`authelia` viram middlewares que você aplica nas outras stacks.
 
 ## Convenções
 - **Proxy:** Traefik v3 na rede overlay externa `web`, `exposedByDefault=false` (todo serviço

@@ -1,0 +1,61 @@
+# Stack "rocketchat" — Rocket.Chat + MongoDB replica set (Docker Swarm)
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# O MongoDB roda como replica set (rs0), exigido pelo Rocket.Chat (oplog).
+#
+# Toda customização é feita por variáveis de ambiente (ver README e bloco abaixo).
+# Obrigatórias: ROCKETCHAT_FQDN.
+#
+# NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster com mais de um worker,
+# fixe os serviços com volume definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+#
+# IMPORTANTE: na PRIMEIRA execução é preciso inicializar o replica set (rs.initiate()).
+# Veja a seção "Uso" do README.
+services:
+  rocketchat:
+    image: rocketchat/rocket.chat:${ROCKETCHAT_IMAGE_TAG:-latest}
+    environment:
+      - ROOT_URL=https://${ROCKETCHAT_FQDN}
+      - PORT=3000
+      - MONGO_URL=mongodb://db:27017/${ROCKETCHAT_DB_NAME:-rocketchat}?replicaSet=rs0
+      - MONGO_OPLOG_URL=mongodb://db:27017/local?replicaSet=rs0
+      - DEPLOY_METHOD=docker
+    networks:
+      - default
+      - web
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.rocketchat.rule=Host(`${ROCKETCHAT_FQDN}`)
+        - traefik.http.routers.rocketchat.entrypoints=websecure
+        - traefik.http.routers.rocketchat.tls=true
+        - traefik.http.routers.rocketchat.tls.certresolver=letsencryptresolver
+        - traefik.http.services.rocketchat.loadbalancer.server.port=3000
+
+  db:
+    image: mongo:${MONGO_IMAGE_TAG:-6.0}
+    command: mongod --replSet rs0 --oplogSize 128
+    volumes:
+      - mongo:/data/db
+    networks:
+      - default
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay
+
+volumes:
+  mongo:
+    driver: local

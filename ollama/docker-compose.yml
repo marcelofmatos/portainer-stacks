@@ -1,0 +1,56 @@
+# Stack "ollama" — Ollama (runtime de LLMs) em Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Exposição via Traefik é OPCIONAL e por padrão NÃO tem autenticação — ver README (ALERTA de segurança).
+#
+# Toda customização é feita por variáveis de ambiente (ver README e bloco abaixo).
+# Variável para exposição pública: OLLAMA_FQDN.
+#
+# NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster com mais de um worker,
+# fixe o serviço com volume definindo WORKER_HOSTNAME e descomentando o constraint de hostname,
+# senão o estado (modelos baixados) pode "trocar" de nó a cada reagendamento.
+services:
+  ollama:
+    image: ollama/ollama:${OLLAMA_IMAGE_TAG:-latest}
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+      - OLLAMA_KEEP_ALIVE=${OLLAMA_KEEP_ALIVE:-5m}
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - default
+      - web
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.ollama.rule=Host(`${OLLAMA_FQDN}`)
+        - traefik.http.routers.ollama.entrypoints=websecure
+        - traefik.http.routers.ollama.tls=true
+        - traefik.http.routers.ollama.tls.certresolver=letsencryptresolver
+        - traefik.http.services.ollama.loadbalancer.server.port=11434
+      # --- GPU NVIDIA (opcional) -------------------------------------------------
+      # Requer nvidia-container-toolkit instalado no host e o runtime NVIDIA
+      # configurado no Docker daemon. Descomente para reservar a(s) GPU(s) ao serviço.
+      # resources:
+      #   reservations:
+      #     devices:
+      #       - driver: nvidia
+      #         count: all
+      #         capabilities: [gpu]
+      # ---------------------------------------------------------------------------
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay
+
+volumes:
+  ollama-data:
+    driver: local

@@ -1,0 +1,30 @@
+# Stack "openspeedtest" — OpenSpeedTest (Docker Swarm)
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Teste de velocidade self-hosted (HTML5). Serviço único, STATELESS (sem volume, sem banco).
+# Variável obrigatória: OPENSPEEDTEST_FQDN (ex.: speedtest.cloud.exemplo.com).
+services:
+  openspeedtest:
+    image: openspeedtest/latest:${OPENSPEEDTEST_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.openspeedtest.rule=Host(`${OPENSPEEDTEST_FQDN}`)
+        - traefik.http.routers.openspeedtest.entrypoints=websecure
+        - traefik.http.routers.openspeedtest.tls=true
+        - traefik.http.routers.openspeedtest.tls.certresolver=letsencryptresolver
+        - traefik.http.services.openspeedtest.loadbalancer.server.port=3000
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay

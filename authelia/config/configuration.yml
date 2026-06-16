@@ -1,0 +1,81 @@
+## Authelia — template de configuração (configuration.yml)
+## Conteúdo do Docker config externo `authelia_config_v1`, montado em /config/configuration.yml.
+## Substitua os <placeholders> pelos seus valores. NÃO versione segredos reais aqui:
+## jwt_secret, session.secret e storage.encryption_key vêm por variável de ambiente
+## (AUTHELIA_JWT_SECRET, AUTHELIA_SESSION_SECRET, AUTHELIA_STORAGE_ENCRYPTION_KEY).
+
+theme: light
+default_redirection_url: https://<AUTHELIA_FQDN>
+
+server:
+  host: 0.0.0.0
+  port: 9091
+
+log:
+  level: info
+
+## TOTP (2FA por app autenticador)
+totp:
+  issuer: <AUTHELIA_FQDN>
+
+## Backend de autenticação de usuários.
+## Opção A (padrão deste template): arquivo de usuários.
+authentication_backend:
+  password_reset:
+    disable: false
+  file:
+    path: /config/users.yml
+    password:
+      algorithm: argon2id
+
+## Opção B (exemplo, comentado): LDAP — reaproveita a stack `account` (OpenLDAP) via rede `ldap`.
+## Para usar, anexe também a rede externa `ldap` ao serviço `authelia` no docker-compose.yml.
+# authentication_backend:
+#   ldap:
+#     implementation: custom
+#     url: ldap://account_ldap:389
+#     base_dn: dc=example,dc=com
+#     username_attribute: uid
+#     additional_users_dn: ou=People
+#     users_filter: (&({username_attribute}={input})(objectClass=person))
+#     additional_groups_dn: ou=Groups
+#     groups_filter: (&(member={dn})(objectClass=groupOfNames))
+#     group_name_attribute: cn
+#     mail_attribute: mail
+#     display_name_attribute: displayName
+#     user: cn=admin,dc=example,dc=com
+#     password: <LDAP_ADMIN_PASSWORD>
+
+## Regras de acesso (ajuste aos seus domínios).
+access_control:
+  default_policy: deny
+  rules:
+    - domain: <AUTHELIA_FQDN>
+      policy: bypass
+    - domain: "*.<SEU_DOMINIO>"
+      policy: two_factor
+
+## Sessão — usa o Redis desta stack (host `redis`).
+session:
+  name: authelia_session
+  domain: <SEU_DOMINIO>
+  expiration: 1h
+  inactivity: 5m
+  redis:
+    host: redis
+    port: 6379
+
+regulation:
+  max_retries: 3
+  find_time: 2m
+  ban_time: 5m
+
+## Armazenamento (DB de 2FA/sessões persistentes). Para produção, prefira PostgreSQL/MySQL.
+storage:
+  local:
+    path: /config/db.sqlite3
+
+## Notificações (recuperação de senha / registro de 2FA). Ajuste para SMTP em produção.
+notifier:
+  filesystem:
+    filename: /config/notification.txt
