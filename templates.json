@@ -1,0 +1,96 @@
+{
+  "version": "2",
+  "templates": [
+    {
+      "type": 2,
+      "title": "balancer — Traefik v3",
+      "name": "balancer",
+      "description": "Reverse proxy Traefik v3 para Docker Swarm com TLS automatico (Let's Encrypt) e dashboard protegido. Cria o ponto de entrada da rede publica `web`.",
+      "note": "Rode no manager. A rede overlay publica precisa existir: `docker network create --driver overlay --attachable web`. HTTP_AUTH_BASIC no formato usuario:hash (use `htpasswd -nbB`).",
+      "categories": ["proxy", "networking"],
+      "platform": "linux",
+      "logo": "https://raw.githubusercontent.com/traefik/traefik/master/docs/content/assets/img/traefik.logo.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "balancer/docker-compose.yml"
+      },
+      "env": [
+        { "name": "DOMAIN", "label": "Dominio base", "description": "Dashboard fica em traefik.balancer.<DOMAIN>" },
+        { "name": "ACME_EMAIL", "label": "E-mail Let's Encrypt", "description": "Contato para os certificados" },
+        { "name": "HTTP_AUTH_BASIC", "label": "Basicauth do dashboard", "description": "Formato usuario:hash_bcrypt (htpasswd -nbB)" },
+        { "name": "PROXY_NET", "label": "Rede publica", "default": "web" },
+        { "name": "TRAEFIK_LOG_LEVEL", "label": "Nivel de log", "default": "WARN" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "drive — ownCloud",
+      "name": "drive",
+      "description": "Servidor de arquivos ownCloud (server 10.x) com MySQL e Redis, publicado via Traefik v3 com TLS. Pode autenticar usuarios via LDAP (stack account).",
+      "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. Para LDAP, requer a rede `ldap` e a stack account.",
+      "categories": ["storage", "productivity"],
+      "platform": "linux",
+      "logo": "https://owncloud.org/wp-content/themes/owncloudorgnew/assets/img/common/owncloud-logo.svg",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "drive/docker-compose.yml"
+      },
+      "env": [
+        { "name": "DRIVE_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: drive.exemplo.com" },
+        { "name": "OWNCLOUD_ADMIN_PASSWORD", "label": "Senha do admin", "description": "Senha do admin inicial do ownCloud" },
+        { "name": "OWNCLOUD_DB_PASSWORD", "label": "Senha do banco", "description": "Senha do usuario MySQL do ownCloud" },
+        { "name": "MYSQL_ROOT_PASSWORD", "label": "Senha root do MySQL", "description": "Senha root do MySQL" },
+        { "name": "OWNCLOUD_ADMIN_USERNAME", "label": "Usuario admin", "default": "admin" },
+        { "name": "OWNCLOUD_DEFAULT_LANGUAGE", "label": "Idioma padrao", "default": "pt_BR" },
+        { "name": "OWNCLOUD_MAX_UPLOAD", "label": "Limite de upload", "default": "100G" },
+        { "name": "OWNCLOUD_IMAGE_TAG", "label": "Tag da imagem ownCloud", "default": "10.15.0" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" },
+        { "name": "LDAP_NET", "label": "Rede compartilhada LDAP", "default": "ldap" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "account — OpenLDAP + LAM + self-service-password",
+      "name": "account",
+      "description": "Diretorio OpenLDAP com LDAP Account Manager (administracao) e self-service-password (troca de senha). Expoe a rede `ldap` para outras stacks autenticarem.",
+      "note": "PRE-REQUISITO: crie antes os Docker configs do self-service-password (`docker config create account_ssp_config_v1 ...` e `account_ssp_css_custom_v1 ...`). Veja o README da stack.",
+      "categories": ["authentication", "ldap"],
+      "platform": "linux",
+      "logo": "https://www.ldap-account-manager.org/lamcms/sites/default/files/lam_logo.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "account/docker-compose.yml"
+      },
+      "env": [
+        { "name": "LAM_FQDN", "label": "Dominio do LAM", "description": "Ex.: account.exemplo.com" },
+        { "name": "SSP_FQDN", "label": "Dominio do self-service-password", "description": "Ex.: senha.exemplo.com" },
+        { "name": "LDAP_DOMAIN", "label": "Dominio LDAP", "description": "Vira dc=... (ex.: exemplo.com)", "default": "example.com" },
+        { "name": "LDAP_ORGANISATION", "label": "Organizacao", "default": "Example Org" },
+        { "name": "LDAP_ADMIN_PASSWORD", "label": "Senha admin LDAP", "description": "Senha do cn=admin,dc=..." },
+        { "name": "SSP_CONFIG_NAME", "label": "Docker config (config.inc.local.php)", "default": "account_ssp_config_v1" },
+        { "name": "SSP_CSS_NAME", "label": "Docker config (custom.css)", "default": "account_ssp_css_custom_v1" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" },
+        { "name": "LDAP_NET", "label": "Rede compartilhada LDAP", "default": "ldap" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "tools — phpMyAdmin",
+      "name": "tools",
+      "description": "phpMyAdmin publicado via Traefik v3 com TLS. PMA_ARBITRARY permite informar o host do banco na tela de login.",
+      "note": "Requer a rede `web` (stack balancer). Para acessar bancos de outras stacks, anexe a rede correspondente ao servico.",
+      "categories": ["database", "tools"],
+      "platform": "linux",
+      "logo": "https://www.phpmyadmin.net/static/images/logo_right.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "tools/docker-compose.yml"
+      },
+      "env": [
+        { "name": "PMA_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: pma.exemplo.com" },
+        { "name": "PMA_UPLOAD_LIMIT", "label": "Limite de upload", "default": "256M" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+      ]
+    }
+  ]
+}

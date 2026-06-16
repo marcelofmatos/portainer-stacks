@@ -1,0 +1,8 @@
+# Segredos locais — nunca versionar
+.env
+*.env
+*.secret
+secrets/
+**/*-secret*
+# Configs do SSP com valores reais (mantenha só os templates *.inc.local.php genéricos)
+**/config/*.local.real.php

@@ -1,0 +1,16 @@
+.bg-body-tertiary {
+  background: #19396a40 !important;
+}
+
+.logo {
+  display: none !important;
+}
+
+.navbar {
+  margin-bottom: 1em;
+  border-radius: 0.375rem;
+}
+
+.card-body .container {
+  padding: 0;
+}

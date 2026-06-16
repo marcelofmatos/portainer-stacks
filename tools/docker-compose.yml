@@ -1,0 +1,31 @@
+# Stack "tools" — phpMyAdmin (Docker Swarm)
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt.
+# PMA_ARBITRARY=1 permite informar o host do banco na tela de login.
+# Variável: PMA_FQDN (ex.: pma.cloud.exemplo.com).
+services:
+  pma:
+    image: phpmyadmin/phpmyadmin:${PMA_IMAGE_TAG:-latest}
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_ABSOLUTE_URI: https://${PMA_FQDN}/
+      UPLOAD_LIMIT: ${PMA_UPLOAD_LIMIT:-256M}
+    networks:
+      - web
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.pma.rule=Host(`${PMA_FQDN}`)
+        - traefik.http.routers.pma.entrypoints=websecure
+        - traefik.http.routers.pma.tls=true
+        - traefik.http.routers.pma.tls.certresolver=letsencryptresolver
+        - traefik.http.services.pma.loadbalancer.server.port=80
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}

@@ -1,0 +1,123 @@
+# Stack "account" — OpenLDAP + LDAP Account Manager (LAM) + self-service-password (Docker Swarm)
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt.
+# Rede externa `ldap` compartilhada para outras stacks autenticarem no diretório (ex.: drive/ownCloud).
+#
+# Toda customização é feita por variáveis de ambiente (ver README e bloco abaixo).
+# Obrigatórias: LAM_FQDN, SSP_FQDN, LDAP_DOMAIN, LDAP_ORGANISATION, LDAP_ADMIN_PASSWORD.
+#
+# PRÉ-REQUISITO: o serviço `user` (self-service-password) usa 2 Docker configs EXTERNOS
+# (nomes configuráveis em SSP_CONFIG_NAME / SSP_CSS_NAME):
+#   <SSP_CONFIG_NAME> -> /var/www/conf/config.inc.local.php  (ver config/ssp-config.inc.local.php)
+#   <SSP_CSS_NAME>    -> /var/www/htdocs/css/custom.css       (ver config/ssp-custom.css)
+# Crie-os antes do deploy (instruções no README).
+#
+# NOTA (volumes em Swarm): em cluster multi-worker, fixe os serviços definindo WORKER_HOSTNAME
+# e descomentando o constraint de hostname.
+configs:
+  account_ssp_config:
+    name: ${SSP_CONFIG_NAME:-account_ssp_config_v1}
+    external: true
+  account_ssp_css_custom:
+    name: ${SSP_CSS_NAME:-account_ssp_css_custom_v1}
+    external: true
+
+services:
+
+  manager:
+    image: ghcr.io/ldapaccountmanager/lam:${LAM_IMAGE_TAG:-9.5}
+    environment:
+      LAM_SKIP_PRECONFIGURE: 'true'
+    volumes:
+      - lam-etc:/etc/ldap-account-manager/
+      - lam-lib:/var/lib/ldap-account-manager/
+    networks:
+      - default
+      - web
+    healthcheck:
+      disable: true
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.account-manager.rule=Host(`${LAM_FQDN}`)
+        - traefik.http.routers.account-manager.entrypoints=websecure
+        - traefik.http.routers.account-manager.tls=true
+        - traefik.http.routers.account-manager.tls.certresolver=letsencryptresolver
+        - traefik.http.services.account-manager.loadbalancer.server.port=80
+
+  ldap:
+    image: osixia/openldap:${OPENLDAP_IMAGE_TAG:-latest}
+    environment:
+      LDAP_ORGANISATION: ${LDAP_ORGANISATION:-Example Org}
+      LDAP_DOMAIN: ${LDAP_DOMAIN:-example.com}
+      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+    volumes:
+      - ldap-database:/var/lib/ldap
+      - ldap-config:/etc/ldap/slapd.d
+    networks:
+      - default
+      - ldap
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+  user:
+    image: ltbproject/self-service-password:${SSP_IMAGE_TAG:-latest}
+    configs:
+      - source: account_ssp_config
+        target: /var/www/conf/config.inc.local.php
+      - source: account_ssp_css_custom
+        target: /var/www/htdocs/css/custom.css
+    environment:
+      HTTP_ACCEPT_LANGUAGE: ${SSP_LANGUAGE:-pt_BR}
+    networks:
+      - default
+      - web
+    volumes:
+      - user-cache:/var/www/cache
+      - user-conf:/var/www/conf
+      - user-templates_c:/var/www/templates_c
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.account-user.rule=Host(`${SSP_FQDN}`)
+        - traefik.http.routers.account-user.entrypoints=websecure
+        - traefik.http.routers.account-user.tls=true
+        - traefik.http.routers.account-user.tls.certresolver=letsencryptresolver
+        - traefik.http.services.account-user.loadbalancer.server.port=80
+
+volumes:
+  lam-etc:
+    driver: local
+  lam-lib:
+    driver: local
+  ldap-database: ~
+  ldap-config: ~
+  user-cache: ~
+  user-conf: ~
+  user-templates_c: ~
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  ldap:
+    external: true
+    name: ${LDAP_NET:-ldap}
+  default:
+    driver: overlay

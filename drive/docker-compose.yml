@@ -1,0 +1,105 @@
+# Stack "drive" — ownCloud (Docker Swarm)
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Integra com a stack `account` via rede externa `ldap` (autenticação LDAP).
+#
+# Toda customização é feita por variáveis de ambiente (ver README e bloco abaixo).
+# Obrigatórias: DRIVE_FQDN, OWNCLOUD_ADMIN_PASSWORD, OWNCLOUD_DB_PASSWORD, MYSQL_ROOT_PASSWORD.
+#
+# NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster com mais de um worker,
+# fixe os serviços com volume definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+services:
+  www:
+    image: owncloud/server:${OWNCLOUD_IMAGE_TAG:-10.15.0}
+    networks:
+      - default
+      - web
+      - ldap
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.drive.rule=Host(`${DRIVE_FQDN}`)
+        - traefik.http.routers.drive.entrypoints=websecure
+        - traefik.http.routers.drive.tls=true
+        - traefik.http.routers.drive.tls.certresolver=letsencryptresolver
+        - traefik.http.services.drive.loadbalancer.server.port=8080
+        - traefik.http.routers.drive.middlewares=drive-hsts
+        - traefik.http.middlewares.drive-hsts.headers.stsSeconds=31536000
+        - traefik.http.middlewares.drive-hsts.headers.stsIncludeSubdomains=true
+        - traefik.http.middlewares.drive-hsts.headers.stsPreload=true
+        - traefik.http.middlewares.drive-hsts.headers.forceSTSHeader=true
+    environment:
+      - OWNCLOUD_DOMAIN=${DRIVE_FQDN}
+      - OWNCLOUD_DB_TYPE=mysql
+      - OWNCLOUD_DB_NAME=${OWNCLOUD_DB_NAME:-owncloud}
+      - OWNCLOUD_DB_USERNAME=${OWNCLOUD_DB_USERNAME:-owncloud}
+      - OWNCLOUD_DB_PASSWORD=${OWNCLOUD_DB_PASSWORD}
+      - OWNCLOUD_DB_HOST=db
+      - OWNCLOUD_ADMIN_USERNAME=${OWNCLOUD_ADMIN_USERNAME:-admin}
+      - OWNCLOUD_ADMIN_PASSWORD=${OWNCLOUD_ADMIN_PASSWORD}
+      - OWNCLOUD_MYSQL_UTF8MB4=true
+      - OWNCLOUD_REDIS_ENABLED=true
+      - OWNCLOUD_REDIS_HOST=redis
+      - OWNCLOUD_DEFAULT_LANGUAGE=${OWNCLOUD_DEFAULT_LANGUAGE:-pt_BR}
+      - OWNCLOUD_MAX_UPLOAD=${OWNCLOUD_MAX_UPLOAD:-100G}
+    volumes:
+      - files:/mnt/data
+      - tmp:/tmp
+
+  db:
+    image: mysql:${MYSQL_IMAGE_TAG:-5.7}
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${OWNCLOUD_DB_USERNAME:-owncloud}
+      - MYSQL_PASSWORD=${OWNCLOUD_DB_PASSWORD}
+      - MYSQL_DATABASE=${OWNCLOUD_DB_NAME:-owncloud}
+      - MYSQL_MAX_ALLOWED_PACKET=512M
+      - MYSQL_INNODB_LOG_FILE_SIZE=64M
+    volumes:
+      - mysql:/var/lib/mysql
+    networks:
+      - default
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+  redis:
+    image: webhippie/redis:${REDIS_IMAGE_TAG:-latest}
+    environment:
+      - REDIS_DATABASES=1
+    volumes:
+      - redis:/var/lib/redis
+    networks:
+      - default
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  ldap:
+    external: true
+    name: ${LDAP_NET:-ldap}
+  default:
+    driver: overlay
+
+volumes:
+  files:
+    driver: local
+  tmp:
+    driver: local
+  mysql:
+    driver: local
+  redis:
+    driver: local
