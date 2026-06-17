@@ -1,7 +1,7 @@
 # ┌───────────────────────────────────────────────────────────────────────────┐
 # │ Stack "wordpress" — WordPress + MariaDB embarcado (Docker Swarm)            │
 # └───────────────────────────────────────────────────────────────────────────┘
-# PRIMEIRA VEZ? Leia isto:
+# Pré-requisitos de deploy:
 #   1. Crie as redes externas (uma vez por cluster):
 #        docker network create --driver overlay --attachable web
 #        docker network create --driver overlay --attachable data
