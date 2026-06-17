@@ -7,16 +7,42 @@
       "name": "balancer",
       "description": "Reverse proxy Traefik v3 para Docker Swarm com TLS automatico (Let's Encrypt) e dashboard protegido. Cria o ponto de entrada da rede publica `web`.",
       "note": "Rode no manager. A rede overlay publica precisa existir: `docker network create --driver overlay --attachable web`. HTTP_AUTH_BASIC no formato usuario:hash (use `htpasswd -nbB`).",
-      "categories": ["proxy", "networking"],
+      "categories": [
+        "proxy",
+        "networking"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/traefik.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "balancer/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "balancer/docker-compose.yml"
+      },
       "env": [
-        { "name": "DOMAIN", "label": "Dominio base", "description": "Dashboard fica em traefik.balancer.<DOMAIN>" },
-        { "name": "ACME_EMAIL", "label": "E-mail Let's Encrypt", "description": "Contato para os certificados" },
-        { "name": "HTTP_AUTH_BASIC", "label": "Basicauth do dashboard", "description": "Formato usuario:hash_bcrypt (htpasswd -nbB)" },
-        { "name": "PROXY_NET", "label": "Rede publica", "default": "web" },
-        { "name": "TRAEFIK_LOG_LEVEL", "label": "Nivel de log", "default": "WARN" }
+        {
+          "name": "DOMAIN",
+          "label": "Dominio base",
+          "description": "Dashboard fica em traefik.balancer.<DOMAIN>"
+        },
+        {
+          "name": "ACME_EMAIL",
+          "label": "E-mail Let's Encrypt",
+          "description": "Contato para os certificados"
+        },
+        {
+          "name": "HTTP_AUTH_BASIC",
+          "label": "Basicauth do dashboard",
+          "description": "Formato usuario:hash_bcrypt (htpasswd -nbB)"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede publica",
+          "default": "web"
+        },
+        {
+          "name": "TRAEFIK_LOG_LEVEL",
+          "label": "Nivel de log",
+          "default": "WARN"
+        }
       ]
     },
     {
@@ -25,21 +51,67 @@
       "name": "drive",
       "description": "Servidor de arquivos ownCloud (server 10.x) com MySQL e Redis, publicado via Traefik v3 com TLS. Pode autenticar usuarios via LDAP (stack account).",
       "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. Para LDAP, requer a rede `ldap` e a stack account.",
-      "categories": ["storage", "productivity"],
+      "categories": [
+        "storage",
+        "productivity"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/owncloud.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "drive/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "drive/docker-compose.yml"
+      },
       "env": [
-        { "name": "DRIVE_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: drive.exemplo.com" },
-        { "name": "OWNCLOUD_ADMIN_PASSWORD", "label": "Senha do admin", "description": "Senha do admin inicial do ownCloud" },
-        { "name": "OWNCLOUD_DB_PASSWORD", "label": "Senha do banco", "description": "Senha do usuario MySQL do ownCloud" },
-        { "name": "MYSQL_ROOT_PASSWORD", "label": "Senha root do MySQL", "description": "Senha root do MySQL" },
-        { "name": "OWNCLOUD_ADMIN_USERNAME", "label": "Usuario admin", "default": "admin" },
-        { "name": "OWNCLOUD_DEFAULT_LANGUAGE", "label": "Idioma padrao", "default": "pt_BR" },
-        { "name": "OWNCLOUD_MAX_UPLOAD", "label": "Limite de upload", "default": "100G" },
-        { "name": "OWNCLOUD_IMAGE_TAG", "label": "Tag da imagem ownCloud", "default": "10.15.0" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" },
-        { "name": "LDAP_NET", "label": "Rede compartilhada LDAP", "default": "ldap" }
+        {
+          "name": "DRIVE_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: drive.exemplo.com"
+        },
+        {
+          "name": "OWNCLOUD_ADMIN_PASSWORD",
+          "label": "Senha do admin",
+          "description": "Senha do admin inicial do ownCloud"
+        },
+        {
+          "name": "OWNCLOUD_DB_PASSWORD",
+          "label": "Senha do banco",
+          "description": "Senha do usuario MySQL do ownCloud"
+        },
+        {
+          "name": "MYSQL_ROOT_PASSWORD",
+          "label": "Senha root do MySQL",
+          "description": "Senha root do MySQL"
+        },
+        {
+          "name": "OWNCLOUD_ADMIN_USERNAME",
+          "label": "Usuario admin",
+          "default": "admin"
+        },
+        {
+          "name": "OWNCLOUD_DEFAULT_LANGUAGE",
+          "label": "Idioma padrao",
+          "default": "pt_BR"
+        },
+        {
+          "name": "OWNCLOUD_MAX_UPLOAD",
+          "label": "Limite de upload",
+          "default": "100G"
+        },
+        {
+          "name": "OWNCLOUD_IMAGE_TAG",
+          "label": "Tag da imagem ownCloud",
+          "default": "10.15.0"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        },
+        {
+          "name": "LDAP_NET",
+          "label": "Rede compartilhada LDAP",
+          "default": "ldap"
+        }
       ]
     },
     {
@@ -48,20 +120,63 @@
       "name": "account",
       "description": "Diretorio OpenLDAP com LDAP Account Manager (administracao) e self-service-password (troca de senha). Expoe a rede `ldap` para outras stacks autenticarem.",
       "note": "PRE-REQUISITO: crie antes os Docker configs do self-service-password (`docker config create account_ssp_config_v1 ...` e `account_ssp_css_custom_v1 ...`). Veja o README da stack.",
-      "categories": ["authentication", "ldap"],
+      "categories": [
+        "authentication",
+        "ldap"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/ldap-account-manager.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "account/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "account/docker-compose.yml"
+      },
       "env": [
-        { "name": "LAM_FQDN", "label": "Dominio do LAM", "description": "Ex.: account.exemplo.com" },
-        { "name": "SSP_FQDN", "label": "Dominio do self-service-password", "description": "Ex.: senha.exemplo.com" },
-        { "name": "LDAP_DOMAIN", "label": "Dominio LDAP", "description": "Vira dc=... (ex.: exemplo.com)", "default": "example.com" },
-        { "name": "LDAP_ORGANISATION", "label": "Organizacao", "default": "Example Org" },
-        { "name": "LDAP_ADMIN_PASSWORD", "label": "Senha admin LDAP", "description": "Senha do cn=admin,dc=..." },
-        { "name": "SSP_CONFIG_NAME", "label": "Docker config (config.inc.local.php)", "default": "account_ssp_config_v1" },
-        { "name": "SSP_CSS_NAME", "label": "Docker config (custom.css)", "default": "account_ssp_css_custom_v1" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" },
-        { "name": "LDAP_NET", "label": "Rede compartilhada LDAP", "default": "ldap" }
+        {
+          "name": "LAM_FQDN",
+          "label": "Dominio do LAM",
+          "description": "Ex.: account.exemplo.com"
+        },
+        {
+          "name": "SSP_FQDN",
+          "label": "Dominio do self-service-password",
+          "description": "Ex.: senha.exemplo.com"
+        },
+        {
+          "name": "LDAP_DOMAIN",
+          "label": "Dominio LDAP",
+          "description": "Vira dc=... (ex.: exemplo.com)",
+          "default": "example.com"
+        },
+        {
+          "name": "LDAP_ORGANISATION",
+          "label": "Organizacao",
+          "default": "Example Org"
+        },
+        {
+          "name": "LDAP_ADMIN_PASSWORD",
+          "label": "Senha admin LDAP",
+          "description": "Senha do cn=admin,dc=..."
+        },
+        {
+          "name": "SSP_CONFIG_NAME",
+          "label": "Docker config (config.inc.local.php)",
+          "default": "account_ssp_config_v1"
+        },
+        {
+          "name": "SSP_CSS_NAME",
+          "label": "Docker config (custom.css)",
+          "default": "account_ssp_css_custom_v1"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        },
+        {
+          "name": "LDAP_NET",
+          "label": "Rede compartilhada LDAP",
+          "default": "ldap"
+        }
       ]
     },
     {
@@ -70,16 +185,42 @@
       "name": "phpmyadmin",
       "description": "phpMyAdmin publicado via Traefik v3 com TLS. Entra na rede `data` e alcanca a stack mariadb pelo host `mariadb`. PMA_ARBITRARY permite informar outro host na tela de login.",
       "note": "Requer a rede `web` (stack balancer) e a rede `data` (docker network create --driver overlay --attachable data).",
-      "categories": ["database", "tools"],
+      "categories": [
+        "database",
+        "tools"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/phpmyadmin.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "phpmyadmin/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "phpmyadmin/docker-compose.yml"
+      },
       "env": [
-        { "name": "PMA_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: pma.exemplo.com" },
-        { "name": "PMA_HOSTS", "label": "Hosts de banco", "default": "mariadb" },
-        { "name": "PMA_UPLOAD_LIMIT", "label": "Limite de upload", "default": "256M" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" },
-        { "name": "DATA_NET", "label": "Rede de dados", "default": "data" }
+        {
+          "name": "PMA_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: pma.exemplo.com"
+        },
+        {
+          "name": "PMA_HOSTS",
+          "label": "Hosts de banco",
+          "default": "mariadb"
+        },
+        {
+          "name": "PMA_UPLOAD_LIMIT",
+          "label": "Limite de upload",
+          "default": "256M"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        },
+        {
+          "name": "DATA_NET",
+          "label": "Rede de dados",
+          "default": "data"
+        }
       ]
     },
     {
@@ -88,14 +229,33 @@
       "name": "error-pages",
       "description": "Paginas de erro customizadas para o Traefik (tarampampam/error-pages). Funciona como middleware `errors` que captura respostas 4xx/5xx das outras stacks.",
       "note": "Apos o deploy, aplique nas outras stacks o middleware: traefik.http.routers.<r>.middlewares=error-pages@swarm",
-      "categories": ["proxy", "tools"],
+      "categories": [
+        "proxy",
+        "tools"
+      ],
       "platform": "linux",
-      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/html.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "error-pages/docker-compose.yml" },
+      "logo": "https://api.iconify.design/tabler/error-404.svg?color=%23ef4444&height=128",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "error-pages/docker-compose.yml"
+      },
       "env": [
-        { "name": "ERRORPAGES_TEMPLATE", "label": "Template visual", "default": "ghost", "description": "ghost, l7-dark, matrix, etc." },
-        { "name": "ERRORPAGES_FQDN", "label": "Dominio de preview (opcional)", "description": "Ex.: errors.exemplo.com" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+        {
+          "name": "ERRORPAGES_TEMPLATE",
+          "label": "Template visual",
+          "default": "ghost",
+          "description": "ghost, l7-dark, matrix, etc."
+        },
+        {
+          "name": "ERRORPAGES_FQDN",
+          "label": "Dominio de preview (opcional)",
+          "description": "Ex.: errors.exemplo.com"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
       ]
     },
     {
@@ -104,16 +264,42 @@
       "name": "keycloak",
       "description": "Keycloak (identidade, SSO, OIDC/SAML) com PostgreSQL, publicado via Traefik v3 com TLS.",
       "note": "Requer a rede `web`. Configure os realms apos o primeiro acesso com o admin bootstrap.",
-      "categories": ["authentication", "identity"],
+      "categories": [
+        "authentication",
+        "identity"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/keycloak.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "keycloak/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "keycloak/docker-compose.yml"
+      },
       "env": [
-        { "name": "KEYCLOAK_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: auth.exemplo.com" },
-        { "name": "KEYCLOAK_ADMIN_PASSWORD", "label": "Senha do admin", "description": "Senha do admin bootstrap" },
-        { "name": "KEYCLOAK_DB_PASSWORD", "label": "Senha do banco", "description": "Senha do PostgreSQL" },
-        { "name": "KEYCLOAK_ADMIN", "label": "Usuario admin", "default": "admin" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+        {
+          "name": "KEYCLOAK_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: auth.exemplo.com"
+        },
+        {
+          "name": "KEYCLOAK_ADMIN_PASSWORD",
+          "label": "Senha do admin",
+          "description": "Senha do admin bootstrap"
+        },
+        {
+          "name": "KEYCLOAK_DB_PASSWORD",
+          "label": "Senha do banco",
+          "description": "Senha do PostgreSQL"
+        },
+        {
+          "name": "KEYCLOAK_ADMIN",
+          "label": "Usuario admin",
+          "default": "admin"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
       ]
     },
     {
@@ -122,15 +308,37 @@
       "name": "pgadmin4",
       "description": "pgAdmin 4 publicado via Traefik v3 com TLS, para administrar bancos PostgreSQL do cluster.",
       "note": "Requer a rede `web`. Informe o host do banco ao adicionar um server no pgAdmin.",
-      "categories": ["database", "tools"],
+      "categories": [
+        "database",
+        "tools"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/pgadmin.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "pgadmin4/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "pgadmin4/docker-compose.yml"
+      },
       "env": [
-        { "name": "PGADMIN_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: pgadmin.exemplo.com" },
-        { "name": "PGADMIN_EMAIL", "label": "E-mail do admin", "description": "Login do administrador" },
-        { "name": "PGADMIN_PASSWORD", "label": "Senha do admin", "description": "Senha do administrador" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+        {
+          "name": "PGADMIN_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: pgadmin.exemplo.com"
+        },
+        {
+          "name": "PGADMIN_EMAIL",
+          "label": "E-mail do admin",
+          "description": "Login do administrador"
+        },
+        {
+          "name": "PGADMIN_PASSWORD",
+          "label": "Senha do admin",
+          "description": "Senha do administrador"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
       ]
     },
     {
@@ -138,15 +346,37 @@
       "title": "stirlingpdf — ferramentas de PDF",
       "name": "stirlingpdf",
       "description": "Stirling-PDF: suite de ferramentas de PDF (merge, split, OCR, conversao...) self-hosted, via Traefik v3 com TLS.",
-      "categories": ["documents", "tools"],
+      "categories": [
+        "documents",
+        "tools"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/stirling-pdf.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "stirlingpdf/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "stirlingpdf/docker-compose.yml"
+      },
       "env": [
-        { "name": "STIRLING_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: pdf.exemplo.com" },
-        { "name": "STIRLING_ENABLE_SECURITY", "label": "Habilitar login", "default": "false" },
-        { "name": "STIRLING_LANGS", "label": "Idiomas", "default": "pt_BR,en_US" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+        {
+          "name": "STIRLING_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: pdf.exemplo.com"
+        },
+        {
+          "name": "STIRLING_ENABLE_SECURITY",
+          "label": "Habilitar login",
+          "default": "false"
+        },
+        {
+          "name": "STIRLING_LANGS",
+          "label": "Idiomas",
+          "default": "pt_BR,en_US"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
       ]
     },
     {
@@ -155,16 +385,41 @@
       "name": "swarmprom",
       "description": "Monitoramento nativo de Docker Swarm: Prometheus, Grafana, Alertmanager, node-exporter e cAdvisor. Expoe o Grafana via Traefik v3.",
       "note": "node-exporter e cAdvisor rodam em modo global. Prometheus/Grafana podem exigir configuracao adicional (datasources/dashboards) - veja o README.",
-      "categories": ["monitoring"],
+      "categories": [
+        "monitoring"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/grafana.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "swarmprom/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "swarmprom/docker-compose.yml"
+      },
       "env": [
-        { "name": "SWARMPROM_GRAFANA_FQDN", "label": "Dominio do Grafana", "description": "Ex.: grafana.exemplo.com" },
-        { "name": "GRAFANA_ADMIN_PASSWORD", "label": "Senha admin Grafana", "description": "Senha do admin do Grafana" },
-        { "name": "GRAFANA_ADMIN_USER", "label": "Usuario admin Grafana", "default": "admin" },
-        { "name": "PROMETHEUS_RETENTION", "label": "Retencao Prometheus", "default": "15d" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+        {
+          "name": "SWARMPROM_GRAFANA_FQDN",
+          "label": "Dominio do Grafana",
+          "description": "Ex.: grafana.exemplo.com"
+        },
+        {
+          "name": "GRAFANA_ADMIN_PASSWORD",
+          "label": "Senha admin Grafana",
+          "description": "Senha do admin do Grafana"
+        },
+        {
+          "name": "GRAFANA_ADMIN_USER",
+          "label": "Usuario admin Grafana",
+          "default": "admin"
+        },
+        {
+          "name": "PROMETHEUS_RETENTION",
+          "label": "Retencao Prometheus",
+          "default": "15d"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
       ]
     },
     {
@@ -173,16 +428,41 @@
       "name": "workflows",
       "description": "n8n (automacao de workflows low-code) com PostgreSQL, publicado via Traefik v3 com TLS.",
       "note": "Requer a rede `web`. Gere a N8N_ENCRYPTION_KEY com `openssl rand -hex 32` (nao altere depois).",
-      "categories": ["automation"],
+      "categories": [
+        "automation"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/n8n.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "workflows/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "workflows/docker-compose.yml"
+      },
       "env": [
-        { "name": "N8N_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: workflows.exemplo.com" },
-        { "name": "N8N_ENCRYPTION_KEY", "label": "Encryption key", "description": "openssl rand -hex 32" },
-        { "name": "N8N_DB_PASSWORD", "label": "Senha do banco", "description": "Senha do PostgreSQL" },
-        { "name": "TZ", "label": "Timezone", "default": "America/Sao_Paulo" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+        {
+          "name": "N8N_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: workflows.exemplo.com"
+        },
+        {
+          "name": "N8N_ENCRYPTION_KEY",
+          "label": "Encryption key",
+          "description": "openssl rand -hex 32"
+        },
+        {
+          "name": "N8N_DB_PASSWORD",
+          "label": "Senha do banco",
+          "description": "Senha do PostgreSQL"
+        },
+        {
+          "name": "TZ",
+          "label": "Timezone",
+          "default": "America/Sao_Paulo"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
       ]
     },
     {
@@ -191,14 +471,31 @@
       "name": "ollama",
       "description": "Ollama: executa modelos de linguagem (LLMs) localmente. Exposicao via Traefik opcional.",
       "note": "ATENCAO: o Ollama nao tem autenticacao nativa. Proteja com basicauth no Traefik ou nao exponha publicamente. GPU NVIDIA opcional (ver README).",
-      "categories": ["ai"],
+      "categories": [
+        "ai"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/ollama.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "ollama/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "ollama/docker-compose.yml"
+      },
       "env": [
-        { "name": "OLLAMA_FQDN", "label": "Dominio (opcional)", "description": "Deixe vazio para nao expor publicamente" },
-        { "name": "OLLAMA_KEEP_ALIVE", "label": "Keep-alive do modelo", "default": "5m" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+        {
+          "name": "OLLAMA_FQDN",
+          "label": "Dominio (opcional)",
+          "description": "Deixe vazio para nao expor publicamente"
+        },
+        {
+          "name": "OLLAMA_KEEP_ALIVE",
+          "label": "Keep-alive do modelo",
+          "default": "5m"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
       ]
     },
     {
@@ -207,17 +504,47 @@
       "name": "authelia",
       "description": "Authelia: portal de autenticacao e 2FA (forward-auth) para proteger servicos atras do Traefik. Inclui Redis.",
       "note": "PRE-REQUISITO: crie o Docker config `authelia_config_v1` a partir de config/configuration.yml. Aplique nas stacks o middleware authelia@swarm. Veja o README.",
-      "categories": ["authentication", "security"],
+      "categories": [
+        "authentication",
+        "security"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/authelia.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "authelia/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "authelia/docker-compose.yml"
+      },
       "env": [
-        { "name": "AUTHELIA_FQDN", "label": "Dominio do portal", "description": "Ex.: auth.exemplo.com" },
-        { "name": "AUTHELIA_JWT_SECRET", "label": "JWT secret", "description": "Segredo para assinar JWTs" },
-        { "name": "AUTHELIA_SESSION_SECRET", "label": "Session secret", "description": "Segredo das sessoes" },
-        { "name": "AUTHELIA_STORAGE_ENCRYPTION_KEY", "label": "Storage key", "description": "Chave de storage (min. 20 chars)" },
-        { "name": "AUTHELIA_CONFIG_NAME", "label": "Docker config", "default": "authelia_config_v1" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+        {
+          "name": "AUTHELIA_FQDN",
+          "label": "Dominio do portal",
+          "description": "Ex.: auth.exemplo.com"
+        },
+        {
+          "name": "AUTHELIA_JWT_SECRET",
+          "label": "JWT secret",
+          "description": "Segredo para assinar JWTs"
+        },
+        {
+          "name": "AUTHELIA_SESSION_SECRET",
+          "label": "Session secret",
+          "description": "Segredo das sessoes"
+        },
+        {
+          "name": "AUTHELIA_STORAGE_ENCRYPTION_KEY",
+          "label": "Storage key",
+          "description": "Chave de storage (min. 20 chars)"
+        },
+        {
+          "name": "AUTHELIA_CONFIG_NAME",
+          "label": "Docker config",
+          "default": "authelia_config_v1"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
       ]
     },
     {
@@ -226,14 +553,31 @@
       "name": "rocketchat",
       "description": "Rocket.Chat (mensageria de equipe) com MongoDB (replica set), publicado via Traefik v3 com TLS.",
       "note": "Na primeira vez e preciso inicializar o replica set do MongoDB (`rs.initiate()`) - veja o README.",
-      "categories": ["communication"],
+      "categories": [
+        "communication"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/rocket-chat.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "rocketchat/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "rocketchat/docker-compose.yml"
+      },
       "env": [
-        { "name": "ROCKETCHAT_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: chat.exemplo.com" },
-        { "name": "ROCKETCHAT_DB_NAME", "label": "Nome do banco", "default": "rocketchat" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+        {
+          "name": "ROCKETCHAT_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: chat.exemplo.com"
+        },
+        {
+          "name": "ROCKETCHAT_DB_NAME",
+          "label": "Nome do banco",
+          "default": "rocketchat"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
       ]
     },
     {
@@ -242,16 +586,41 @@
       "name": "minio",
       "description": "MinIO: armazenamento de objetos compativel com S3, com console web. Dois dominios (API e console) via Traefik v3.",
       "note": "Requer a rede `web` e DNS para os dois FQDNs (API S3 e console).",
-      "categories": ["storage"],
+      "categories": [
+        "storage"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/minio.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "minio/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "minio/docker-compose.yml"
+      },
       "env": [
-        { "name": "MINIO_S3_FQDN", "label": "Dominio API S3", "description": "Ex.: s3.exemplo.com" },
-        { "name": "MINIO_CONSOLE_FQDN", "label": "Dominio do console", "description": "Ex.: minio.exemplo.com" },
-        { "name": "MINIO_ROOT_USER", "label": "Usuario root", "description": "Usuario admin inicial" },
-        { "name": "MINIO_ROOT_PASSWORD", "label": "Senha root", "description": "Senha do root (min. 8 chars)" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+        {
+          "name": "MINIO_S3_FQDN",
+          "label": "Dominio API S3",
+          "description": "Ex.: s3.exemplo.com"
+        },
+        {
+          "name": "MINIO_CONSOLE_FQDN",
+          "label": "Dominio do console",
+          "description": "Ex.: minio.exemplo.com"
+        },
+        {
+          "name": "MINIO_ROOT_USER",
+          "label": "Usuario root",
+          "description": "Usuario admin inicial"
+        },
+        {
+          "name": "MINIO_ROOT_PASSWORD",
+          "label": "Senha root",
+          "description": "Senha do root (min. 8 chars)"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
       ]
     },
     {
@@ -260,17 +629,46 @@
       "name": "litellm",
       "description": "LiteLLM Proxy: gateway OpenAI-compativel para varios provedores de LLM, publicado via Traefik v3 com TLS.",
       "note": "PRE-REQUISITO: crie o Docker config `litellm_config_v1` a partir de config/config.yaml (lista de modelos). Veja o README.",
-      "categories": ["ai"],
+      "categories": [
+        "ai"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/selfhst/icons/png/litellm.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "litellm/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "litellm/docker-compose.yml"
+      },
       "env": [
-        { "name": "LITELLM_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: llm.exemplo.com" },
-        { "name": "LITELLM_MASTER_KEY", "label": "Master key", "description": "Chave mestra (sk-...)" },
-        { "name": "LITELLM_SALT_KEY", "label": "Salt key", "description": "Salt de criptografia (nao alterar depois)" },
-        { "name": "OPENAI_API_KEY", "label": "OpenAI API key (opcional)", "description": "Usada pelo config.yaml" },
-        { "name": "LITELLM_CONFIG_NAME", "label": "Docker config", "default": "litellm_config_v1" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+        {
+          "name": "LITELLM_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: llm.exemplo.com"
+        },
+        {
+          "name": "LITELLM_MASTER_KEY",
+          "label": "Master key",
+          "description": "Chave mestra (sk-...)"
+        },
+        {
+          "name": "LITELLM_SALT_KEY",
+          "label": "Salt key",
+          "description": "Salt de criptografia (nao alterar depois)"
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "label": "OpenAI API key (opcional)",
+          "description": "Usada pelo config.yaml"
+        },
+        {
+          "name": "LITELLM_CONFIG_NAME",
+          "label": "Docker config",
+          "default": "litellm_config_v1"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
       ]
     },
     {
@@ -279,15 +677,37 @@
       "name": "chromadb",
       "description": "ChromaDB: banco de dados vetorial para IA/RAG, publicado via Traefik v3 com TLS.",
       "note": "ATENCAO: sem token a API fica aberta. Defina CHROMA_AUTH_TOKEN (e o provider) ou proteja via Traefik.",
-      "categories": ["ai", "database"],
+      "categories": [
+        "ai",
+        "database"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/chroma.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "chromadb/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "chromadb/docker-compose.yml"
+      },
       "env": [
-        { "name": "CHROMA_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: chroma.exemplo.com" },
-        { "name": "CHROMA_AUTH_TOKEN", "label": "Token de auth (opcional)", "description": "Se definido, exige Bearer token" },
-        { "name": "CHROMA_AUTH_PROVIDER", "label": "Provider de auth", "description": "Para token: chromadb.auth.token_authn.TokenAuthenticationServerProvider" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+        {
+          "name": "CHROMA_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: chroma.exemplo.com"
+        },
+        {
+          "name": "CHROMA_AUTH_TOKEN",
+          "label": "Token de auth (opcional)",
+          "description": "Se definido, exige Bearer token"
+        },
+        {
+          "name": "CHROMA_AUTH_PROVIDER",
+          "label": "Provider de auth",
+          "description": "Para token: chromadb.auth.token_authn.TokenAuthenticationServerProvider"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
       ]
     },
     {
@@ -295,13 +715,27 @@
       "title": "openspeedtest — teste de velocidade",
       "name": "openspeedtest",
       "description": "OpenSpeedTest: teste de velocidade de rede self-hosted (HTML5), publicado via Traefik v3 com TLS.",
-      "categories": ["network", "tools"],
+      "categories": [
+        "network",
+        "tools"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/openspeedtest.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "openspeedtest/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "openspeedtest/docker-compose.yml"
+      },
       "env": [
-        { "name": "OPENSPEEDTEST_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: speedtest.exemplo.com" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+        {
+          "name": "OPENSPEEDTEST_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: speedtest.exemplo.com"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
       ]
     },
     {
@@ -310,15 +744,36 @@
       "name": "joomla",
       "description": "Joomla (CMS) com MySQL, publicado via Traefik v3 com TLS.",
       "note": "Requer a rede `web` e DNS do FQDN apontando para o host.",
-      "categories": ["cms"],
+      "categories": [
+        "cms"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/joomla.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "joomla/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "joomla/docker-compose.yml"
+      },
       "env": [
-        { "name": "JOOMLA_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: joomla.exemplo.com" },
-        { "name": "JOOMLA_DB_PASSWORD", "label": "Senha do banco", "description": "Senha do usuario do banco" },
-        { "name": "MYSQL_ROOT_PASSWORD", "label": "Senha root MySQL", "description": "Senha root do MySQL" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+        {
+          "name": "JOOMLA_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: joomla.exemplo.com"
+        },
+        {
+          "name": "JOOMLA_DB_PASSWORD",
+          "label": "Senha do banco",
+          "description": "Senha do usuario do banco"
+        },
+        {
+          "name": "MYSQL_ROOT_PASSWORD",
+          "label": "Senha root MySQL",
+          "description": "Senha root do MySQL"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
       ]
     },
     {
@@ -327,18 +782,52 @@
       "name": "moodle",
       "description": "Moodle (ambiente de ensino a distancia) com MariaDB, imagens Bitnami, publicado via Traefik v3 com TLS.",
       "note": "Requer a rede `web` e DNS do FQDN. O primeiro boot pode demorar (instalacao do Moodle).",
-      "categories": ["education", "cms"],
+      "categories": [
+        "education",
+        "cms"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/moodle.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "moodle/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "moodle/docker-compose.yml"
+      },
       "env": [
-        { "name": "MOODLE_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: moodle.exemplo.com" },
-        { "name": "MOODLE_DB_PASSWORD", "label": "Senha do banco", "description": "Senha do usuario do banco" },
-        { "name": "MOODLE_ADMIN_PASSWORD", "label": "Senha admin Moodle", "description": "Senha do administrador" },
-        { "name": "MARIADB_ROOT_PASSWORD", "label": "Senha root MariaDB", "description": "Senha root do MariaDB" },
-        { "name": "MOODLE_ADMIN_USER", "label": "Usuario admin", "default": "admin" },
-        { "name": "MOODLE_ADMIN_EMAIL", "label": "E-mail admin", "default": "admin@example.com" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+        {
+          "name": "MOODLE_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: moodle.exemplo.com"
+        },
+        {
+          "name": "MOODLE_DB_PASSWORD",
+          "label": "Senha do banco",
+          "description": "Senha do usuario do banco"
+        },
+        {
+          "name": "MOODLE_ADMIN_PASSWORD",
+          "label": "Senha admin Moodle",
+          "description": "Senha do administrador"
+        },
+        {
+          "name": "MARIADB_ROOT_PASSWORD",
+          "label": "Senha root MariaDB",
+          "description": "Senha root do MariaDB"
+        },
+        {
+          "name": "MOODLE_ADMIN_USER",
+          "label": "Usuario admin",
+          "default": "admin"
+        },
+        {
+          "name": "MOODLE_ADMIN_EMAIL",
+          "label": "E-mail admin",
+          "default": "admin@example.com"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
       ]
     },
     {
@@ -346,13 +835,27 @@
       "title": "excalidraw — quadro branco",
       "name": "excalidraw",
       "description": "Excalidraw: quadro branco / desenho colaborativo (imagem oficial), publicado via Traefik v3 com TLS.",
-      "categories": ["productivity", "tools"],
+      "categories": [
+        "productivity",
+        "tools"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/excalidraw.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "excalidraw/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "excalidraw/docker-compose.yml"
+      },
       "env": [
-        { "name": "EXCALIDRAW_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: draw.exemplo.com" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+        {
+          "name": "EXCALIDRAW_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: draw.exemplo.com"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
       ]
     },
     {
@@ -361,16 +864,41 @@
       "name": "mariadb",
       "description": "Banco de dados MariaDB compartilhado (sem proxy). Entra na rede overlay `data` para outras stacks conectarem por `mariadb:3306`.",
       "note": "PRE-REQUISITO: crie a rede compartilhada: `docker network create --driver overlay --attachable data`. Para acesso externo, descomente o bloco ports no compose.",
-      "categories": ["database"],
+      "categories": [
+        "database"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/mariadb.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "mariadb/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "mariadb/docker-compose.yml"
+      },
       "env": [
-        { "name": "MARIADB_ROOT_PASSWORD", "label": "Senha root", "description": "Senha do usuario root" },
-        { "name": "MARIADB_PASSWORD", "label": "Senha do app", "description": "Senha do usuario de aplicacao" },
-        { "name": "MARIADB_DATABASE", "label": "Banco inicial", "default": "appdb" },
-        { "name": "MARIADB_USER", "label": "Usuario do app", "default": "app" },
-        { "name": "DATA_NET", "label": "Rede de dados", "default": "data" }
+        {
+          "name": "MARIADB_ROOT_PASSWORD",
+          "label": "Senha root",
+          "description": "Senha do usuario root"
+        },
+        {
+          "name": "MARIADB_PASSWORD",
+          "label": "Senha do app",
+          "description": "Senha do usuario de aplicacao"
+        },
+        {
+          "name": "MARIADB_DATABASE",
+          "label": "Banco inicial",
+          "default": "appdb"
+        },
+        {
+          "name": "MARIADB_USER",
+          "label": "Usuario do app",
+          "default": "app"
+        },
+        {
+          "name": "DATA_NET",
+          "label": "Rede de dados",
+          "default": "data"
+        }
       ]
     },
     {
@@ -379,17 +907,47 @@
       "name": "postgres-pgvector",
       "description": "PostgreSQL com a extensao pgvector nativa (imagem oficial pgvector/pgvector), para IA/RAG (embeddings). Entra na rede overlay `data` para outras stacks conectarem por `postgres:5432`.",
       "note": "PRE-REQUISITO: crie a rede `data` (docker network create --driver overlay --attachable data) e o Docker config de init `pgvector_init_v1` (CREATE EXTENSION vector). Veja o README.",
-      "categories": ["database", "ai"],
+      "categories": [
+        "database",
+        "ai"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/postgresql.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "postgres-pgvector/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "postgres-pgvector/docker-compose.yml"
+      },
       "env": [
-        { "name": "POSTGRES_PASSWORD", "label": "Senha do PostgreSQL", "description": "Senha do usuario do banco" },
-        { "name": "POSTGRES_DB", "label": "Banco padrao", "default": "vectordb" },
-        { "name": "POSTGRES_USER", "label": "Usuario do banco", "default": "postgres" },
-        { "name": "PGVECTOR_IMAGE_TAG", "label": "Tag pgvector", "default": "pg16" },
-        { "name": "PGVECTOR_INIT_CONFIG", "label": "Docker config de init", "default": "pgvector_init_v1" },
-        { "name": "DATA_NET", "label": "Rede de dados", "default": "data" }
+        {
+          "name": "POSTGRES_PASSWORD",
+          "label": "Senha do PostgreSQL",
+          "description": "Senha do usuario do banco"
+        },
+        {
+          "name": "POSTGRES_DB",
+          "label": "Banco padrao",
+          "default": "vectordb"
+        },
+        {
+          "name": "POSTGRES_USER",
+          "label": "Usuario do banco",
+          "default": "postgres"
+        },
+        {
+          "name": "PGVECTOR_IMAGE_TAG",
+          "label": "Tag pgvector",
+          "default": "pg16"
+        },
+        {
+          "name": "PGVECTOR_INIT_CONFIG",
+          "label": "Docker config de init",
+          "default": "pgvector_init_v1"
+        },
+        {
+          "name": "DATA_NET",
+          "label": "Rede de dados",
+          "default": "data"
+        }
       ]
     },
     {
@@ -398,16 +956,42 @@
       "name": "redis",
       "description": "Redis como cache/memoria compartilhado (sem proxy). Entra na rede overlay `data` para outras stacks conectarem por `redis:6379`.",
       "note": "PRE-REQUISITO: crie a rede `data` (docker network create --driver overlay --attachable data). Defina REDIS_PASSWORD para proteger o cache.",
-      "categories": ["database", "cache"],
+      "categories": [
+        "database",
+        "cache"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/redis.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "redis/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "redis/docker-compose.yml"
+      },
       "env": [
-        { "name": "REDIS_PASSWORD", "label": "Senha (recomendada)", "description": "AUTH do Redis; vazio = sem senha" },
-        { "name": "REDIS_MAXMEMORY", "label": "Limite de memoria", "default": "256mb" },
-        { "name": "REDIS_MAXMEMORY_POLICY", "label": "Politica de eviccao", "default": "allkeys-lru" },
-        { "name": "REDIS_APPENDONLY", "label": "Persistencia AOF", "default": "yes" },
-        { "name": "DATA_NET", "label": "Rede de dados", "default": "data" }
+        {
+          "name": "REDIS_PASSWORD",
+          "label": "Senha (recomendada)",
+          "description": "AUTH do Redis; vazio = sem senha"
+        },
+        {
+          "name": "REDIS_MAXMEMORY",
+          "label": "Limite de memoria",
+          "default": "256mb"
+        },
+        {
+          "name": "REDIS_MAXMEMORY_POLICY",
+          "label": "Politica de eviccao",
+          "default": "allkeys-lru"
+        },
+        {
+          "name": "REDIS_APPENDONLY",
+          "label": "Persistencia AOF",
+          "default": "yes"
+        },
+        {
+          "name": "DATA_NET",
+          "label": "Rede de dados",
+          "default": "data"
+        }
       ]
     },
     {
@@ -416,19 +1000,57 @@
       "name": "evolution-api",
       "description": "Evolution API (gateway de WhatsApp) via Traefik v3. Usa o PostgreSQL (stack postgres-pgvector) e o Redis (stack redis) compartilhados na rede `data`.",
       "note": "PRE-REQUISITO: redes `web` e `data`; stacks postgres-pgvector e redis na `data`; e o banco `evolution` criado no PostgreSQL (CREATE DATABASE evolution).",
-      "categories": ["communication", "api"],
+      "categories": [
+        "communication",
+        "api"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/whatsapp.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "evolution-api/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "evolution-api/docker-compose.yml"
+      },
       "env": [
-        { "name": "EVOLUTION_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: evolution.exemplo.com" },
-        { "name": "EVOLUTION_API_KEY", "label": "API key", "description": "Chave global de autenticacao da API" },
-        { "name": "EVOLUTION_DB_PASSWORD", "label": "Senha do PostgreSQL", "description": "Senha do usuario do banco compartilhado" },
-        { "name": "EVOLUTION_DB_HOST", "label": "Host do PostgreSQL", "default": "postgres" },
-        { "name": "EVOLUTION_DB_NAME", "label": "Banco", "default": "evolution" },
-        { "name": "EVOLUTION_REDIS_URI", "label": "URI do Redis", "default": "redis://redis:6379/6" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" },
-        { "name": "DATA_NET", "label": "Rede de dados", "default": "data" }
+        {
+          "name": "EVOLUTION_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: evolution.exemplo.com"
+        },
+        {
+          "name": "EVOLUTION_API_KEY",
+          "label": "API key",
+          "description": "Chave global de autenticacao da API"
+        },
+        {
+          "name": "EVOLUTION_DB_PASSWORD",
+          "label": "Senha do PostgreSQL",
+          "description": "Senha do usuario do banco compartilhado"
+        },
+        {
+          "name": "EVOLUTION_DB_HOST",
+          "label": "Host do PostgreSQL",
+          "default": "postgres"
+        },
+        {
+          "name": "EVOLUTION_DB_NAME",
+          "label": "Banco",
+          "default": "evolution"
+        },
+        {
+          "name": "EVOLUTION_REDIS_URI",
+          "label": "URI do Redis",
+          "default": "redis://redis:6379/6"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        },
+        {
+          "name": "DATA_NET",
+          "label": "Rede de dados",
+          "default": "data"
+        }
       ]
     },
     {
@@ -437,18 +1059,51 @@
       "name": "wordpress",
       "description": "WordPress via Traefik v3 com TLS. Usa o MariaDB compartilhado (stack mariadb) na rede `data` — nao sobe banco proprio.",
       "note": "PRE-REQUISITO: redes `web` e `data`; stack mariadb na `data`; e o banco/usuario `wordpress` criado no MariaDB. Veja o README.",
-      "categories": ["cms"],
+      "categories": [
+        "cms"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/wordpress.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "wordpress/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "wordpress/docker-compose.yml"
+      },
       "env": [
-        { "name": "WORDPRESS_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: blog.exemplo.com" },
-        { "name": "WORDPRESS_DB_PASSWORD", "label": "Senha do banco", "description": "Senha do usuario do MariaDB" },
-        { "name": "WORDPRESS_DB_HOST", "label": "Host do banco", "default": "mariadb" },
-        { "name": "WORDPRESS_DB_NAME", "label": "Banco", "default": "wordpress" },
-        { "name": "WORDPRESS_DB_USER", "label": "Usuario do banco", "default": "wordpress" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" },
-        { "name": "DATA_NET", "label": "Rede de dados", "default": "data" }
+        {
+          "name": "WORDPRESS_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: blog.exemplo.com"
+        },
+        {
+          "name": "WORDPRESS_DB_PASSWORD",
+          "label": "Senha do banco",
+          "description": "Senha do usuario do MariaDB"
+        },
+        {
+          "name": "WORDPRESS_DB_HOST",
+          "label": "Host do banco",
+          "default": "mariadb"
+        },
+        {
+          "name": "WORDPRESS_DB_NAME",
+          "label": "Banco",
+          "default": "wordpress"
+        },
+        {
+          "name": "WORDPRESS_DB_USER",
+          "label": "Usuario do banco",
+          "default": "wordpress"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        },
+        {
+          "name": "DATA_NET",
+          "label": "Rede de dados",
+          "default": "data"
+        }
       ]
     },
     {
@@ -457,18 +1112,52 @@
       "name": "wikijs",
       "description": "Wiki.js: wiki moderno baseado em Markdown (busca, versionamento, ACL). Via Traefik v3. Usa o PostgreSQL compartilhado (stack postgres-pgvector) na rede `data`.",
       "note": "PRE-REQUISITO: redes `web` e `data`; stack postgres-pgvector na `data`; e o banco/usuario `wikijs` criado no PostgreSQL. Veja o README.",
-      "categories": ["documentation", "wiki"],
+      "categories": [
+        "documentation",
+        "wiki"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/wikijs.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "wikijs/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "wikijs/docker-compose.yml"
+      },
       "env": [
-        { "name": "WIKIJS_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: wiki.exemplo.com" },
-        { "name": "WIKIJS_DB_PASSWORD", "label": "Senha do banco", "description": "Senha do usuario do PostgreSQL" },
-        { "name": "WIKIJS_DB_HOST", "label": "Host do banco", "default": "postgres" },
-        { "name": "WIKIJS_DB_NAME", "label": "Banco", "default": "wikijs" },
-        { "name": "WIKIJS_DB_USER", "label": "Usuario do banco", "default": "wikijs" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" },
-        { "name": "DATA_NET", "label": "Rede de dados", "default": "data" }
+        {
+          "name": "WIKIJS_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: wiki.exemplo.com"
+        },
+        {
+          "name": "WIKIJS_DB_PASSWORD",
+          "label": "Senha do banco",
+          "description": "Senha do usuario do PostgreSQL"
+        },
+        {
+          "name": "WIKIJS_DB_HOST",
+          "label": "Host do banco",
+          "default": "postgres"
+        },
+        {
+          "name": "WIKIJS_DB_NAME",
+          "label": "Banco",
+          "default": "wikijs"
+        },
+        {
+          "name": "WIKIJS_DB_USER",
+          "label": "Usuario do banco",
+          "default": "wikijs"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        },
+        {
+          "name": "DATA_NET",
+          "label": "Rede de dados",
+          "default": "data"
+        }
       ]
     },
     {
@@ -477,23 +1166,78 @@
       "name": "supabase",
       "description": "Supabase self-hosted (Postgres + Studio + Kong/API + Auth + REST + Realtime + Storage + Functions...) adaptado para Docker Swarm. Studio e API expostos via Traefik v3.",
       "note": "Adaptacao best-effort p/ Swarm. Gere as chaves (JWT_SECRET, ANON_KEY, SERVICE_ROLE_KEY etc.) conforme a doc da Supabase antes do deploy. Veja o README.",
-      "categories": ["database", "ai", "backend"],
+      "categories": [
+        "database",
+        "ai",
+        "backend"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/supabase.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "supabase/docker-compose.yml" },
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "supabase/docker-compose.yml"
+      },
       "env": [
-        { "name": "SUPABASE_STUDIO_FQDN", "label": "Dominio do Studio", "description": "Ex.: studio.exemplo.com" },
-        { "name": "SUPABASE_API_FQDN", "label": "Dominio da API", "description": "Ex.: api.exemplo.com" },
-        { "name": "POSTGRES_PASSWORD", "label": "Senha do Postgres", "description": "Usada por todos os servicos" },
-        { "name": "JWT_SECRET", "label": "JWT secret", "description": "Segredo HS256 (min. 32 chars)" },
-        { "name": "ANON_KEY", "label": "Anon key", "description": "JWT da role anon" },
-        { "name": "SERVICE_ROLE_KEY", "label": "Service role key", "description": "JWT da role service_role" },
-        { "name": "DASHBOARD_USERNAME", "label": "Usuario do Studio", "description": "Basic-auth do Studio" },
-        { "name": "DASHBOARD_PASSWORD", "label": "Senha do Studio", "description": "Basic-auth do Studio" },
-        { "name": "SECRET_KEY_BASE", "label": "Realtime key base", "description": "Chave de sessao do realtime (64 chars)" },
-        { "name": "VAULT_ENC_KEY", "label": "Vault enc key", "description": "Chave do Vault (32 chars)" },
-        { "name": "LOGFLARE_API_KEY", "label": "Logflare API key", "description": "Chave do analytics/vector" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+        {
+          "name": "SUPABASE_STUDIO_FQDN",
+          "label": "Dominio do Studio",
+          "description": "Ex.: studio.exemplo.com"
+        },
+        {
+          "name": "SUPABASE_API_FQDN",
+          "label": "Dominio da API",
+          "description": "Ex.: api.exemplo.com"
+        },
+        {
+          "name": "POSTGRES_PASSWORD",
+          "label": "Senha do Postgres",
+          "description": "Usada por todos os servicos"
+        },
+        {
+          "name": "JWT_SECRET",
+          "label": "JWT secret",
+          "description": "Segredo HS256 (min. 32 chars)"
+        },
+        {
+          "name": "ANON_KEY",
+          "label": "Anon key",
+          "description": "JWT da role anon"
+        },
+        {
+          "name": "SERVICE_ROLE_KEY",
+          "label": "Service role key",
+          "description": "JWT da role service_role"
+        },
+        {
+          "name": "DASHBOARD_USERNAME",
+          "label": "Usuario do Studio",
+          "description": "Basic-auth do Studio"
+        },
+        {
+          "name": "DASHBOARD_PASSWORD",
+          "label": "Senha do Studio",
+          "description": "Basic-auth do Studio"
+        },
+        {
+          "name": "SECRET_KEY_BASE",
+          "label": "Realtime key base",
+          "description": "Chave de sessao do realtime (64 chars)"
+        },
+        {
+          "name": "VAULT_ENC_KEY",
+          "label": "Vault enc key",
+          "description": "Chave do Vault (32 chars)"
+        },
+        {
+          "name": "LOGFLARE_API_KEY",
+          "label": "Logflare API key",
+          "description": "Chave do analytics/vector"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
       ]
     }
   ]
