@@ -2291,7 +2291,7 @@
         { "name": "LANGFUSE_SALT", "label": "Salt", "description": "openssl rand -base64 32" },
         { "name": "LANGFUSE_DB_HOST", "label": "Host do PostgreSQL", "default": "postgres" },
         { "name": "LANGFUSE_DB_NAME", "label": "Banco", "default": "langfuse" },
-        { "name": "LANGFUSE_DISABLE_SIGNUP", "label": "Desabilitar signup", "default": "false" },
+        { "name": "LANGFUSE_DISABLE_SIGNUP", "label": "Desabilitar signup", "default": "true" },
         { "name": "LANGFUSE_IMAGE_TAG", "label": "Tag da imagem", "default": "2" }
       ]
     },

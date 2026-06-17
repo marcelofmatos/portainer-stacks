@@ -15,7 +15,7 @@ services:
       - data
     environment:
       - STORAGE_DIR=/app/server/storage
-      - JWT_SECRET=${ANYTHINGLLM_JWT_SECRET}
+      - JWT_SECRET=${ANYTHINGLLM_JWT_SECRET:?ANYTHINGLLM_JWT_SECRET e obrigatorio}
       - DISABLE_TELEMETRY=${ANYTHINGLLM_DISABLE_TELEMETRY:-true}
     volumes:
       - anythingllm-data:/app/server/storage

@@ -17,7 +17,8 @@ services:
       - NEXTAUTH_SECRET=${LANGFUSE_NEXTAUTH_SECRET}
       - SALT=${LANGFUSE_SALT}
       - TELEMETRY_ENABLED=${LANGFUSE_TELEMETRY_ENABLED:-true}
-      - AUTH_DISABLE_SIGNUP=${LANGFUSE_DISABLE_SIGNUP:-false}
+      # Signup DESABILITADO por padrão. Defina false só para criar a 1ª conta e habilite de novo.
+      - AUTH_DISABLE_SIGNUP=${LANGFUSE_DISABLE_SIGNUP:-true}
     deploy:
       mode: replicated
       replicas: 1

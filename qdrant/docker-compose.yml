@@ -15,7 +15,7 @@ services:
       - web
       - data
     environment:
-      - QDRANT__SERVICE__API_KEY=${QDRANT_API_KEY}
+      - QDRANT__SERVICE__API_KEY=${QDRANT_API_KEY:?QDRANT_API_KEY e obrigatoria}
     volumes:
       - qdrant-data:/qdrant/storage
     deploy:

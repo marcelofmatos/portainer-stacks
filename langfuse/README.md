@@ -28,7 +28,7 @@ flowchart LR
 | `LANGFUSE_DB_PORT` | não | `5432` | porta do PostgreSQL |
 | `LANGFUSE_DB_USER` | não | `postgres` | usuário do PostgreSQL |
 | `LANGFUSE_DB_NAME` | não | `langfuse` | banco usado pelo Langfuse |
-| `LANGFUSE_DISABLE_SIGNUP` | não | `false` | bloqueia auto-cadastro após criar o admin |
+| `LANGFUSE_DISABLE_SIGNUP` | não | `true` | bloqueia auto-cadastro (fechado por padrão; abra só p/ criar a 1ª conta) |
 | `LANGFUSE_IMAGE_TAG` | não | `2` | tag da imagem langfuse/langfuse (v2) |
 | `PROXY_NET` | não | `web` | rede externa do Traefik |
 | `DATA_NET` | não | `data` | rede overlay dos serviços compartilhados |
@@ -42,9 +42,10 @@ flowchart LR
 
 ## Uso
 1. Crie o banco `langfuse`, gere os segredos e faça o deploy (migrações aplicadas no start).
-2. Acesse `https://LANGFUSE_FQDN`, crie a conta e um projeto; gere as chaves (public/secret).
-3. **Feche o signup** após criar sua conta: defina `LANGFUSE_DISABLE_SIGNUP=true` e reimplante (a app
-   é exposta publicamente; sem isso qualquer um pode se cadastrar).
+2. **Criar a 1ª conta:** o signup vem **fechado** (`LANGFUSE_DISABLE_SIGNUP=true`). Suba com
+   `LANGFUSE_DISABLE_SIGNUP=false`, acesse `https://LANGFUSE_FQDN`, crie sua conta/projeto e **volte
+   para `true`** reimplantando (a app é pública; sem isso qualquer um pode se cadastrar).
+3. Aponte o cliente (ex.: `litellm`, SDK) para `https://LANGFUSE_FQDN` com as chaves do projeto.
 4. Aponte o cliente (ex.: `litellm`, SDK) para `https://LANGFUSE_FQDN` com as chaves do projeto.
 
 ## Troubleshooting
