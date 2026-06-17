@@ -90,6 +90,7 @@
       "note": "Apos o deploy, aplique nas outras stacks o middleware: traefik.http.routers.<r>.middlewares=error-pages@swarm",
       "categories": ["proxy", "tools"],
       "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/html.png",
       "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "error-pages/docker-compose.yml" },
       "env": [
         { "name": "ERRORPAGES_TEMPLATE", "label": "Template visual", "default": "ghost", "description": "ghost, l7-dark, matrix, etc." },
@@ -261,6 +262,7 @@
       "note": "PRE-REQUISITO: crie o Docker config `litellm_config_v1` a partir de config/config.yaml (lista de modelos). Veja o README.",
       "categories": ["ai"],
       "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/selfhst/icons/png/litellm.png",
       "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "litellm/docker-compose.yml" },
       "env": [
         { "name": "LITELLM_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: llm.exemplo.com" },
@@ -416,6 +418,7 @@
       "note": "PRE-REQUISITO: redes `web` e `data`; stacks postgres-pgvector e redis na `data`; e o banco `evolution` criado no PostgreSQL (CREATE DATABASE evolution).",
       "categories": ["communication", "api"],
       "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/whatsapp.png",
       "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "evolution-api/docker-compose.yml" },
       "env": [
         { "name": "EVOLUTION_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: evolution.exemplo.com" },
