@@ -1,0 +1,40 @@
+# ┌──────────────────────────────────────────────────────────────────────────┐
+# │ Stack "cloudflared" — Cloudflare Tunnel (acesso sem abrir portas)          │
+# └──────────────────────────────────────────────────────────────────────────┘
+# Pré-requisitos de deploy:
+#   1. Crie a rede externa do proxy (uma vez por cluster):
+#        docker network create --driver overlay --attachable web
+#   2. No painel Cloudflare Zero Trust → Networks → Tunnels, crie um túnel e copie o TOKEN.
+#   3. Configure os ingress/rotas do túnel NO PAINEL, apontando o hostname público para o
+#      serviço interno (ex.: Service = http://balancer:80, ou http://<servico>:<porta> na rede web).
+#   4. Defina a variável OBRIGATÓRIA no deploy: CLOUDFLARED_TUNNEL_TOKEN.
+#
+# COMO FUNCIONA:
+#   - `tunnel` faz conexão de SAÍDA (egress) para a borda da Cloudflare — NÃO expõe portas,
+#     não precisa de IP público nem de entrada pelo Traefik. O roteamento HTTP é definido no painel.
+#   - Fica na rede `web` para alcançar o Traefik (`balancer`) e os serviços publicados pelo
+#     nome de serviço. Modo remoto (token): todo o ingress é gerenciado no painel da Cloudflare.
+#
+# Porte: Leve (64 MB → 512 MB RAM)
+# Hardware (1 réplica): mínimo 1 vCPU · 64 MB RAM · 1 GB disco · ideal 1 vCPU · 128 MB RAM · 2 GB disco
+services:
+  tunnel:
+    image: cloudflare/cloudflared:${CLOUDFLARED_IMAGE_TAG:-latest}
+    command: tunnel --no-autoupdate run
+    networks:
+      - web # alcança o Traefik (balancer) e os serviços publicados por nome de serviço
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARED_TUNNEL_TOKEN} # OBRIGATÓRIA (segredo do túnel — painel Cloudflare)
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: any
+
+networks:
+  web: # externa: criada pela stack balancer (Traefik); o túnel alcança os serviços por aqui
+    external: true
+    name: ${PROXY_NET:-web}

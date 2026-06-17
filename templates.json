@@ -2653,6 +2653,36 @@
           "default": "latest"
         }
       ]
+    },
+    {
+      "type": 2,
+      "title": "cloudflared — Cloudflare Tunnel",
+      "name": "cloudflared",
+      "description": "Cloudflare Tunnel: publica serviços internos na internet por um túnel de saída, sem abrir portas nem IP público. Modo remote-managed (token); ingress configurado no painel Cloudflare Zero Trust. Complementa o Traefik (balancer).",
+      "note": "Crie o túnel no painel Cloudflare Zero Trust (Networks > Tunnels) e informe CLOUDFLARED_TUNNEL_TOKEN. Configure os Public Hostnames no painel apontando para os serviços internos (ex.: http://balancer:80). Requer a rede externa 'web'.",
+      "categories": [
+        "networking",
+        "proxy",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/cloudflared.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "cloudflared/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "CLOUDFLARED_TUNNEL_TOKEN",
+          "label": "Token do túnel",
+          "description": "Cloudflare Zero Trust > Networks > Tunnels > token do conector (segredo)"
+        },
+        {
+          "name": "CLOUDFLARED_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "latest"
+        }
+      ]
     }
   ]
 }

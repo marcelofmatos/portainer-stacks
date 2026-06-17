@@ -21,7 +21,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 
 | Porte | RAM (mín → ideal) | Stacks |
 |---|---|---|
-| **Leve** | 64 MB → 512 MB | `error-pages`, `socat`, `web-redirect`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis` |
+| **Leve** | 64 MB → 512 MB | `error-pages`, `cloudflared`, `socat`, `web-redirect`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis` |
 | **Médio** | 512 MB → 2 GB | `account`, `keycloak`, `zabbix`, `mariadb`, `postgres-pgvector`, `mongodb`, `chromadb`, `qdrant`, `minio`, `workflows`, `evolution-api`, `joomla`, `wordpress`, `wikijs`, `espocrm`, `typebot`, `stirlingpdf`, `flowise`, `litellm`, `open-webui` |
 | **Pesado** | 2 GB → 4–8 GB | `swarmprom`, `elasticsearch`, `drive`, `rocketchat`, `moodle`, `twenty`, `botpress`, `langfuse`, `librechat`, `anythingllm`, `chatwoot`, `ligerosmart`, `dify`, `supabase` |
 | **GPU / ML** | 8 GB+ (GPU recomendada) | `ollama`, `comfyui`, `ragflow` |
@@ -37,6 +37,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 | [`zabbix`](zabbix/) | Monitoramento (server+web+agent) — usa `postgres-pgvector` | [README](zabbix/README.md) |
 | [`phpnetmap`](phpnetmap/) | Mapa/monitoramento de rede via SNMP | [README](phpnetmap/README.md) |
 | [`haproxy`](haproxy/) | Load balancer TCP/HTTP + página de stats | [README](haproxy/README.md) |
+| [`cloudflared`](cloudflared/) | Cloudflare Tunnel (expõe serviços sem abrir portas/IP público) | [README](cloudflared/README.md) |
 | [`socat`](socat/) | Relay TCP (expõe serviço interno para fora) | [README](socat/README.md) |
 | [`web-redirect`](web-redirect/) | Redirecionador HTTP (301/302) | [README](web-redirect/README.md) |
 | [`ssh-server`](ssh-server/) | Servidor OpenSSH/SFTP | [README](ssh-server/README.md) |
