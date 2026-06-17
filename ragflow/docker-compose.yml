@@ -1,0 +1,63 @@
+# Stack "ragflow" — RAGFlow (motor de RAG com parsing de documentos) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Reaproveita os serviços compartilhados da rede `data`: MySQL/MariaDB (stack mariadb), Redis (stack
+# redis), Elasticsearch (stack elasticsearch) e MinIO (stack minio) — não sobe esses backends.
+#
+# Obrigatórias: RAGFLOW_FQDN, RAGFLOW_MYSQL_PASSWORD, RAGFLOW_MINIO_PASSWORD, RAGFLOW_ES_PASSWORD.
+# RAGFlow é pesado e sensível à versão — confira as variáveis/host de cada backend no README.
+# NOTA (volume em Swarm): o cache de modelos é local ao nó — em cluster multi-worker fixe o serviço
+# definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+services:
+  ragflow:
+    image: infiniflow/ragflow:${RAGFLOW_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+      - data
+    environment:
+      - DOC_ENGINE=elasticsearch
+      - MYSQL_HOST=${RAGFLOW_MYSQL_HOST:-mariadb}
+      - MYSQL_PORT=${RAGFLOW_MYSQL_PORT:-3306}
+      - MYSQL_DBNAME=${RAGFLOW_MYSQL_DB:-rag_flow}
+      - MYSQL_PASSWORD=${RAGFLOW_MYSQL_PASSWORD}
+      - MINIO_HOST=${RAGFLOW_MINIO_HOST:-minio:9000}
+      - MINIO_USER=${RAGFLOW_MINIO_USER:-ragflow}
+      - MINIO_PASSWORD=${RAGFLOW_MINIO_PASSWORD}
+      - ES_HOST=${RAGFLOW_ES_HOST:-elasticsearch}
+      - ES_PORT=${RAGFLOW_ES_PORT:-9200}
+      - ELASTIC_PASSWORD=${RAGFLOW_ES_PASSWORD}
+      - REDIS_HOST=${RAGFLOW_REDIS_HOST:-redis}
+      - REDIS_PORT=${RAGFLOW_REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${RAGFLOW_REDIS_PASSWORD:-}
+      - SVR_HTTP_PORT=9380
+      - TIMEZONE=${RAGFLOW_TIMEZONE:-America/Sao_Paulo}
+    volumes:
+      - ragflow-data:/root/.ragflow
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.ragflow.rule=Host(`${RAGFLOW_FQDN}`)
+        - traefik.http.routers.ragflow.entrypoints=websecure
+        - traefik.http.routers.ragflow.tls=true
+        - traefik.http.routers.ragflow.tls.certresolver=letsencryptresolver
+        - traefik.http.services.ragflow.loadbalancer.server.port=80
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: overlay
+
+volumes:
+  ragflow-data:
+    driver: local

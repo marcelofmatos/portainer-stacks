@@ -1,0 +1,49 @@
+# Stack "searxng" — SearXNG (meta-busca / web search) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Meta-mecanismo de busca, útil como backend de "web search" para agentes/RAG (flowise, dify, etc.).
+# Também disponível na rede `data` para outras stacks conectarem por `searxng:8080`.
+#
+# Obrigatórias: SEARXNG_FQDN, SEARXNG_SECRET.
+# NOTA (volume em Swarm): o volume de config é local ao nó — em cluster multi-worker fixe o serviço
+# definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+services:
+  searxng:
+    image: searxng/searxng:${SEARXNG_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+      - data
+    environment:
+      - SEARXNG_BASE_URL=https://${SEARXNG_FQDN}/
+      - SEARXNG_SECRET=${SEARXNG_SECRET}
+      - SEARXNG_REDIS_URL=${SEARXNG_REDIS_URL:-}
+    volumes:
+      - searxng-config:/etc/searxng
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.searxng.rule=Host(`${SEARXNG_FQDN}`)
+        - traefik.http.routers.searxng.entrypoints=websecure
+        - traefik.http.routers.searxng.tls=true
+        - traefik.http.routers.searxng.tls.certresolver=letsencryptresolver
+        - traefik.http.services.searxng.loadbalancer.server.port=8080
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: overlay
+
+volumes:
+  searxng-config:
+    driver: local

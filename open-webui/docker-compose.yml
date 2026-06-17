@@ -1,0 +1,49 @@
+# Stack "open-webui" — Open WebUI (UI de chat para LLMs) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Interface de chat para Ollama e/ou endpoints OpenAI-compatible (ex.: stacks `ollama` e `litellm`).
+# Persiste em volume local (SQLite por padrão).
+#
+# Obrigatórias: OPENWEBUI_FQDN, OPENWEBUI_SECRET_KEY.
+# NOTA (volume em Swarm): o volume é local ao nó — em cluster multi-worker fixe o serviço definindo
+# WORKER_HOSTNAME e descomentando o constraint de hostname.
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:${OPENWEBUI_IMAGE_TAG:-main}
+    networks:
+      - default
+      - web
+    environment:
+      - WEBUI_SECRET_KEY=${OPENWEBUI_SECRET_KEY}
+      - WEBUI_URL=https://${OPENWEBUI_FQDN}
+      # Aponte para suas stacks de LLM (use as URLs públicas do ollama/litellm):
+      - OLLAMA_BASE_URL=${OPENWEBUI_OLLAMA_URL:-}
+      - OPENAI_API_BASE_URL=${OPENWEBUI_OPENAI_BASE_URL:-}
+      - OPENAI_API_KEY=${OPENWEBUI_OPENAI_API_KEY:-}
+      - ENABLE_SIGNUP=${OPENWEBUI_ENABLE_SIGNUP:-false}
+    volumes:
+      - open-webui-data:/app/backend/data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.open-webui.rule=Host(`${OPENWEBUI_FQDN}`)
+        - traefik.http.routers.open-webui.entrypoints=websecure
+        - traefik.http.routers.open-webui.tls=true
+        - traefik.http.routers.open-webui.tls.certresolver=letsencryptresolver
+        - traefik.http.services.open-webui.loadbalancer.server.port=8080
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay
+
+volumes:
+  open-webui-data:
+    driver: local

@@ -1,0 +1,48 @@
+# Stack "qdrant" — Qdrant (vector database) — Docker Swarm
+# Publicado via Traefik v3 com TLS (REST 6333) e também disponível na rede `data` para outras stacks
+# (ex.: dify) conectarem internamente por `qdrant:6333`.
+#
+# AUTENTICAÇÃO: defina QDRANT_API_KEY para exigir o header `api-key`. Sem ela, a API fica ABERTA.
+# Obrigatórias: QDRANT_FQDN.
+#
+# NOTA (volume em Swarm): o volume é local ao nó — em cluster multi-worker fixe o serviço definindo
+# WORKER_HOSTNAME e descomentando o constraint de hostname.
+services:
+  qdrant:
+    image: qdrant/qdrant:${QDRANT_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+      - data
+    environment:
+      - QDRANT__SERVICE__API_KEY=${QDRANT_API_KEY:-}
+    volumes:
+      - qdrant-data:/qdrant/storage
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.qdrant.rule=Host(`${QDRANT_FQDN}`)
+        - traefik.http.routers.qdrant.entrypoints=websecure
+        - traefik.http.routers.qdrant.tls=true
+        - traefik.http.routers.qdrant.tls.certresolver=letsencryptresolver
+        - traefik.http.services.qdrant.loadbalancer.server.port=6333
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: overlay
+
+volumes:
+  qdrant-data:
+    driver: local

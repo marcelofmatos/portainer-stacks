@@ -1,0 +1,43 @@
+# Stack "langfuse" — Langfuse (observabilidade de LLM) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Tracing/observabilidade de aplicações LLM. Esta stack usa o Langfuse v2 (single-service), que precisa
+# apenas do PostgreSQL compartilhado (stack postgres-pgvector) na rede `data`.
+#
+# Obrigatórias: LANGFUSE_FQDN, LANGFUSE_DB_PASSWORD, LANGFUSE_NEXTAUTH_SECRET, LANGFUSE_SALT.
+services:
+  langfuse:
+    image: langfuse/langfuse:${LANGFUSE_IMAGE_TAG:-2}
+    networks:
+      - default
+      - web
+      - data
+    environment:
+      - DATABASE_URL=postgresql://${LANGFUSE_DB_USER:-postgres}:${LANGFUSE_DB_PASSWORD}@${LANGFUSE_DB_HOST:-postgres}:${LANGFUSE_DB_PORT:-5432}/${LANGFUSE_DB_NAME:-langfuse}
+      - NEXTAUTH_URL=https://${LANGFUSE_FQDN}
+      - NEXTAUTH_SECRET=${LANGFUSE_NEXTAUTH_SECRET}
+      - SALT=${LANGFUSE_SALT}
+      - TELEMETRY_ENABLED=${LANGFUSE_TELEMETRY_ENABLED:-true}
+      - AUTH_DISABLE_SIGNUP=${LANGFUSE_DISABLE_SIGNUP:-false}
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.langfuse.rule=Host(`${LANGFUSE_FQDN}`)
+        - traefik.http.routers.langfuse.entrypoints=websecure
+        - traefik.http.routers.langfuse.tls=true
+        - traefik.http.routers.langfuse.tls.certresolver=letsencryptresolver
+        - traefik.http.services.langfuse.loadbalancer.server.port=3000
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: overlay

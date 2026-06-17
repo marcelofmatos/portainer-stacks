@@ -74,8 +74,17 @@ fica no repositório.
 | [`ollama`](ollama/) | Runtime de LLMs | [README](ollama/README.md) |
 | [`litellm`](litellm/) | Gateway OpenAI-compatible para LLMs | [README](litellm/README.md) |
 | [`chromadb`](chromadb/) | Vector database (RAG) | [README](chromadb/README.md) |
+| [`qdrant`](qdrant/) | Vector database de alta performance (rede `data`) | [README](qdrant/README.md) |
 | [`supabase`](supabase/) | Backend self-hosted (Postgres+Auth+API+Studio...) | [README](supabase/README.md) |
 | [`flowise`](flowise/) | Builder de agentes de IA (LLM/RAG) — usa `litellm`/`ollama` | [README](flowise/README.md) |
+| [`open-webui`](open-webui/) | UI de chat para Ollama/OpenAI-compatible | [README](open-webui/README.md) |
+| [`librechat`](librechat/) | UI multi-provedor (RAG/agentes) — usa `mongodb` + Meilisearch | [README](librechat/README.md) |
+| [`anythingllm`](anythingllm/) | RAG tudo-em-um (chat + documentos) | [README](anythingllm/README.md) |
+| [`dify`](dify/) | LLMOps/RAG — usa `postgres-pgvector` + `redis` + `qdrant` | [README](dify/README.md) |
+| [`ragflow`](ragflow/) | Motor de RAG — usa `mariadb`+`redis`+`elasticsearch`+`minio` | [README](ragflow/README.md) |
+| [`langfuse`](langfuse/) | Observabilidade/tracing de LLM — usa `postgres-pgvector` | [README](langfuse/README.md) |
+| [`searxng`](searxng/) | Meta-busca (web search para agentes/RAG) | [README](searxng/README.md) |
+| [`comfyui`](comfyui/) | Geração de imagem (Stable Diffusion) — requer GPU | [README](comfyui/README.md) |
 
 > Ordem sugerida de deploy: **balancer** primeiro (cria o ponto de entrada). Depois as demais em qualquer ordem; `error-pages`/`authelia` viram middlewares que você aplica nas outras stacks.
 

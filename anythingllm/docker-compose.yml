@@ -1,0 +1,49 @@
+# Stack "anythingllm" — AnythingLLM (RAG tudo-em-um) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# App completo de RAG/chat com documentos e agentes. LLM e vector store são configurados na UI
+# (ex.: aponte para as stacks `ollama`/`litellm` e `qdrant`/`chromadb`).
+#
+# Obrigatórias: ANYTHINGLLM_FQDN.
+# NOTA (volume em Swarm): o volume é local ao nó — em cluster multi-worker fixe o serviço definindo
+# WORKER_HOSTNAME e descomentando o constraint de hostname.
+services:
+  anythingllm:
+    image: mintplexlabs/anythingllm:${ANYTHINGLLM_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+      - data
+    environment:
+      - STORAGE_DIR=/app/server/storage
+      - JWT_SECRET=${ANYTHINGLLM_JWT_SECRET:-}
+      - DISABLE_TELEMETRY=${ANYTHINGLLM_DISABLE_TELEMETRY:-true}
+    volumes:
+      - anythingllm-data:/app/server/storage
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.anythingllm.rule=Host(`${ANYTHINGLLM_FQDN}`)
+        - traefik.http.routers.anythingllm.entrypoints=websecure
+        - traefik.http.routers.anythingllm.tls=true
+        - traefik.http.routers.anythingllm.tls.certresolver=letsencryptresolver
+        - traefik.http.services.anythingllm.loadbalancer.server.port=3001
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: overlay
+
+volumes:
+  anythingllm-data:
+    driver: local

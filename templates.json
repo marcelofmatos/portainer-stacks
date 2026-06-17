@@ -2168,6 +2168,220 @@
           "default": "latest"
         }
       ]
+    },
+    {
+      "type": 2,
+      "title": "open-webui — chat de LLMs",
+      "name": "open-webui",
+      "description": "Open WebUI: interface de chat (estilo ChatGPT) para Ollama e endpoints OpenAI-compatible (stacks ollama/litellm). Publicado via Traefik v3 com TLS; persiste em volume local.",
+      "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. Aponte OPENWEBUI_OLLAMA_URL e/ou OPENWEBUI_OPENAI_BASE_URL. Primeiro usuario cadastrado vira admin.",
+      "categories": [
+        "ai"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/open-webui.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "open-webui/docker-compose.yml"
+      },
+      "env": [
+        { "name": "OPENWEBUI_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: chat.exemplo.com" },
+        { "name": "OPENWEBUI_SECRET_KEY", "label": "Secret key", "description": "Sessao (openssl rand -hex 32)" },
+        { "name": "OPENWEBUI_OLLAMA_URL", "label": "URL do Ollama", "description": "Ex.: https://ollama.exemplo.com" },
+        { "name": "OPENWEBUI_OPENAI_BASE_URL", "label": "Base OpenAI-compatible", "description": "Ex.: https://litellm.exemplo.com/v1" },
+        { "name": "OPENWEBUI_OPENAI_API_KEY", "label": "Chave OpenAI/litellm", "description": "Chave do endpoint (opcional)" },
+        { "name": "OPENWEBUI_IMAGE_TAG", "label": "Tag da imagem", "default": "main" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "librechat — UI multi-provedor de LLMs",
+      "name": "librechat",
+      "description": "LibreChat: UI de chat multi-provedor (OpenAI/Anthropic/Ollama/litellm) com busca, RAG e agentes. Publicado via Traefik v3 com TLS. Reaproveita o MongoDB compartilhado (stack mongodb) e sobe um Meilisearch proprio.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `mongodb`. Gere os segredos CREDS_KEY/CREDS_IV/JWT_*/MEILI_MASTER_KEY (ver README). DNS do FQDN apontando para o host.",
+      "categories": [
+        "ai"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/librechat.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "librechat/docker-compose.yml"
+      },
+      "env": [
+        { "name": "LIBRECHAT_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: librechat.exemplo.com" },
+        { "name": "LIBRECHAT_MONGO_PASSWORD", "label": "Senha do MongoDB", "description": "Senha do usuario do MongoDB (segredo)" },
+        { "name": "LIBRECHAT_CREDS_KEY", "label": "CREDS_KEY", "description": "32 bytes hex (openssl rand -hex 32)" },
+        { "name": "LIBRECHAT_CREDS_IV", "label": "CREDS_IV", "description": "16 bytes hex (openssl rand -hex 16)" },
+        { "name": "LIBRECHAT_JWT_SECRET", "label": "JWT secret", "description": "openssl rand -hex 32" },
+        { "name": "LIBRECHAT_JWT_REFRESH_SECRET", "label": "JWT refresh secret", "description": "openssl rand -hex 32" },
+        { "name": "LIBRECHAT_MEILI_MASTER_KEY", "label": "Meili master key", "description": "openssl rand -hex 32" },
+        { "name": "LIBRECHAT_OPENAI_REVERSE_PROXY", "label": "Base OpenAI-compatible", "description": "Ex.: https://litellm.exemplo.com/v1 (opcional)" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "dify — LLMOps / RAG",
+      "name": "dify",
+      "description": "Dify: plataforma para criar apps de LLM (chatbots, agentes, workflows, RAG, datasets). Servicos api/worker/web/sandbox publicados via Traefik v3 com TLS. Reaproveita PostgreSQL, Redis e Qdrant na rede data.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data` e as stacks `postgres-pgvector`, `redis` e `qdrant`. Crie o banco `dify`. Dify evolui rapido: confira as variaveis com a versao. DNS do FQDN apontando para o host.",
+      "categories": [
+        "ai"
+      ],
+      "platform": "linux",
+      "logo": "https://api.iconify.design/tabler/apps.svg?color=%236366f1&height=128",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "dify/docker-compose.yml"
+      },
+      "env": [
+        { "name": "DIFY_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: dify.exemplo.com" },
+        { "name": "DIFY_SECRET_KEY", "label": "Secret key", "description": "openssl rand -base64 42" },
+        { "name": "DIFY_DB_PASSWORD", "label": "Senha do PostgreSQL", "description": "Senha do usuario do banco (segredo)" },
+        { "name": "DIFY_SANDBOX_API_KEY", "label": "Sandbox API key", "description": "Chave compartilhada api/worker/sandbox" },
+        { "name": "DIFY_DB_HOST", "label": "Host do PostgreSQL", "default": "postgres" },
+        { "name": "DIFY_DB_NAME", "label": "Banco", "default": "dify" },
+        { "name": "DIFY_QDRANT_URL", "label": "URL do Qdrant", "default": "http://qdrant:6333" },
+        { "name": "DIFY_IMAGE_TAG", "label": "Tag das imagens", "default": "latest" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "qdrant — vector database",
+      "name": "qdrant",
+      "description": "Qdrant: banco de dados vetorial de alta performance (RAG, busca semantica). Publicado via Traefik v3 com TLS (REST 6333) e disponivel na rede data para outras stacks (ex.: dify) por qdrant:6333.",
+      "note": "Requer a rede `web` (stack balancer) e a rede `data`. Defina QDRANT_API_KEY para nao deixar a API aberta. DNS do FQDN apontando para o host.",
+      "categories": [
+        "ai",
+        "database"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/qdrant.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "qdrant/docker-compose.yml"
+      },
+      "env": [
+        { "name": "QDRANT_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: qdrant.exemplo.com" },
+        { "name": "QDRANT_API_KEY", "label": "API key", "description": "Exige header api-key (recomendado)" },
+        { "name": "QDRANT_IMAGE_TAG", "label": "Tag da imagem", "default": "latest" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "langfuse — observabilidade de LLM",
+      "name": "langfuse",
+      "description": "Langfuse (v2): tracing/observabilidade de aplicacoes LLM (traces, prompts, custos, avaliacoes). Publicado via Traefik v3 com TLS e reaproveita o PostgreSQL compartilhado (stack postgres-pgvector).",
+      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `postgres-pgvector` com um banco `langfuse`. DNS do FQDN apontando para o host. (Langfuse v3 exige ClickHouse/Redis/S3.)",
+      "categories": [
+        "ai",
+        "monitoring"
+      ],
+      "platform": "linux",
+      "logo": "https://api.iconify.design/tabler/telescope.svg?color=%2310b981&height=128",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "langfuse/docker-compose.yml"
+      },
+      "env": [
+        { "name": "LANGFUSE_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: langfuse.exemplo.com" },
+        { "name": "LANGFUSE_DB_PASSWORD", "label": "Senha do PostgreSQL", "description": "Senha do usuario do banco (segredo)" },
+        { "name": "LANGFUSE_NEXTAUTH_SECRET", "label": "NextAuth secret", "description": "openssl rand -base64 32" },
+        { "name": "LANGFUSE_SALT", "label": "Salt", "description": "openssl rand -base64 32" },
+        { "name": "LANGFUSE_DB_HOST", "label": "Host do PostgreSQL", "default": "postgres" },
+        { "name": "LANGFUSE_DB_NAME", "label": "Banco", "default": "langfuse" },
+        { "name": "LANGFUSE_IMAGE_TAG", "label": "Tag da imagem", "default": "2" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "comfyui — geracao de imagem (GPU)",
+      "name": "comfyui",
+      "description": "ComfyUI: editor por nos para Stable Diffusion / geracao de imagem. Publicado via Traefik v3 com TLS e protegido por basicauth. REQUER GPU NVIDIA no no.",
+      "note": "Requer a rede `web` (stack balancer), GPU NVIDIA (nvidia-container-runtime) e DNS do FQDN apontando para o host. A imagem e o caminho de dados dependem do build (ver README). COMFYUI_AUTH_BASIC: usuario:hash (htpasswd -nbB).",
+      "categories": [
+        "ai"
+      ],
+      "platform": "linux",
+      "logo": "https://api.iconify.design/tabler/photo-ai.svg?color=%23ec4899&height=128",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "comfyui/docker-compose.yml"
+      },
+      "env": [
+        { "name": "COMFYUI_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: comfy.exemplo.com" },
+        { "name": "COMFYUI_AUTH_BASIC", "label": "Basicauth do Traefik", "description": "Formato usuario:hash_bcrypt (htpasswd -nbB)" },
+        { "name": "COMFYUI_IMAGE", "label": "Imagem ComfyUI", "default": "yanwk/comfyui-boot:latest" },
+        { "name": "COMFYUI_DATA_PATH", "label": "Caminho de dados", "default": "/root" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "ragflow — motor de RAG",
+      "name": "ragflow",
+      "description": "RAGFlow: motor de RAG com parsing avancado de documentos (OCR, tabelas, layout) e busca hibrida. Publicado via Traefik v3 com TLS. Reaproveita MariaDB, Redis, Elasticsearch e MinIO na rede data.",
+      "note": "Pesado e sensivel a versao. Requer a rede `web` (stack balancer), a rede `data` e as stacks `mariadb`, `redis`, `elasticsearch` e `minio`. Crie o banco `rag_flow` e o acesso ao MinIO. DNS do FQDN apontando para o host.",
+      "categories": [
+        "ai"
+      ],
+      "platform": "linux",
+      "logo": "https://api.iconify.design/tabler/file-search.svg?color=%23f59e0b&height=128",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "ragflow/docker-compose.yml"
+      },
+      "env": [
+        { "name": "RAGFLOW_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: ragflow.exemplo.com" },
+        { "name": "RAGFLOW_MYSQL_PASSWORD", "label": "Senha do MySQL/MariaDB", "description": "Segredo" },
+        { "name": "RAGFLOW_MINIO_PASSWORD", "label": "Senha do MinIO", "description": "Segredo" },
+        { "name": "RAGFLOW_ES_PASSWORD", "label": "Senha do Elasticsearch", "description": "Usuario elastic (segredo)" },
+        { "name": "RAGFLOW_MINIO_USER", "label": "Usuario do MinIO", "default": "ragflow" },
+        { "name": "RAGFLOW_IMAGE_TAG", "label": "Tag da imagem", "default": "latest" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "searxng — meta-busca",
+      "name": "searxng",
+      "description": "SearXNG: meta-mecanismo de busca (agrega varios buscadores, sem rastreamento). Util como backend de web search para agentes/RAG (flowise, dify). Publicado via Traefik v3 com TLS e disponivel na rede data por searxng:8080.",
+      "note": "Requer a rede `web` (stack balancer) e a rede `data`. Para uso como API, habilite o formato JSON no settings.yml (ver README). DNS do FQDN apontando para o host.",
+      "categories": [
+        "ai",
+        "search"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/searxng.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "searxng/docker-compose.yml"
+      },
+      "env": [
+        { "name": "SEARXNG_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: busca.exemplo.com" },
+        { "name": "SEARXNG_SECRET", "label": "Secret", "description": "openssl rand -hex 32" },
+        { "name": "SEARXNG_REDIS_URL", "label": "URL do Redis", "description": "Ex.: redis://redis:6379/4 (opcional)" },
+        { "name": "SEARXNG_IMAGE_TAG", "label": "Tag da imagem", "default": "latest" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "anythingllm — RAG tudo-em-um",
+      "name": "anythingllm",
+      "description": "AnythingLLM: app completo de RAG/chat com documentos e agentes (workspaces, ingestao de arquivos, multiplos provedores de LLM e vector stores). Publicado via Traefik v3 com TLS; LLM/vetor configurados na UI.",
+      "note": "Requer a rede `web` (stack balancer) e a rede `data` (para alcancar qdrant/chromadb). Primeiro acesso faz o onboarding do admin. DNS do FQDN apontando para o host.",
+      "categories": [
+        "ai"
+      ],
+      "platform": "linux",
+      "logo": "https://api.iconify.design/tabler/brain.svg?color=%238b5cf6&height=128",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "anythingllm/docker-compose.yml"
+      },
+      "env": [
+        { "name": "ANYTHINGLLM_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: rag.exemplo.com" },
+        { "name": "ANYTHINGLLM_JWT_SECRET", "label": "JWT secret", "description": "openssl rand -hex 32 (recomendado)" },
+        { "name": "ANYTHINGLLM_IMAGE_TAG", "label": "Tag da imagem", "default": "latest" }
+      ]
     }
   ]
 }

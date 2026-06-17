@@ -1,0 +1,53 @@
+# Stack "comfyui" — ComfyUI (geração de imagem / Stable Diffusion) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+#
+# REQUER GPU NVIDIA no nó (driver + nvidia-container-runtime). Em Swarm, exponha a GPU via
+# generic_resources (descomente o bloco e configure o daemon do nó — ver README).
+#
+# A imagem e o caminho de dados variam conforme o build de ComfyUI escolhido — ajuste COMFYUI_IMAGE
+# e COMFYUI_DATA_PATH (ver README).
+#
+# Obrigatórias: COMFYUI_FQDN, COMFYUI_AUTH_BASIC (ComfyUI não tem login — protegido por basicauth).
+# NOTA (volume em Swarm): o volume é local ao nó — fixe o serviço no nó com GPU via WORKER_HOSTNAME.
+services:
+  comfyui:
+    image: ${COMFYUI_IMAGE:-yanwk/comfyui-boot:latest}
+    networks:
+      - default
+      - web
+    volumes:
+      - comfyui-data:${COMFYUI_DATA_PATH:-/root}
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}   # fixe no nó que tem a GPU
+      # GPU via Swarm (requer nvidia-container-runtime + node.generic_resources no daemon.json):
+      # resources:
+      #   reservations:
+      #     generic_resources:
+      #       - discrete_resource_spec:
+      #           kind: "NVIDIA-GPU"
+      #           value: 1
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.comfyui.rule=Host(`${COMFYUI_FQDN}`)
+        - traefik.http.routers.comfyui.entrypoints=websecure
+        - traefik.http.routers.comfyui.tls=true
+        - traefik.http.routers.comfyui.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.comfyui.middlewares=comfyui-auth
+        - traefik.http.middlewares.comfyui-auth.basicauth.users=${COMFYUI_AUTH_BASIC}
+        - traefik.http.services.comfyui.loadbalancer.server.port=8188
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay
+
+volumes:
+  comfyui-data:
+    driver: local

@@ -1,0 +1,75 @@
+# Stack "librechat" — LibreChat (UI multi-provedor de LLMs) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# UI de chat tipo ChatGPT com múltiplos provedores (OpenAI/Anthropic/Ollama/litellm), RAG e agentes.
+# Reaproveita o MongoDB compartilhado (stack `mongodb`) na rede `data` e sobe um Meilisearch próprio.
+#
+# Obrigatórias: LIBRECHAT_FQDN, LIBRECHAT_MONGO_PASSWORD, LIBRECHAT_CREDS_KEY, LIBRECHAT_CREDS_IV,
+#               LIBRECHAT_JWT_SECRET, LIBRECHAT_JWT_REFRESH_SECRET, LIBRECHAT_MEILI_MASTER_KEY.
+services:
+  api:
+    image: ghcr.io/danny-avila/librechat:${LIBRECHAT_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+      - data
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3080
+      - MONGO_URI=mongodb://${LIBRECHAT_MONGO_USER:-root}:${LIBRECHAT_MONGO_PASSWORD}@${LIBRECHAT_MONGO_HOST:-mongodb}:27017/${LIBRECHAT_MONGO_DB:-LibreChat}?authSource=admin
+      - DOMAIN_CLIENT=https://${LIBRECHAT_FQDN}
+      - DOMAIN_SERVER=https://${LIBRECHAT_FQDN}
+      - CREDS_KEY=${LIBRECHAT_CREDS_KEY}
+      - CREDS_IV=${LIBRECHAT_CREDS_IV}
+      - JWT_SECRET=${LIBRECHAT_JWT_SECRET}
+      - JWT_REFRESH_SECRET=${LIBRECHAT_JWT_REFRESH_SECRET}
+      - ALLOW_REGISTRATION=${LIBRECHAT_ALLOW_REGISTRATION:-true}
+      - SEARCH=true
+      - MEILI_HOST=http://meilisearch:7700
+      - MEILI_MASTER_KEY=${LIBRECHAT_MEILI_MASTER_KEY}
+      # Provedores (opcionais): aponte para suas stacks ou use chaves diretas.
+      - OPENAI_API_KEY=${LIBRECHAT_OPENAI_API_KEY:-}
+      - OPENAI_REVERSE_PROXY=${LIBRECHAT_OPENAI_REVERSE_PROXY:-}
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.librechat.rule=Host(`${LIBRECHAT_FQDN}`)
+        - traefik.http.routers.librechat.entrypoints=websecure
+        - traefik.http.routers.librechat.tls=true
+        - traefik.http.routers.librechat.tls.certresolver=letsencryptresolver
+        - traefik.http.services.librechat.loadbalancer.server.port=3080
+
+  meilisearch:
+    image: getmeili/meilisearch:${LIBRECHAT_MEILI_IMAGE_TAG:-v1.12}
+    networks:
+      - default
+    environment:
+      - MEILI_MASTER_KEY=${LIBRECHAT_MEILI_MASTER_KEY}
+      - MEILI_NO_ANALYTICS=true
+    volumes:
+      - meilisearch-data:/meili_data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: overlay
+
+volumes:
+  meilisearch-data:
+    driver: local
