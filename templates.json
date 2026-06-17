@@ -181,6 +181,66 @@
     },
     {
       "type": 2,
+      "title": "lldap — Light LDAP",
+      "name": "lldap",
+      "description": "Servidor LDAP leve (usuarios + grupos) com UI web. Alternativa simples ao OpenLDAP/AD; expoe a rede `ldap` para outras stacks autenticarem (host lldap_server:3890).",
+      "note": "Gere segredos fortes para LLDAP_JWT_SECRET e LLDAP_KEY_SEED (openssl rand -hex 32). A rede overlay `ldap` precisa existir.",
+      "categories": [
+        "authentication",
+        "ldap"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/lldap.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "lldap/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "LLDAP_FQDN",
+          "label": "Dominio da UI",
+          "description": "Ex.: lldap.exemplo.com"
+        },
+        {
+          "name": "LLDAP_JWT_SECRET",
+          "label": "JWT secret",
+          "description": "openssl rand -hex 32"
+        },
+        {
+          "name": "LLDAP_KEY_SEED",
+          "label": "Key seed",
+          "description": "openssl rand -hex 32 (deriva a chave privada; nao troque apos criar dados)"
+        },
+        {
+          "name": "LLDAP_ADMIN_PASSWORD",
+          "label": "Senha do admin",
+          "description": "Senha do usuario administrador"
+        },
+        {
+          "name": "LLDAP_BASE_DN",
+          "label": "Base DN",
+          "description": "Ex.: dc=exemplo,dc=com",
+          "default": "dc=example,dc=com"
+        },
+        {
+          "name": "LLDAP_ADMIN_USERNAME",
+          "label": "Usuario admin",
+          "default": "admin"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        },
+        {
+          "name": "LDAP_NET",
+          "label": "Rede compartilhada LDAP",
+          "default": "ldap"
+        }
+      ]
+    },
+    {
+      "type": 2,
       "title": "phpmyadmin — admin MySQL/MariaDB",
       "name": "phpmyadmin",
       "description": "phpMyAdmin publicado via Traefik v3 com TLS. Entra na rede `data` e alcanca a stack mariadb pelo host `mariadb`. PMA_ARBITRARY permite informar outro host na tela de login.",

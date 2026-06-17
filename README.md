@@ -20,6 +20,7 @@ fica no repositório.
 | Stack | Descrição | Doc |
 |---|---|---|
 | [`account`](account/) | OpenLDAP + LAM + self-service-password | [README](account/README.md) |
+| [`lldap`](lldap/) | LDAP leve (usuários + grupos) + UI web | [README](lldap/README.md) |
 | [`keycloak`](keycloak/) | IAM/SSO (OIDC/SAML) + PostgreSQL | [README](keycloak/README.md) |
 | [`authelia`](authelia/) | Autenticação/2FA (forward-auth) + Redis | [README](authelia/README.md) |
 
