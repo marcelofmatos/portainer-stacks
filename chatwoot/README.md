@@ -62,11 +62,15 @@ o Instagram **não** passa pela Evolution, e sim pela **Meta Graph / Instagram M
 ## Pré-requisitos
 - Stack `balancer` (Traefik) + rede `web`; DNS de `CHATWOOT_FQDN` apontando para o host.
 - Rede `data`: `docker network create --driver overlay --attachable data`.
-- Stack **`postgres-pgvector`** na rede `data` com um banco para o Chatwoot:
+- Stack **`postgres-pgvector`** na rede `data` com um banco para o Chatwoot. Crie o banco e habilite a
+  extensão `vector` **nesse banco** (o Chatwoot usa `vector` para os recursos de IA; a extensão é por
+  banco):
   ```sql
   CREATE DATABASE chatwoot;
+  \c chatwoot
+  CREATE EXTENSION IF NOT EXISTS vector;
   ```
-  > O Chatwoot usa a extensão `vector` (recursos de IA); a stack `postgres-pgvector` já a fornece.
+  > Via container: `docker exec -it <container_postgres> psql -U postgres -d chatwoot -c "CREATE EXTENSION IF NOT EXISTS vector;"`
 - Stack **`redis`** na rede `data` (se tiver senha, use a URI autenticada em `CHATWOOT_REDIS_URL`).
 
 ## Uso
