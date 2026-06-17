@@ -1,32 +1,33 @@
-# Stack "evolution-api" — Evolution API (WhatsApp API) — Docker Swarm
+# Stack "evolution-api" — Evolution API (WhatsApp) + PostgreSQL + Redis embarcados — Docker Swarm
 # Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt.
-# Usa serviços compartilhados da rede `data`: PostgreSQL (stack postgres-pgvector) e Redis (stack redis).
-# NÃO sobe banco/cache próprios — depende das stacks `postgres-pgvector` e `redis` na rede `data`.
+# Banco (PostgreSQL) e cache (Redis) são PRÓPRIOS desta stack: NÃO dependem das stacks
+# compartilhadas `postgres-pgvector`/`redis`. Ambos ficam na rede interna `default` (o app os
+# acessa por `db`/`redis`) e TAMBÉM na `data` SÓ para ferramentas de admin os alcançarem como
+# `evolution-api_db` (pgadmin4) e `evolution-api_redis` (redisinsight).
 #
-# NOTA (volume em Swarm): em cluster multi-worker fixe o serviço definindo WORKER_HOSTNAME e
-# descomentando o constraint de hostname.
+# NOTA (volume em Swarm): volumes são locais ao nó. Em cluster multi-worker fixe os serviços
+# `db`/`redis` definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
 services:
   evolution-api:
     image: atendai/evolution-api:${EVOLUTION_IMAGE_TAG:-v2.2.3}
     networks:
-      - default
-      - web
-      - data
+      - default # conversa com `db` e `redis` internamente
+      - web # exposto pelo Traefik
     environment:
       - SERVER_URL=https://${EVOLUTION_FQDN}
       - AUTHENTICATION_API_KEY=${EVOLUTION_API_KEY}
       - LANGUAGE=${EVOLUTION_LANGUAGE:-pt-BR}
-      # Banco (PostgreSQL compartilhado na rede `data`)
+      # Banco (PostgreSQL embarcado — serviço `db` desta stack)
       - DATABASE_ENABLED=true
       - DATABASE_PROVIDER=postgresql
-      - DATABASE_CONNECTION_URI=postgresql://${EVOLUTION_DB_USER:-postgres}:${EVOLUTION_DB_PASSWORD}@${EVOLUTION_DB_HOST:-postgres}:${EVOLUTION_DB_PORT:-5432}/${EVOLUTION_DB_NAME:-evolution}
+      - DATABASE_CONNECTION_URI=postgresql://${EVOLUTION_DB_USER:-postgres}:${EVOLUTION_DB_PASSWORD}@${EVOLUTION_DB_HOST:-db}:${EVOLUTION_DB_PORT:-5432}/${EVOLUTION_DB_NAME:-evolution}
       - DATABASE_CONNECTION_CLIENT_NAME=evolution
       - DATABASE_SAVE_DATA_INSTANCE=true
       - DATABASE_SAVE_DATA_NEW_MESSAGE=true
       - DATABASE_SAVE_MESSAGE_UPDATE=true
       - DATABASE_SAVE_DATA_CONTACTS=true
       - DATABASE_SAVE_DATA_CHATS=true
-      # Cache (Redis compartilhado na rede `data`)
+      # Cache (Redis embarcado — serviço `redis` desta stack)
       - CACHE_REDIS_ENABLED=true
       - CACHE_REDIS_URI=${EVOLUTION_REDIS_URI:-redis://redis:6379/6}
       - CACHE_REDIS_PREFIX_KEY=evolution
@@ -49,16 +50,55 @@ services:
         - traefik.http.routers.evolution-api.tls.certresolver=letsencryptresolver
         - traefik.http.services.evolution-api.loadbalancer.server.port=8080
 
+  # Banco de dados PRÓPRIO da stack (não compartilhe com outras stacks).
+  db:
+    image: postgres:${EVOLUTION_DB_IMAGE_TAG:-16-alpine}
+    networks:
+      - default # acesso do app
+      - data # SÓ para ferramentas de admin (pgadmin4) via host `evolution-api_db`
+    environment:
+      - POSTGRES_DB=${EVOLUTION_DB_NAME:-evolution}
+      - POSTGRES_USER=${EVOLUTION_DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${EVOLUTION_DB_PASSWORD} # OBRIGATÓRIA
+    volumes:
+      - db-data:/var/lib/postgresql/data # ← copie este volume para migrar de host
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # fixe o db no nó em cluster multi-worker:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+  # Cache PRÓPRIO da stack (não compartilhe com outras stacks).
+  redis:
+    image: redis:${EVOLUTION_REDIS_IMAGE_TAG:-7-alpine}
+    command: redis-server --save 60 1
+    networks:
+      - default # acesso do app
+      - data # SÓ para ferramentas de admin (redisinsight) via host `evolution-api_redis`
+    volumes:
+      - redis-data:/data # ← copie este volume para migrar de host
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # fixe o redis no nó em cluster multi-worker:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
 networks:
-  web:
+  web: # externa: criada pela stack balancer (Traefik)
     external: true
     name: ${PROXY_NET:-web}
-  data:
+  data: # externa: liga banco/cache às ferramentas de admin (pgadmin4, redisinsight)
     external: true
     name: ${DATA_NET:-data}
-  default:
+  default: # interna desta stack: app <-> db/redis
     driver: overlay
 
 volumes:
   evolution-instances:
+    driver: local
+  db-data:
+    driver: local
+  redis-data:
     driver: local

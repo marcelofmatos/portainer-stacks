@@ -1,12 +1,28 @@
-# Stack "chatwoot" — Chatwoot (atendimento omnichannel) — Docker Swarm
-# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
-# Usa os serviços compartilhados da rede `data`: PostgreSQL (stack postgres-pgvector) e Redis (stack redis).
-# NÃO sobe banco/cache próprios.
+# ┌───────────────────────────────────────────────────────────────────────────┐
+# │ Stack "chatwoot" — Chatwoot omnichannel + PostgreSQL/Redis embarcados (Swarm)│
+# └───────────────────────────────────────────────────────────────────────────┘
+# PRIMEIRA VEZ? Leia isto:
+#   1. Crie as redes externas (uma vez por cluster):
+#        docker network create --driver overlay --attachable web
+#        docker network create --driver overlay --attachable data
+#   2. Tenha a stack `balancer` (Traefik) rodando e o DNS de CHATWOOT_FQDN apontando p/ o host.
+#   3. Defina as variáveis OBRIGATÓRIAS no deploy: CHATWOOT_FQDN, CHATWOOT_SECRET_KEY_BASE,
+#      CHATWOOT_DB_PASSWORD.
+#   4. Prepare o banco (migrações + seed) na PRIMEIRA execução. Veja a seção "Uso" do README.
+#   5. Deploy → acesse https://CHATWOOT_FQDN e crie a conta de administrador.
 #
-# `rails` = web/API (porta 3000); `sidekiq` = jobs assíncronos. Integra com a stack `evolution-api`
-# como canal de WhatsApp (configurado na UI / via integração da Evolution).
+# COMO FUNCIONA:
+#   - `rails` = web/API (porta 3000), publicado pelo Traefik na rede `web`; `sidekiq` = jobs assíncronos.
+#     Ambos falam com o banco/cache pela rede interna `default`.
+#   - `db` (PostgreSQL) e `redis` são o banco/cache PRÓPRIOS desta stack: NÃO use o `postgres-pgvector`
+#     nem a stack `redis` compartilhados.
+#       * ficam na `default` (os apps os acessam pelos nomes `db` e `redis`)
+#       * ficam TAMBÉM na `data` SÓ para ferramentas de admin os alcançarem como `chatwoot_db`/`chatwoot_redis`
+#   - Integra com a stack `evolution-api` como canal de WhatsApp (configurado na UI / via integração da Evolution).
+#   - Volumes dedicados (`db-data`, `redis-data`, `chatwoot-storage`): para migrar de host, copie-os.
 #
-# IMPORTANTE: na PRIMEIRA execução prepare o banco (migrações + seed). Veja a seção "Uso" do README.
+# VOLUME EM SWARM: volumes são locais ao nó. Em cluster com +1 worker, fixe `db`/`redis`/apps no mesmo
+# nó definindo WORKER_HOSTNAME e descomentando os constraints `node.hostname` abaixo.
 services:
   rails:
     image: chatwoot/chatwoot:${CHATWOOT_IMAGE_TAG:-v4.6.0}
@@ -15,7 +31,6 @@ services:
     networks:
       - default
       - web
-      - data
     environment:
       - INSTALLATION_ENV=docker
       - RAILS_ENV=production
@@ -23,7 +38,7 @@ services:
       - RAILS_LOG_TO_STDOUT=true
       - SECRET_KEY_BASE=${CHATWOOT_SECRET_KEY_BASE}
       - FRONTEND_URL=https://${CHATWOOT_FQDN}
-      - POSTGRES_HOST=${CHATWOOT_DB_HOST:-postgres}
+      - POSTGRES_HOST=${CHATWOOT_DB_HOST:-db}
       - POSTGRES_PORT=${CHATWOOT_DB_PORT:-5432}
       - POSTGRES_USERNAME=${CHATWOOT_DB_USER:-postgres}
       - POSTGRES_PASSWORD=${CHATWOOT_DB_PASSWORD}
@@ -52,7 +67,6 @@ services:
     command: ["bundle", "exec", "sidekiq", "-C", "config/sidekiq.yml"]
     networks:
       - default
-      - data
     environment:
       - INSTALLATION_ENV=docker
       - RAILS_ENV=production
@@ -60,7 +74,7 @@ services:
       - RAILS_LOG_TO_STDOUT=true
       - SECRET_KEY_BASE=${CHATWOOT_SECRET_KEY_BASE}
       - FRONTEND_URL=https://${CHATWOOT_FQDN}
-      - POSTGRES_HOST=${CHATWOOT_DB_HOST:-postgres}
+      - POSTGRES_HOST=${CHATWOOT_DB_HOST:-db}
       - POSTGRES_PORT=${CHATWOOT_DB_PORT:-5432}
       - POSTGRES_USERNAME=${CHATWOOT_DB_USER:-postgres}
       - POSTGRES_PASSWORD=${CHATWOOT_DB_PASSWORD}
@@ -76,16 +90,55 @@ services:
           - node.role == worker
           # - node.hostname == ${WORKER_HOSTNAME:-}   # fixe no MESMO nó do rails
 
+  # Banco de dados PRÓPRIO da stack (não compartilhe com outras stacks).
+  db:
+    image: postgres:${CHATWOOT_DB_IMAGE_TAG:-16-alpine}
+    networks:
+      - default # acesso dos apps
+      - data # SÓ para ferramentas de admin (pgadmin4) via host `chatwoot_db`
+    environment:
+      - POSTGRES_DB=${CHATWOOT_DB_NAME:-chatwoot}
+      - POSTGRES_USER=${CHATWOOT_DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${CHATWOOT_DB_PASSWORD} # OBRIGATÓRIA
+    volumes:
+      - db-data:/var/lib/postgresql/data # ← copie este volume para migrar de host
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # fixe o db no nó em cluster multi-worker:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+  # Cache/fila PRÓPRIO da stack (não compartilhe com outras stacks).
+  redis:
+    image: redis:${CHATWOOT_REDIS_IMAGE_TAG:-7-alpine}
+    command: redis-server --save 60 1
+    networks:
+      - default # acesso dos apps
+      - data # SÓ para ferramentas de admin (redisinsight) via host `chatwoot_redis`
+    volumes:
+      - redis-data:/data # ← copie este volume para migrar de host
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # fixe o redis no nó em cluster multi-worker:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
 networks:
-  web:
+  web: # externa: criada pela stack balancer (Traefik)
     external: true
     name: ${PROXY_NET:-web}
-  data:
+  data: # externa: liga banco/cache às ferramentas de admin (pgadmin4, redisinsight etc.)
     external: true
     name: ${DATA_NET:-data}
-  default:
+  default: # interna desta stack: apps <-> db/redis
     driver: overlay
 
 volumes:
   chatwoot-storage:
+    driver: local
+  db-data:
+    driver: local
+  redis-data:
     driver: local

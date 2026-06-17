@@ -1,20 +1,36 @@
-# Stack "wikijs" — Wiki.js (wiki em Markdown) — Docker Swarm
-# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt.
-# Usa o PostgreSQL compartilhado (stack `postgres-pgvector`) na rede `data` — não sobe banco próprio.
-# O conteúdo (markdown) fica no banco; serviço stateless.
+# ┌───────────────────────────────────────────────────────────────────────────┐
+# │ Stack "wikijs" — Wiki.js (Markdown) + PostgreSQL embarcado (Docker Swarm)   │
+# └───────────────────────────────────────────────────────────────────────────┘
+# PRIMEIRA VEZ? Leia isto:
+#   1. Crie as redes externas (uma vez por cluster):
+#        docker network create --driver overlay --attachable web
+#        docker network create --driver overlay --attachable data
+#   2. Tenha a stack `balancer` (Traefik) rodando e o DNS de WIKIJS_FQDN apontando p/ o host.
+#   3. Defina as variáveis OBRIGATÓRIAS no deploy: WIKIJS_FQDN, WIKIJS_DB_PASSWORD.
+#   4. Deploy → acesse https://WIKIJS_FQDN (primeira tela = criação do administrador).
+#
+# COMO FUNCIONA:
+#   - `wikijs` (app) é publicado pelo Traefik na rede `web`; fala com o banco pela rede interna `default`.
+#   - `db` (PostgreSQL) é o banco PRÓPRIO desta stack: NÃO use o `postgres-pgvector` compartilhado.
+#       * fica na `default` (o app o acessa pelo nome `db`)
+#       * fica TAMBÉM na `data` SÓ para ferramentas de admin (pgadmin4) o alcançarem como `wikijs_db`
+#   - Volume dedicado (`db-data`): para migrar de host, basta copiar esse volume. Conteúdo do wiki
+#     (páginas/histórico) vive no banco → o serviço da app é stateless.
+#
+# VOLUME EM SWARM: volumes são locais ao nó. Em cluster com +1 worker, fixe o serviço `db` no nó
+# definindo WORKER_HOSTNAME e descomentando o constraint `node.hostname` abaixo.
 services:
   wikijs:
     image: requarks/wiki:${WIKIJS_IMAGE_TAG:-2}
     networks:
-      - default
-      - web
-      - data
+      - default # conversa com o banco `db` internamente
+      - web # exposto pelo Traefik
     environment:
       - DB_TYPE=postgres
-      - DB_HOST=${WIKIJS_DB_HOST:-postgres}
+      - DB_HOST=${WIKIJS_DB_HOST:-db} # nome do serviço de banco nesta stack
       - DB_PORT=${WIKIJS_DB_PORT:-5432}
       - DB_USER=${WIKIJS_DB_USER:-wikijs}
-      - DB_PASS=${WIKIJS_DB_PASSWORD}
+      - DB_PASS=${WIKIJS_DB_PASSWORD} # OBRIGATÓRIA (mesma senha do serviço db)
       - DB_NAME=${WIKIJS_DB_NAME:-wikijs}
     deploy:
       mode: replicated
@@ -30,12 +46,35 @@ services:
         - traefik.http.routers.wikijs.tls.certresolver=letsencryptresolver
         - traefik.http.services.wikijs.loadbalancer.server.port=3000
 
+  # Banco de dados PRÓPRIO da stack (não compartilhe com outras stacks).
+  db:
+    image: postgres:${WIKIJS_DB_IMAGE_TAG:-16-alpine}
+    networks:
+      - default # acesso do app
+      - data # SÓ para ferramentas de admin (pgadmin4) via host `wikijs_db`
+    environment:
+      - POSTGRES_DB=${WIKIJS_DB_NAME:-wikijs}
+      - POSTGRES_USER=${WIKIJS_DB_USER:-wikijs}
+      - POSTGRES_PASSWORD=${WIKIJS_DB_PASSWORD} # OBRIGATÓRIA
+    volumes:
+      - db-data:/var/lib/postgresql/data # ← copie este volume para migrar de host
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # fixe o db no nó em cluster multi-worker:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
 networks:
-  web:
+  web: # externa: criada pela stack balancer (Traefik)
     external: true
     name: ${PROXY_NET:-web}
-  data:
+  data: # externa: liga o banco às ferramentas de admin (pgadmin4 etc.)
     external: true
     name: ${DATA_NET:-data}
-  default:
+  default: # interna desta stack: app <-> db
     driver: overlay
+
+volumes:
+  db-data:
+    driver: local

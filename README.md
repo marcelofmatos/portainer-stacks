@@ -57,7 +57,11 @@ fica no repositório.
 | [`botpress`](botpress/) | Plataforma de chatbots — usa `postgres-pgvector` | [README](botpress/README.md) |
 | [`protonmail-bridge`](protonmail-bridge/) | Ponte SMTP/IMAP da conta ProtonMail | [README](protonmail-bridge/README.md) |
 
-### Bancos e cache (compartilhados, rede `data`)
+### Bancos e cache compartilhados — opção (rede `data`)
+
+> Alternativa ao padrão preferido (banco embarcado por stack). Útil para um DB central; a rede
+> `data` também conecta as **ferramentas de administração** aos bancos de cada stack (`<stack>_db`).
+
 | Stack | Descrição | Doc |
 |---|---|---|
 | [`mariadb`](mariadb/) | MariaDB compartilhado | [README](mariadb/README.md) |
@@ -94,6 +98,12 @@ fica no repositório.
 - **TLS:** Let's Encrypt via httpchallenge (`certresolver=letsencryptresolver`); o DNS de cada
   FQDN deve apontar para o host (porta 80 acessível).
 - **Swarm:** labels do Traefik ficam em `deploy.labels`. Bancos/cache ficam fora da rede `web`.
+- **Banco de dados:** o padrão **preferido** é **cada stack embarcar o próprio banco**
+  (mariadb/postgres/mongo) na rede `default` da stack — volume isolado, fácil de **migrar de host**
+  copiando só aquele volume. O banco também entra na rede `data`, mas **só** para as ferramentas de
+  administração (`phpmyadmin`, `pgadmin4`, `redisinsight`, `mongo-express`) o alcançarem como
+  `<stack>_db`. As stacks de banco compartilhado (`mariadb`, `postgres-pgvector`, `redis`,
+  `mongodb`) seguem disponíveis como **opção** para quem preferir um DB central.
 - **Volumes:** locais ao nó. Em cluster multi-worker, fixe os serviços com volume via
   `WORKER_HOSTNAME` (constraint `node.hostname`, comentado nos composes).
 
@@ -116,7 +126,7 @@ docker stack deploy -c drive/docker-compose.yml drive
 - Docker Swarm inicializado.
 - Rede overlay pública: `docker network create --driver overlay --attachable web`.
 - Para integração LDAP entre stacks: `docker network create --driver overlay --attachable ldap`.
-- Para bancos compartilhados (`mariadb`, `postgres-pgvector`): `docker network create --driver overlay --attachable data`.
+- Rede `data` (ferramentas de admin alcançando bancos embarcados, ou bancos compartilhados): `docker network create --driver overlay --attachable data`.
 - Stack `balancer` (Traefik) em execução no manager.
 
 ## Segurança

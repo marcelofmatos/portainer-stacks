@@ -1,21 +1,33 @@
-# Stack "botpress" — Botpress (plataforma de chatbots) — Docker Swarm
-# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
-# Usa o PostgreSQL compartilhado (stack postgres-pgvector) na rede `data` — não sobe banco próprio.
-# Pode entregar respostas no WhatsApp via stack `evolution-api`.
+# ┌───────────────────────────────────────────────────────────────────────────┐
+# │ Stack "botpress" — Botpress (chatbots) + PostgreSQL embarcado (Docker Swarm)│
+# └───────────────────────────────────────────────────────────────────────────┘
+# PRIMEIRA VEZ? Leia isto:
+#   1. Crie as redes externas (uma vez por cluster):
+#        docker network create --driver overlay --attachable web
+#        docker network create --driver overlay --attachable data
+#   2. Tenha a stack `balancer` (Traefik) rodando e o DNS de BOTPRESS_FQDN apontando p/ o host.
+#   3. Defina as variáveis OBRIGATÓRIAS no deploy: BOTPRESS_FQDN, BOTPRESS_DB_PASSWORD.
+#   4. Deploy → acesse https://BOTPRESS_FQDN (primeira tela = criação do administrador).
 #
-# Obrigatórias: BOTPRESS_FQDN, BOTPRESS_DB_PASSWORD.
-# NOTA (volume em Swarm): o volume /botpress/data é local ao nó — em cluster multi-worker fixe o
-# serviço definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+# COMO FUNCIONA:
+#   - `botpress` (app) é publicado pelo Traefik na rede `web`; fala com o banco pela rede interna `default`.
+#   - `db` (PostgreSQL) é o banco PRÓPRIO desta stack: NÃO use o `postgres-pgvector` compartilhado.
+#       * fica na `default` (o app o acessa pelo nome `db`)
+#       * fica TAMBÉM na `data` SÓ para ferramentas de admin (pgadmin4) o alcançarem como `botpress_db`
+#   - Pode entregar respostas no WhatsApp via stack `evolution-api`.
+#   - Volume dedicado (`db-data`): para migrar de host, basta copiar esse volume.
+#
+# VOLUME EM SWARM: volumes são locais ao nó. Em cluster com +1 worker, fixe o serviço `db` no nó
+# definindo WORKER_HOSTNAME e descomentando o constraint `node.hostname` abaixo.
 services:
   botpress:
     image: botpress/server:${BOTPRESS_IMAGE_TAG:-latest}
     networks:
-      - default
-      - web
-      - data
+      - default # conversa com o banco `db` internamente
+      - web # exposto pelo Traefik
     environment:
       - EXTERNAL_URL=https://${BOTPRESS_FQDN}
-      - DATABASE_URL=postgres://${BOTPRESS_DB_USER:-postgres}:${BOTPRESS_DB_PASSWORD}@${BOTPRESS_DB_HOST:-postgres}:${BOTPRESS_DB_PORT:-5432}/${BOTPRESS_DB_NAME:-botpress}
+      - DATABASE_URL=postgres://${BOTPRESS_DB_USER:-postgres}:${BOTPRESS_DB_PASSWORD}@${BOTPRESS_DB_HOST:-db}:${BOTPRESS_DB_PORT:-5432}/${BOTPRESS_DB_NAME:-botpress}
       - BP_PRODUCTION=true
       - PORT=3000
     volumes:
@@ -35,16 +47,37 @@ services:
         - traefik.http.routers.botpress.tls.certresolver=letsencryptresolver
         - traefik.http.services.botpress.loadbalancer.server.port=3000
 
+  # Banco de dados PRÓPRIO da stack (não compartilhe com outras stacks).
+  db:
+    image: postgres:${BOTPRESS_DB_IMAGE_TAG:-16-alpine}
+    networks:
+      - default # acesso do app
+      - data # SÓ para ferramentas de admin (pgadmin4) via host `botpress_db`
+    environment:
+      - POSTGRES_DB=${BOTPRESS_DB_NAME:-botpress}
+      - POSTGRES_USER=${BOTPRESS_DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${BOTPRESS_DB_PASSWORD} # OBRIGATÓRIA
+    volumes:
+      - db-data:/var/lib/postgresql/data # ← copie este volume para migrar de host
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # fixe o db no nó em cluster multi-worker:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
 networks:
-  web:
+  web: # externa: criada pela stack balancer (Traefik)
     external: true
     name: ${PROXY_NET:-web}
-  data:
+  data: # externa: liga o banco às ferramentas de admin (pgadmin4 etc.)
     external: true
     name: ${DATA_NET:-data}
-  default:
+  default: # interna desta stack: app <-> db
     driver: overlay
 
 volumes:
   botpress-data:
+    driver: local
+  db-data:
     driver: local

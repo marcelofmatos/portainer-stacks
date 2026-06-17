@@ -1,31 +1,46 @@
-# Stack "wordpress" — WordPress (Docker Swarm)
-# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt.
-# Usa o MariaDB compartilhado (stack `mariadb`) na rede `data` — não sobe banco próprio.
+# ┌───────────────────────────────────────────────────────────────────────────┐
+# │ Stack "wordpress" — WordPress + MariaDB embarcado (Docker Swarm)            │
+# └───────────────────────────────────────────────────────────────────────────┘
+# PRIMEIRA VEZ? Leia isto:
+#   1. Crie as redes externas (uma vez por cluster):
+#        docker network create --driver overlay --attachable web
+#        docker network create --driver overlay --attachable data
+#   2. Tenha a stack `balancer` (Traefik) rodando e o DNS de WORDPRESS_FQDN apontando p/ o host.
+#   3. Defina as variáveis OBRIGATÓRIAS no deploy (Portainer pede no formulário):
+#        WORDPRESS_FQDN, WORDPRESS_DB_PASSWORD, WORDPRESS_DB_ROOT_PASSWORD
+#   4. Deploy → acesse https://WORDPRESS_FQDN (instalador do WordPress).
 #
-# NOTA (volume em Swarm): em cluster multi-worker fixe o serviço definindo WORKER_HOSTNAME e
-# descomentando o constraint de hostname.
+# COMO FUNCIONA:
+#   - `wordpress` (app) é publicado pelo Traefik na rede `web`; fala com o banco pela rede interna `default`.
+#   - `db` (MariaDB) é o banco PRÓPRIO desta stack: NÃO use o `mariadb` compartilhado.
+#       * fica na `default` (o app o acessa pelo nome `db`)
+#       * fica TAMBÉM na `data` SÓ para ferramentas de admin (phpmyadmin) o alcançarem como `wordpress_db`
+#   - Volume dedicado (`db-data`): para migrar de host, basta copiar esse volume.
+#
+# VOLUME EM SWARM: volumes são locais ao nó. Em cluster com +1 worker, fixe os serviços no nó
+# definindo WORKER_HOSTNAME e descomentando o constraint `node.hostname` abaixo.
 services:
   wordpress:
     image: wordpress:${WORDPRESS_IMAGE_TAG:-php8.3-apache}
     networks:
-      - default
-      - web
-      - data
+      - default # conversa com o banco `db` internamente
+      - web # exposto pelo Traefik
     environment:
-      - WORDPRESS_DB_HOST=${WORDPRESS_DB_HOST:-mariadb}
+      - WORDPRESS_DB_HOST=${WORDPRESS_DB_HOST:-db} # nome do serviço de banco nesta stack
       - WORDPRESS_DB_NAME=${WORDPRESS_DB_NAME:-wordpress}
       - WORDPRESS_DB_USER=${WORDPRESS_DB_USER:-wordpress}
-      - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_PASSWORD}
+      - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_PASSWORD} # OBRIGATÓRIA (mesma senha do serviço db)
       - WORDPRESS_TABLE_PREFIX=${WORDPRESS_TABLE_PREFIX:-wp_}
-      - WORDPRESS_CONFIG_EXTRA=${WORDPRESS_CONFIG_EXTRA:-}
+      - WORDPRESS_CONFIG_EXTRA=${WORDPRESS_CONFIG_EXTRA:-} # HTTPS atrás do proxy (veja README)
     volumes:
-      - wordpress-data:/var/www/html
+      - wordpress-data:/var/www/html # wp-content, uploads, plugins, temas
     deploy:
       mode: replicated
       replicas: 1
       placement:
         constraints:
           - node.role == worker
+          # descomente em cluster multi-worker p/ fixar o volume no nó:
           # - node.hostname == ${WORKER_HOSTNAME:-}
       labels:
         - traefik.enable=true
@@ -35,16 +50,38 @@ services:
         - traefik.http.routers.wordpress.tls.certresolver=letsencryptresolver
         - traefik.http.services.wordpress.loadbalancer.server.port=80
 
+  # Banco de dados PRÓPRIO da stack (não compartilhe com outras stacks).
+  db:
+    image: mariadb:${WORDPRESS_DB_IMAGE_TAG:-11}
+    networks:
+      - default # acesso do app
+      - data # SÓ para ferramentas de admin (phpmyadmin) via host `wordpress_db`
+    environment:
+      - MARIADB_DATABASE=${WORDPRESS_DB_NAME:-wordpress}
+      - MARIADB_USER=${WORDPRESS_DB_USER:-wordpress}
+      - MARIADB_PASSWORD=${WORDPRESS_DB_PASSWORD} # OBRIGATÓRIA
+      - MARIADB_ROOT_PASSWORD=${WORDPRESS_DB_ROOT_PASSWORD} # OBRIGATÓRIA (senha root do MariaDB)
+    volumes:
+      - db-data:/var/lib/mysql # ← copie este volume para migrar de host
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # fixe junto do app no mesmo nó:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
 networks:
-  web:
+  web: # externa: criada pela stack balancer (Traefik)
     external: true
     name: ${PROXY_NET:-web}
-  data:
+  data: # externa: liga o banco às ferramentas de admin (phpmyadmin etc.)
     external: true
     name: ${DATA_NET:-data}
-  default:
+  default: # interna desta stack: app <-> db
     driver: overlay
 
 volumes:
   wordpress-data:
+    driver: local
+  db-data:
     driver: local

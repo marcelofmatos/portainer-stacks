@@ -1,18 +1,22 @@
-# Stack "typebot" — Typebot (construtor de chatbots) — Docker Swarm
+# Stack "typebot" — Typebot (construtor de chatbots) + PostgreSQL embarcado — Docker Swarm
 # Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
-# Usa o PostgreSQL compartilhado (stack postgres-pgvector) na rede `data` — não sobe banco próprio.
+# Sobe o próprio PostgreSQL (serviço `db`) — NÃO usa o postgres-pgvector compartilhado.
 #
 # Dois apps: `builder` (editor de fluxos, BUILDER_FQDN) e `viewer` (runtime publicado, VIEWER_FQDN).
+# Ambos falam com o banco `db` pela rede interna `default`. O `db` fica TAMBÉM na rede `data` SÓ
+# para ferramentas de admin (pgadmin4) o alcançarem como `typebot_db`.
 # Armazenamento de mídia opcional via MinIO (S3) — preencha as variáveis TYPEBOT_S3_* (ver README).
+#
+# VOLUME EM SWARM: volumes são locais ao nó. Em cluster com +1 worker, fixe o serviço `db` no nó
+# definindo WORKER_HOSTNAME e descomentando o constraint `node.hostname` abaixo.
 services:
   builder:
     image: baptistearno/typebot-builder:${TYPEBOT_IMAGE_TAG:-latest}
     networks:
-      - default
-      - web
-      - data
+      - default # conversa com o banco `db` internamente
+      - web # exposto pelo Traefik
     environment:
-      - DATABASE_URL=postgresql://${TYPEBOT_DB_USER:-postgres}:${TYPEBOT_DB_PASSWORD}@${TYPEBOT_DB_HOST:-postgres}:${TYPEBOT_DB_PORT:-5432}/${TYPEBOT_DB_NAME:-typebot}
+      - DATABASE_URL=postgresql://${TYPEBOT_DB_USER:-postgres}:${TYPEBOT_DB_PASSWORD}@${TYPEBOT_DB_HOST:-db}:${TYPEBOT_DB_PORT:-5432}/${TYPEBOT_DB_NAME:-typebot}
       - ENCRYPTION_SECRET=${TYPEBOT_ENCRYPTION_SECRET}
       - NEXTAUTH_URL=https://${TYPEBOT_BUILDER_FQDN}
       - NEXT_PUBLIC_VIEWER_URL=https://${TYPEBOT_VIEWER_FQDN}
@@ -41,11 +45,10 @@ services:
   viewer:
     image: baptistearno/typebot-viewer:${TYPEBOT_IMAGE_TAG:-latest}
     networks:
-      - default
-      - web
-      - data
+      - default # conversa com o banco `db` internamente
+      - web # exposto pelo Traefik
     environment:
-      - DATABASE_URL=postgresql://${TYPEBOT_DB_USER:-postgres}:${TYPEBOT_DB_PASSWORD}@${TYPEBOT_DB_HOST:-postgres}:${TYPEBOT_DB_PORT:-5432}/${TYPEBOT_DB_NAME:-typebot}
+      - DATABASE_URL=postgresql://${TYPEBOT_DB_USER:-postgres}:${TYPEBOT_DB_PASSWORD}@${TYPEBOT_DB_HOST:-db}:${TYPEBOT_DB_PORT:-5432}/${TYPEBOT_DB_NAME:-typebot}
       - ENCRYPTION_SECRET=${TYPEBOT_ENCRYPTION_SECRET}
       - NEXTAUTH_URL=https://${TYPEBOT_BUILDER_FQDN}
       - NEXT_PUBLIC_VIEWER_URL=https://${TYPEBOT_VIEWER_FQDN}
@@ -69,12 +72,35 @@ services:
         - traefik.http.routers.typebot-viewer.tls.certresolver=letsencryptresolver
         - traefik.http.services.typebot-viewer.loadbalancer.server.port=3000
 
+  # Banco de dados PRÓPRIO da stack (não compartilhe com outras stacks).
+  db:
+    image: postgres:${TYPEBOT_DB_IMAGE_TAG:-16-alpine}
+    networks:
+      - default # acesso dos apps
+      - data # SÓ para ferramentas de admin (pgadmin4) via host `typebot_db`
+    environment:
+      - POSTGRES_DB=${TYPEBOT_DB_NAME:-typebot}
+      - POSTGRES_USER=${TYPEBOT_DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${TYPEBOT_DB_PASSWORD} # OBRIGATÓRIA
+    volumes:
+      - db-data:/var/lib/postgresql/data # ← copie este volume para migrar de host
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # fixe o db no nó em cluster multi-worker:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
 networks:
-  web:
+  web: # externa: criada pela stack balancer (Traefik)
     external: true
     name: ${PROXY_NET:-web}
-  data:
+  data: # externa: liga o banco às ferramentas de admin (pgadmin4 etc.)
     external: true
     name: ${DATA_NET:-data}
-  default:
+  default: # interna desta stack: apps <-> db
     driver: overlay
+
+volumes:
+  db-data:
+    driver: local

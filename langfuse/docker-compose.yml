@@ -1,18 +1,33 @@
-# Stack "langfuse" — Langfuse (observabilidade de LLM) — Docker Swarm
-# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
-# Tracing/observabilidade de aplicações LLM. Esta stack usa o Langfuse v2 (single-service), que precisa
-# apenas do PostgreSQL compartilhado (stack postgres-pgvector) na rede `data`.
+# ┌───────────────────────────────────────────────────────────────────────────┐
+# │ Stack "langfuse" — Langfuse v2 (observabilidade de LLM) + PostgreSQL embarcado │
+# └───────────────────────────────────────────────────────────────────────────┘
+# PRIMEIRA VEZ? Leia isto:
+#   1. Crie as redes externas (uma vez por cluster):
+#        docker network create --driver overlay --attachable web
+#        docker network create --driver overlay --attachable data
+#   2. Tenha a stack `balancer` (Traefik) rodando e o DNS de LANGFUSE_FQDN apontando p/ o host.
+#   3. Defina as variáveis OBRIGATÓRIAS no deploy:
+#        LANGFUSE_FQDN, LANGFUSE_DB_PASSWORD, LANGFUSE_NEXTAUTH_SECRET, LANGFUSE_SALT.
+#   4. Deploy → acesse https://LANGFUSE_FQDN (suba com LANGFUSE_DISABLE_SIGNUP=false p/ criar a 1ª conta).
 #
-# Obrigatórias: LANGFUSE_FQDN, LANGFUSE_DB_PASSWORD, LANGFUSE_NEXTAUTH_SECRET, LANGFUSE_SALT.
+# COMO FUNCIONA:
+#   - `langfuse` (app) é publicado pelo Traefik na rede `web`; fala com o banco pela rede interna `default`.
+#   - `db` (PostgreSQL) é o banco PRÓPRIO desta stack: NÃO use o `postgres-pgvector` compartilhado.
+#       * fica na `default` (o app o acessa pelo nome `db`)
+#       * fica TAMBÉM na `data` SÓ para ferramentas de admin (pgadmin4) o alcançarem como `langfuse_db`
+#   - Volume dedicado (`db-data`): para migrar de host, basta copiar esse volume. Traces/prompts/custos
+#     vivem no banco → o serviço da app é stateless.
+#
+# VOLUME EM SWARM: volumes são locais ao nó. Em cluster com +1 worker, fixe o serviço `db` no nó
+# definindo WORKER_HOSTNAME e descomentando o constraint `node.hostname` abaixo.
 services:
   langfuse:
     image: langfuse/langfuse:${LANGFUSE_IMAGE_TAG:-2}
     networks:
-      - default
-      - web
-      - data
+      - default # conversa com o banco `db` internamente
+      - web # exposto pelo Traefik
     environment:
-      - DATABASE_URL=postgresql://${LANGFUSE_DB_USER:-postgres}:${LANGFUSE_DB_PASSWORD}@${LANGFUSE_DB_HOST:-postgres}:${LANGFUSE_DB_PORT:-5432}/${LANGFUSE_DB_NAME:-langfuse}
+      - DATABASE_URL=postgresql://${LANGFUSE_DB_USER:-postgres}:${LANGFUSE_DB_PASSWORD}@${LANGFUSE_DB_HOST:-db}:${LANGFUSE_DB_PORT:-5432}/${LANGFUSE_DB_NAME:-langfuse}
       - NEXTAUTH_URL=https://${LANGFUSE_FQDN}
       - NEXTAUTH_SECRET=${LANGFUSE_NEXTAUTH_SECRET}
       - SALT=${LANGFUSE_SALT}
@@ -33,12 +48,35 @@ services:
         - traefik.http.routers.langfuse.tls.certresolver=letsencryptresolver
         - traefik.http.services.langfuse.loadbalancer.server.port=3000
 
+  # Banco de dados PRÓPRIO da stack (não compartilhe com outras stacks).
+  db:
+    image: postgres:${LANGFUSE_DB_IMAGE_TAG:-16-alpine}
+    networks:
+      - default # acesso do app
+      - data # SÓ para ferramentas de admin (pgadmin4) via host `langfuse_db`
+    environment:
+      - POSTGRES_DB=${LANGFUSE_DB_NAME:-langfuse}
+      - POSTGRES_USER=${LANGFUSE_DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${LANGFUSE_DB_PASSWORD} # OBRIGATÓRIA
+    volumes:
+      - db-data:/var/lib/postgresql/data # ← copie este volume para migrar de host
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # fixe o db no nó em cluster multi-worker:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
 networks:
-  web:
+  web: # externa: criada pela stack balancer (Traefik)
     external: true
     name: ${PROXY_NET:-web}
-  data:
+  data: # externa: liga o banco às ferramentas de admin (pgadmin4 etc.)
     external: true
     name: ${DATA_NET:-data}
-  default:
+  default: # interna desta stack: app <-> db
     driver: overlay
+
+volumes:
+  db-data:
+    driver: local

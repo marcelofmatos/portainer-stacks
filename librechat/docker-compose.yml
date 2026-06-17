@@ -1,7 +1,7 @@
 # Stack "librechat" — LibreChat (UI multi-provedor de LLMs) — Docker Swarm
 # Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
 # UI de chat tipo ChatGPT com múltiplos provedores (OpenAI/Anthropic/Ollama/litellm), RAG e agentes.
-# Reaproveita o MongoDB compartilhado (stack `mongodb`) na rede `data` e sobe um Meilisearch próprio.
+# Banco embarcado: sobe um MongoDB PRÓPRIO (serviço `db`) e um Meilisearch próprio — nada compartilhado.
 #
 # Obrigatórias: LIBRECHAT_FQDN, LIBRECHAT_MONGO_PASSWORD, LIBRECHAT_CREDS_KEY, LIBRECHAT_CREDS_IV,
 #               LIBRECHAT_JWT_SECRET, LIBRECHAT_JWT_REFRESH_SECRET, LIBRECHAT_MEILI_MASTER_KEY.
@@ -9,13 +9,12 @@ services:
   api:
     image: ghcr.io/danny-avila/librechat:${LIBRECHAT_IMAGE_TAG:-latest}
     networks:
-      - default
-      - web
-      - data
+      - default # conversa com o banco `db` e o meilisearch internamente
+      - web # exposto pelo Traefik
     environment:
       - HOST=0.0.0.0
       - PORT=3080
-      - MONGO_URI=mongodb://${LIBRECHAT_MONGO_USER:-root}:${LIBRECHAT_MONGO_PASSWORD}@${LIBRECHAT_MONGO_HOST:-mongodb}:27017/${LIBRECHAT_MONGO_DB:-LibreChat}?authSource=admin
+      - MONGO_URI=mongodb://${LIBRECHAT_MONGO_USER:-root}:${LIBRECHAT_MONGO_PASSWORD}@${LIBRECHAT_MONGO_HOST:-db}:27017/${LIBRECHAT_MONGO_DB:-LibreChat}?authSource=admin
       - DOMAIN_CLIENT=https://${LIBRECHAT_FQDN}
       - DOMAIN_SERVER=https://${LIBRECHAT_FQDN}
       - CREDS_KEY=${LIBRECHAT_CREDS_KEY}
@@ -62,16 +61,36 @@ services:
           - node.role == worker
           # - node.hostname == ${WORKER_HOSTNAME:-}
 
+  # Banco de dados PRÓPRIO da stack (não compartilhe com outras stacks).
+  db:
+    image: mongo:${LIBRECHAT_MONGO_IMAGE_TAG:-7}
+    networks:
+      - default # acesso do app
+      - data # SÓ para ferramentas de admin (mongo-express) via host `librechat_db`
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${LIBRECHAT_MONGO_USER:-root}
+      - MONGO_INITDB_ROOT_PASSWORD=${LIBRECHAT_MONGO_PASSWORD} # OBRIGATÓRIA
+    volumes:
+      - db-data:/data/db # ← copie este volume para migrar de host
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # fixe o db no nó em cluster multi-worker:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
 networks:
   web:
     external: true
     name: ${PROXY_NET:-web}
-  data:
+  data: # externa: liga o banco às ferramentas de admin (mongo-express etc.)
     external: true
     name: ${DATA_NET:-data}
-  default:
+  default: # interna desta stack: app <-> db / meilisearch
     driver: overlay
 
 volumes:
   meilisearch-data:
+    driver: local
+  db-data:
     driver: local

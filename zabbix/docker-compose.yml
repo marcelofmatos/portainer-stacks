@@ -1,24 +1,24 @@
-# Stack "zabbix" — Zabbix (monitoramento) — Docker Swarm
+# Stack "zabbix" — Zabbix (monitoramento) + PostgreSQL embarcado — Docker Swarm
 # Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
-# Usa o PostgreSQL compartilhado (stack postgres-pgvector) na rede `data` — não sobe banco próprio.
+# Banco PRÓPRIO desta stack (serviço `db`): NÃO usa o postgres-pgvector compartilhado.
 #
-# Componentes: zabbix-server (coletor, porta 10051), zabbix-web (UI), zabbix-agent2 (auto-monitoração).
-# O zabbix-server importa o schema automaticamente num banco vazio.
+# Componentes: zabbix-server (coletor, porta 10051), zabbix-web (UI), zabbix-agent2 (auto-monitoração),
+# db (PostgreSQL embarcado).
+# O zabbix-server importa o schema automaticamente num banco vazio na primeira subida.
 #
 # Obrigatórias: ZABBIX_FQDN, ZABBIX_DB_PASSWORD.
 services:
   zabbix-server:
     image: zabbix/zabbix-server-pgsql:${ZABBIX_IMAGE_TAG:-alpine-7.0-latest}
     networks:
-      - default
-      - data
+      - default # conversa com o banco `db` internamente
     # Agents externos conectam no trapper 10051. Descomente para publicar no nó.
     # ports:
     #   - target: 10051
     #     published: ${ZABBIX_SERVER_PORT:-10051}
     #     mode: host
     environment:
-      - DB_SERVER_HOST=${ZABBIX_DB_HOST:-postgres}
+      - DB_SERVER_HOST=${ZABBIX_DB_HOST:-db} # nome do serviço de banco nesta stack
       - DB_SERVER_PORT=${ZABBIX_DB_PORT:-5432}
       - POSTGRES_USER=${ZABBIX_DB_USER:-postgres}
       - POSTGRES_PASSWORD=${ZABBIX_DB_PASSWORD}
@@ -33,13 +33,12 @@ services:
   zabbix-web:
     image: zabbix/zabbix-web-nginx-pgsql:${ZABBIX_IMAGE_TAG:-alpine-7.0-latest}
     networks:
-      - default
-      - web
-      - data
+      - default # conversa com o banco `db` e o server internamente
+      - web # exposto pelo Traefik
     environment:
       - ZBX_SERVER_HOST=zabbix-server
       - ZBX_SERVER_PORT=10051
-      - DB_SERVER_HOST=${ZABBIX_DB_HOST:-postgres}
+      - DB_SERVER_HOST=${ZABBIX_DB_HOST:-db} # nome do serviço de banco nesta stack
       - DB_SERVER_PORT=${ZABBIX_DB_PORT:-5432}
       - POSTGRES_USER=${ZABBIX_DB_USER:-postgres}
       - POSTGRES_PASSWORD=${ZABBIX_DB_PASSWORD}
@@ -73,6 +72,25 @@ services:
         constraints:
           - node.role == worker
 
+  # Banco de dados PRÓPRIO da stack (não compartilhe com outras stacks).
+  db:
+    image: postgres:${ZABBIX_DB_IMAGE_TAG:-16-alpine}
+    networks:
+      - default # acesso do server e do web
+      - data # SÓ para ferramentas de admin (pgadmin4) via host `zabbix_db`
+    environment:
+      - POSTGRES_DB=${ZABBIX_DB_NAME:-zabbix}
+      - POSTGRES_USER=${ZABBIX_DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${ZABBIX_DB_PASSWORD} # OBRIGATÓRIA
+    volumes:
+      - db-data:/var/lib/postgresql/data # ← copie este volume para migrar de host
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # fixe o db no nó em cluster multi-worker:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
 networks:
   web:
     external: true
@@ -82,3 +100,7 @@ networks:
     name: ${DATA_NET:-data}
   default:
     driver: overlay
+
+volumes:
+  db-data:
+    driver: local

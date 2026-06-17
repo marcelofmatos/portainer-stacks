@@ -1,24 +1,38 @@
-# Stack "espocrm" — EspoCRM (CRM open source) — Docker Swarm
-# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
-# Usa o MariaDB compartilhado (stack `mariadb`) na rede `data` — não sobe banco próprio.
+# ┌───────────────────────────────────────────────────────────────────────────┐
+# │ Stack "espocrm" — EspoCRM + MariaDB embarcado (Docker Swarm)                │
+# └───────────────────────────────────────────────────────────────────────────┘
+# PRIMEIRA VEZ? Leia isto:
+#   1. Crie as redes externas (uma vez por cluster):
+#        docker network create --driver overlay --attachable web
+#        docker network create --driver overlay --attachable data
+#   2. Tenha a stack `balancer` (Traefik) rodando e o DNS de ESPOCRM_FQDN apontando p/ o host.
+#   3. Defina as variáveis OBRIGATÓRIAS no deploy (Portainer pede no formulário):
+#        ESPOCRM_FQDN, ESPOCRM_ADMIN_PASSWORD, ESPOCRM_DB_PASSWORD, ESPOCRM_DB_ROOT_PASSWORD
+#   4. Deploy → acesse https://ESPOCRM_FQDN (login do admin criado no primeiro start).
 #
-# O serviço `espocrm-daemon` roda o cron/jobs do EspoCRM e compartilha o mesmo volume do web.
-# NOTA (volume em Swarm): o volume é local ao nó e é compartilhado por dois serviços — em cluster
-# multi-worker fixe AMBOS no mesmo nó definindo WORKER_HOSTNAME e descomentando o constraint.
+# COMO FUNCIONA:
+#   - `espocrm` (app) é publicado pelo Traefik na rede `web`; fala com o banco pela rede interna `default`.
+#   - `espocrm-daemon` roda o cron/jobs do EspoCRM e compartilha o mesmo volume do web.
+#   - `db` (MariaDB) é o banco PRÓPRIO desta stack: NÃO use o `mariadb` compartilhado.
+#       * fica na `default` (o app o acessa pelo nome `db`)
+#       * fica TAMBÉM na `data` SÓ para ferramentas de admin (phpmyadmin) o alcançarem como `espocrm_db`
+#   - Volumes dedicados (`espocrm-data`, `db-data`): para migrar de host, basta copiar esses volumes.
+#
+# VOLUME EM SWARM: volumes são locais ao nó. Em cluster com +1 worker, fixe os serviços no nó
+# definindo WORKER_HOSTNAME e descomentando o constraint `node.hostname` abaixo.
 services:
   espocrm:
     image: espocrm/espocrm:${ESPOCRM_IMAGE_TAG:-8.4}
     networks:
-      - default
-      - web
-      - data
+      - default # conversa com o banco `db` internamente
+      - web # exposto pelo Traefik
     environment:
       - ESPOCRM_DATABASE_PLATFORM=Mysql
-      - ESPOCRM_DATABASE_HOST=${ESPOCRM_DB_HOST:-mariadb}
+      - ESPOCRM_DATABASE_HOST=${ESPOCRM_DB_HOST:-db} # nome do serviço de banco nesta stack
       - ESPOCRM_DATABASE_PORT=${ESPOCRM_DB_PORT:-3306}
       - ESPOCRM_DATABASE_NAME=${ESPOCRM_DB_NAME:-espocrm}
       - ESPOCRM_DATABASE_USER=${ESPOCRM_DB_USER:-espocrm}
-      - ESPOCRM_DATABASE_PASSWORD=${ESPOCRM_DB_PASSWORD}
+      - ESPOCRM_DATABASE_PASSWORD=${ESPOCRM_DB_PASSWORD} # OBRIGATÓRIA (mesma senha do serviço db)
       - ESPOCRM_ADMIN_USERNAME=${ESPOCRM_ADMIN_USERNAME:-admin}
       - ESPOCRM_ADMIN_PASSWORD=${ESPOCRM_ADMIN_PASSWORD}
       - ESPOCRM_SITE_URL=https://${ESPOCRM_FQDN}
@@ -30,7 +44,8 @@ services:
       placement:
         constraints:
           - node.role == worker
-          # - node.hostname == ${WORKER_HOSTNAME:-}   # fixe em cluster multi-worker (volume local ao nó)
+          # descomente em cluster multi-worker p/ fixar o volume no nó:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
       labels:
         - traefik.enable=true
         - traefik.http.routers.espocrm.rule=Host(`${ESPOCRM_FQDN}`)
@@ -43,11 +58,10 @@ services:
     image: espocrm/espocrm:${ESPOCRM_IMAGE_TAG:-8.4}
     command: docker-daemon.sh
     networks:
-      - default
-      - data
+      - default # conversa com o banco `db` internamente
     environment:
       - ESPOCRM_DATABASE_PLATFORM=Mysql
-      - ESPOCRM_DATABASE_HOST=${ESPOCRM_DB_HOST:-mariadb}
+      - ESPOCRM_DATABASE_HOST=${ESPOCRM_DB_HOST:-db} # nome do serviço de banco nesta stack
       - ESPOCRM_DATABASE_PORT=${ESPOCRM_DB_PORT:-3306}
       - ESPOCRM_DATABASE_NAME=${ESPOCRM_DB_NAME:-espocrm}
       - ESPOCRM_DATABASE_USER=${ESPOCRM_DB_USER:-espocrm}
@@ -62,16 +76,38 @@ services:
           - node.role == worker
           # - node.hostname == ${WORKER_HOSTNAME:-}   # fixe no MESMO nó do serviço espocrm
 
+  # Banco de dados PRÓPRIO da stack (não compartilhe com outras stacks).
+  db:
+    image: mariadb:${ESPOCRM_DB_IMAGE_TAG:-11}
+    networks:
+      - default # acesso do app
+      - data # SÓ para ferramentas de admin (phpmyadmin) via host `espocrm_db`
+    environment:
+      - MARIADB_DATABASE=${ESPOCRM_DB_NAME:-espocrm}
+      - MARIADB_USER=${ESPOCRM_DB_USER:-espocrm}
+      - MARIADB_PASSWORD=${ESPOCRM_DB_PASSWORD} # OBRIGATÓRIA
+      - MARIADB_ROOT_PASSWORD=${ESPOCRM_DB_ROOT_PASSWORD} # OBRIGATÓRIA (senha root do MariaDB)
+    volumes:
+      - db-data:/var/lib/mysql # ← copie este volume para migrar de host
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # fixe junto do app no mesmo nó:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
 networks:
-  web:
+  web: # externa: criada pela stack balancer (Traefik)
     external: true
     name: ${PROXY_NET:-web}
-  data:
+  data: # externa: liga o banco às ferramentas de admin (phpmyadmin etc.)
     external: true
     name: ${DATA_NET:-data}
-  default:
+  default: # interna desta stack: app <-> db
     driver: overlay
 
 volumes:
   espocrm-data:
+    driver: local
+  db-data:
     driver: local

@@ -1112,8 +1112,8 @@
       "type": 2,
       "title": "wordpress — CMS/blog",
       "name": "wordpress",
-      "description": "WordPress via Traefik v3 com TLS. Usa o MariaDB compartilhado (stack mariadb) na rede `data` — nao sobe banco proprio.",
-      "note": "PRE-REQUISITO: redes `web` e `data`; stack mariadb na `data`; e o banco/usuario `wordpress` criado no MariaDB. Veja o README.",
+      "description": "WordPress via Traefik v3 com TLS, com MariaDB embarcado (banco proprio da stack, na rede `data` so para ferramentas de admin).",
+      "note": "PRE-REQUISITO: redes `web` e `data`. O banco sobe junto (nao precisa da stack mariadb). Veja o README.",
       "categories": [
         "cms"
       ],
@@ -1132,12 +1132,17 @@
         {
           "name": "WORDPRESS_DB_PASSWORD",
           "label": "Senha do banco",
-          "description": "Senha do usuario do MariaDB"
+          "description": "Senha do usuario do banco (app e db)"
+        },
+        {
+          "name": "WORDPRESS_DB_ROOT_PASSWORD",
+          "label": "Senha root do banco",
+          "description": "Senha root do MariaDB embarcado"
         },
         {
           "name": "WORDPRESS_DB_HOST",
           "label": "Host do banco",
-          "default": "mariadb"
+          "default": "db"
         },
         {
           "name": "WORDPRESS_DB_NAME",
@@ -1165,8 +1170,8 @@
       "type": 2,
       "title": "wikijs — wiki em Markdown",
       "name": "wikijs",
-      "description": "Wiki.js: wiki moderno baseado em Markdown (busca, versionamento, ACL). Via Traefik v3. Usa o PostgreSQL compartilhado (stack postgres-pgvector) na rede `data`.",
-      "note": "PRE-REQUISITO: redes `web` e `data`; stack postgres-pgvector na `data`; e o banco/usuario `wikijs` criado no PostgreSQL. Veja o README.",
+      "description": "Wiki.js: wiki moderno baseado em Markdown (busca, versionamento, ACL). Via Traefik v3, com PostgreSQL embarcado (banco proprio da stack).",
+      "note": "PRE-REQUISITO: redes `web` e `data`. O banco sobe junto (nao precisa da stack postgres-pgvector). Veja o README.",
       "categories": [
         "documentation",
         "wiki"
@@ -1186,12 +1191,12 @@
         {
           "name": "WIKIJS_DB_PASSWORD",
           "label": "Senha do banco",
-          "description": "Senha do usuario do PostgreSQL"
+          "description": "Senha do usuario do PostgreSQL (app e db)"
         },
         {
           "name": "WIKIJS_DB_HOST",
           "label": "Host do banco",
-          "default": "postgres"
+          "default": "db"
         },
         {
           "name": "WIKIJS_DB_NAME",
@@ -2180,12 +2185,36 @@
         "stackfile": "open-webui/docker-compose.yml"
       },
       "env": [
-        { "name": "OPENWEBUI_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: chat.exemplo.com" },
-        { "name": "OPENWEBUI_SECRET_KEY", "label": "Secret key", "description": "Sessao (openssl rand -hex 32)" },
-        { "name": "OPENWEBUI_OLLAMA_URL", "label": "URL do Ollama", "description": "Ex.: https://ollama.exemplo.com" },
-        { "name": "OPENWEBUI_OPENAI_BASE_URL", "label": "Base OpenAI-compatible", "description": "Ex.: https://litellm.exemplo.com/v1" },
-        { "name": "OPENWEBUI_OPENAI_API_KEY", "label": "Chave OpenAI/litellm", "description": "Chave do endpoint (opcional)" },
-        { "name": "OPENWEBUI_IMAGE_TAG", "label": "Tag da imagem", "default": "main" }
+        {
+          "name": "OPENWEBUI_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: chat.exemplo.com"
+        },
+        {
+          "name": "OPENWEBUI_SECRET_KEY",
+          "label": "Secret key",
+          "description": "Sessao (openssl rand -hex 32)"
+        },
+        {
+          "name": "OPENWEBUI_OLLAMA_URL",
+          "label": "URL do Ollama",
+          "description": "Ex.: https://ollama.exemplo.com"
+        },
+        {
+          "name": "OPENWEBUI_OPENAI_BASE_URL",
+          "label": "Base OpenAI-compatible",
+          "description": "Ex.: https://litellm.exemplo.com/v1"
+        },
+        {
+          "name": "OPENWEBUI_OPENAI_API_KEY",
+          "label": "Chave OpenAI/litellm",
+          "description": "Chave do endpoint (opcional)"
+        },
+        {
+          "name": "OPENWEBUI_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "main"
+        }
       ]
     },
     {
@@ -2204,15 +2233,51 @@
         "stackfile": "librechat/docker-compose.yml"
       },
       "env": [
-        { "name": "LIBRECHAT_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: librechat.exemplo.com" },
-        { "name": "LIBRECHAT_MONGO_PASSWORD", "label": "Senha do MongoDB", "description": "Senha do usuario do MongoDB (segredo)" },
-        { "name": "LIBRECHAT_CREDS_KEY", "label": "CREDS_KEY", "description": "32 bytes hex (openssl rand -hex 32)" },
-        { "name": "LIBRECHAT_CREDS_IV", "label": "CREDS_IV", "description": "16 bytes hex (openssl rand -hex 16)" },
-        { "name": "LIBRECHAT_JWT_SECRET", "label": "JWT secret", "description": "openssl rand -hex 32" },
-        { "name": "LIBRECHAT_JWT_REFRESH_SECRET", "label": "JWT refresh secret", "description": "openssl rand -hex 32" },
-        { "name": "LIBRECHAT_MEILI_MASTER_KEY", "label": "Meili master key", "description": "openssl rand -hex 32" },
-        { "name": "LIBRECHAT_OPENAI_REVERSE_PROXY", "label": "Base OpenAI-compatible", "description": "Ex.: https://litellm.exemplo.com/v1 (opcional)" },
-        { "name": "LIBRECHAT_ALLOW_REGISTRATION", "label": "Permitir registro", "default": "false" }
+        {
+          "name": "LIBRECHAT_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: librechat.exemplo.com"
+        },
+        {
+          "name": "LIBRECHAT_MONGO_PASSWORD",
+          "label": "Senha do MongoDB",
+          "description": "Senha do usuario do MongoDB (segredo)"
+        },
+        {
+          "name": "LIBRECHAT_CREDS_KEY",
+          "label": "CREDS_KEY",
+          "description": "32 bytes hex (openssl rand -hex 32)"
+        },
+        {
+          "name": "LIBRECHAT_CREDS_IV",
+          "label": "CREDS_IV",
+          "description": "16 bytes hex (openssl rand -hex 16)"
+        },
+        {
+          "name": "LIBRECHAT_JWT_SECRET",
+          "label": "JWT secret",
+          "description": "openssl rand -hex 32"
+        },
+        {
+          "name": "LIBRECHAT_JWT_REFRESH_SECRET",
+          "label": "JWT refresh secret",
+          "description": "openssl rand -hex 32"
+        },
+        {
+          "name": "LIBRECHAT_MEILI_MASTER_KEY",
+          "label": "Meili master key",
+          "description": "openssl rand -hex 32"
+        },
+        {
+          "name": "LIBRECHAT_OPENAI_REVERSE_PROXY",
+          "label": "Base OpenAI-compatible",
+          "description": "Ex.: https://litellm.exemplo.com/v1 (opcional)"
+        },
+        {
+          "name": "LIBRECHAT_ALLOW_REGISTRATION",
+          "label": "Permitir registro",
+          "default": "false"
+        }
       ]
     },
     {
@@ -2231,14 +2296,46 @@
         "stackfile": "dify/docker-compose.yml"
       },
       "env": [
-        { "name": "DIFY_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: dify.exemplo.com" },
-        { "name": "DIFY_SECRET_KEY", "label": "Secret key", "description": "openssl rand -base64 42" },
-        { "name": "DIFY_DB_PASSWORD", "label": "Senha do PostgreSQL", "description": "Senha do usuario do banco (segredo)" },
-        { "name": "DIFY_SANDBOX_API_KEY", "label": "Sandbox API key", "description": "Chave compartilhada api/worker/sandbox" },
-        { "name": "DIFY_DB_HOST", "label": "Host do PostgreSQL", "default": "postgres" },
-        { "name": "DIFY_DB_NAME", "label": "Banco", "default": "dify" },
-        { "name": "DIFY_QDRANT_URL", "label": "URL do Qdrant", "default": "http://qdrant:6333" },
-        { "name": "DIFY_IMAGE_TAG", "label": "Tag das imagens", "default": "latest" }
+        {
+          "name": "DIFY_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: dify.exemplo.com"
+        },
+        {
+          "name": "DIFY_SECRET_KEY",
+          "label": "Secret key",
+          "description": "openssl rand -base64 42"
+        },
+        {
+          "name": "DIFY_DB_PASSWORD",
+          "label": "Senha do PostgreSQL",
+          "description": "Senha do usuario do banco (segredo)"
+        },
+        {
+          "name": "DIFY_SANDBOX_API_KEY",
+          "label": "Sandbox API key",
+          "description": "Chave compartilhada api/worker/sandbox"
+        },
+        {
+          "name": "DIFY_DB_HOST",
+          "label": "Host do PostgreSQL",
+          "default": "postgres"
+        },
+        {
+          "name": "DIFY_DB_NAME",
+          "label": "Banco",
+          "default": "dify"
+        },
+        {
+          "name": "DIFY_QDRANT_URL",
+          "label": "URL do Qdrant",
+          "default": "http://qdrant:6333"
+        },
+        {
+          "name": "DIFY_IMAGE_TAG",
+          "label": "Tag das imagens",
+          "default": "latest"
+        }
       ]
     },
     {
@@ -2258,9 +2355,21 @@
         "stackfile": "qdrant/docker-compose.yml"
       },
       "env": [
-        { "name": "QDRANT_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: qdrant.exemplo.com" },
-        { "name": "QDRANT_API_KEY", "label": "API key", "description": "Obrigatoria: exige o header api-key (a stack e exposta via Traefik)" },
-        { "name": "QDRANT_IMAGE_TAG", "label": "Tag da imagem", "default": "latest" }
+        {
+          "name": "QDRANT_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: qdrant.exemplo.com"
+        },
+        {
+          "name": "QDRANT_API_KEY",
+          "label": "API key",
+          "description": "Obrigatoria: exige o header api-key (a stack e exposta via Traefik)"
+        },
+        {
+          "name": "QDRANT_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "latest"
+        }
       ]
     },
     {
@@ -2280,14 +2389,46 @@
         "stackfile": "langfuse/docker-compose.yml"
       },
       "env": [
-        { "name": "LANGFUSE_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: langfuse.exemplo.com" },
-        { "name": "LANGFUSE_DB_PASSWORD", "label": "Senha do PostgreSQL", "description": "Senha do usuario do banco (segredo)" },
-        { "name": "LANGFUSE_NEXTAUTH_SECRET", "label": "NextAuth secret", "description": "openssl rand -base64 32" },
-        { "name": "LANGFUSE_SALT", "label": "Salt", "description": "openssl rand -base64 32" },
-        { "name": "LANGFUSE_DB_HOST", "label": "Host do PostgreSQL", "default": "postgres" },
-        { "name": "LANGFUSE_DB_NAME", "label": "Banco", "default": "langfuse" },
-        { "name": "LANGFUSE_DISABLE_SIGNUP", "label": "Desabilitar signup", "default": "true" },
-        { "name": "LANGFUSE_IMAGE_TAG", "label": "Tag da imagem", "default": "2" }
+        {
+          "name": "LANGFUSE_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: langfuse.exemplo.com"
+        },
+        {
+          "name": "LANGFUSE_DB_PASSWORD",
+          "label": "Senha do PostgreSQL",
+          "description": "Senha do usuario do banco (segredo)"
+        },
+        {
+          "name": "LANGFUSE_NEXTAUTH_SECRET",
+          "label": "NextAuth secret",
+          "description": "openssl rand -base64 32"
+        },
+        {
+          "name": "LANGFUSE_SALT",
+          "label": "Salt",
+          "description": "openssl rand -base64 32"
+        },
+        {
+          "name": "LANGFUSE_DB_HOST",
+          "label": "Host do PostgreSQL",
+          "default": "postgres"
+        },
+        {
+          "name": "LANGFUSE_DB_NAME",
+          "label": "Banco",
+          "default": "langfuse"
+        },
+        {
+          "name": "LANGFUSE_DISABLE_SIGNUP",
+          "label": "Desabilitar signup",
+          "default": "true"
+        },
+        {
+          "name": "LANGFUSE_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "2"
+        }
       ]
     },
     {
@@ -2306,10 +2447,26 @@
         "stackfile": "comfyui/docker-compose.yml"
       },
       "env": [
-        { "name": "COMFYUI_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: comfy.exemplo.com" },
-        { "name": "COMFYUI_AUTH_BASIC", "label": "Basicauth do Traefik", "description": "Formato usuario:hash_bcrypt (htpasswd -nbB)" },
-        { "name": "COMFYUI_IMAGE", "label": "Imagem ComfyUI", "default": "yanwk/comfyui-boot:latest" },
-        { "name": "COMFYUI_DATA_PATH", "label": "Caminho de dados", "default": "/root" }
+        {
+          "name": "COMFYUI_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: comfy.exemplo.com"
+        },
+        {
+          "name": "COMFYUI_AUTH_BASIC",
+          "label": "Basicauth do Traefik",
+          "description": "Formato usuario:hash_bcrypt (htpasswd -nbB)"
+        },
+        {
+          "name": "COMFYUI_IMAGE",
+          "label": "Imagem ComfyUI",
+          "default": "yanwk/comfyui-boot:latest"
+        },
+        {
+          "name": "COMFYUI_DATA_PATH",
+          "label": "Caminho de dados",
+          "default": "/root"
+        }
       ]
     },
     {
@@ -2328,12 +2485,36 @@
         "stackfile": "ragflow/docker-compose.yml"
       },
       "env": [
-        { "name": "RAGFLOW_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: ragflow.exemplo.com" },
-        { "name": "RAGFLOW_MYSQL_PASSWORD", "label": "Senha do MySQL/MariaDB", "description": "Segredo" },
-        { "name": "RAGFLOW_MINIO_PASSWORD", "label": "Senha do MinIO", "description": "Segredo" },
-        { "name": "RAGFLOW_ES_PASSWORD", "label": "Senha do Elasticsearch", "description": "Usuario elastic (segredo)" },
-        { "name": "RAGFLOW_MINIO_USER", "label": "Usuario do MinIO", "default": "ragflow" },
-        { "name": "RAGFLOW_IMAGE_TAG", "label": "Tag da imagem", "default": "latest" }
+        {
+          "name": "RAGFLOW_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: ragflow.exemplo.com"
+        },
+        {
+          "name": "RAGFLOW_MYSQL_PASSWORD",
+          "label": "Senha do MySQL/MariaDB",
+          "description": "Segredo"
+        },
+        {
+          "name": "RAGFLOW_MINIO_PASSWORD",
+          "label": "Senha do MinIO",
+          "description": "Segredo"
+        },
+        {
+          "name": "RAGFLOW_ES_PASSWORD",
+          "label": "Senha do Elasticsearch",
+          "description": "Usuario elastic (segredo)"
+        },
+        {
+          "name": "RAGFLOW_MINIO_USER",
+          "label": "Usuario do MinIO",
+          "default": "ragflow"
+        },
+        {
+          "name": "RAGFLOW_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "latest"
+        }
       ]
     },
     {
@@ -2353,10 +2534,26 @@
         "stackfile": "searxng/docker-compose.yml"
       },
       "env": [
-        { "name": "SEARXNG_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: busca.exemplo.com" },
-        { "name": "SEARXNG_SECRET", "label": "Secret", "description": "openssl rand -hex 32" },
-        { "name": "SEARXNG_REDIS_URL", "label": "URL do Redis", "description": "Ex.: redis://redis:6379/4 (opcional)" },
-        { "name": "SEARXNG_IMAGE_TAG", "label": "Tag da imagem", "default": "latest" }
+        {
+          "name": "SEARXNG_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: busca.exemplo.com"
+        },
+        {
+          "name": "SEARXNG_SECRET",
+          "label": "Secret",
+          "description": "openssl rand -hex 32"
+        },
+        {
+          "name": "SEARXNG_REDIS_URL",
+          "label": "URL do Redis",
+          "description": "Ex.: redis://redis:6379/4 (opcional)"
+        },
+        {
+          "name": "SEARXNG_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "latest"
+        }
       ]
     },
     {
@@ -2375,9 +2572,21 @@
         "stackfile": "anythingllm/docker-compose.yml"
       },
       "env": [
-        { "name": "ANYTHINGLLM_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: rag.exemplo.com" },
-        { "name": "ANYTHINGLLM_JWT_SECRET", "label": "JWT secret", "description": "Obrigatorio: segredo de sessao (openssl rand -hex 32)" },
-        { "name": "ANYTHINGLLM_IMAGE_TAG", "label": "Tag da imagem", "default": "latest" }
+        {
+          "name": "ANYTHINGLLM_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: rag.exemplo.com"
+        },
+        {
+          "name": "ANYTHINGLLM_JWT_SECRET",
+          "label": "JWT secret",
+          "description": "Obrigatorio: segredo de sessao (openssl rand -hex 32)"
+        },
+        {
+          "name": "ANYTHINGLLM_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "latest"
+        }
       ]
     }
   ]
