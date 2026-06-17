@@ -66,18 +66,20 @@
     },
     {
       "type": 2,
-      "title": "tools — phpMyAdmin",
-      "name": "tools",
-      "description": "phpMyAdmin publicado via Traefik v3 com TLS. PMA_ARBITRARY permite informar o host do banco na tela de login.",
-      "note": "Requer a rede `web` (stack balancer). Para acessar bancos de outras stacks, anexe a rede correspondente ao servico.",
+      "title": "phpmyadmin — admin MySQL/MariaDB",
+      "name": "phpmyadmin",
+      "description": "phpMyAdmin publicado via Traefik v3 com TLS. Entra na rede `data` e alcanca a stack mariadb pelo host `mariadb`. PMA_ARBITRARY permite informar outro host na tela de login.",
+      "note": "Requer a rede `web` (stack balancer) e a rede `data` (docker network create --driver overlay --attachable data).",
       "categories": ["database", "tools"],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/phpmyadmin.png",
-      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "tools/docker-compose.yml" },
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "phpmyadmin/docker-compose.yml" },
       "env": [
         { "name": "PMA_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: pma.exemplo.com" },
+        { "name": "PMA_HOSTS", "label": "Hosts de banco", "default": "mariadb" },
         { "name": "PMA_UPLOAD_LIMIT", "label": "Limite de upload", "default": "256M" },
-        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" },
+        { "name": "DATA_NET", "label": "Rede de dados", "default": "data" }
       ]
     },
     {

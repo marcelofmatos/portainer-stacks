@@ -1,16 +1,18 @@
-# Stack "tools" — phpMyAdmin (Docker Swarm)
+# Stack "phpmyadmin" — phpMyAdmin (Docker Swarm)
 # Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt.
+# Também entra na rede overlay externa `data` para alcançar bancos compartilhados (ex.: a stack `mariadb`, host `mariadb`).
 # PMA_ARBITRARY=1 permite informar o host do banco na tela de login.
-# Variável: PMA_FQDN (ex.: pma.cloud.exemplo.com).
 services:
   pma:
     image: phpmyadmin/phpmyadmin:${PMA_IMAGE_TAG:-latest}
     environment:
       PMA_ARBITRARY: 1
+      PMA_HOSTS: ${PMA_HOSTS:-mariadb}
       PMA_ABSOLUTE_URI: https://${PMA_FQDN}/
       UPLOAD_LIMIT: ${PMA_UPLOAD_LIMIT:-256M}
     networks:
       - web
+      - data
     deploy:
       mode: replicated
       replicas: 1
@@ -29,3 +31,6 @@ networks:
   web:
     external: true
     name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}

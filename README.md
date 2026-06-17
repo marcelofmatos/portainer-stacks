@@ -28,7 +28,7 @@ fica no repositório.
 |---|---|---|
 | [`drive`](drive/) | ownCloud (arquivos) + MySQL + Redis | [README](drive/README.md) |
 | [`minio`](minio/) | Object storage S3 + console | [README](minio/README.md) |
-| [`tools`](tools/) | phpMyAdmin | [README](tools/README.md) |
+| [`phpmyadmin`](phpmyadmin/) | phpMyAdmin (admin MySQL/MariaDB) | [README](phpmyadmin/README.md) |
 | [`pgadmin4`](pgadmin4/) | Admin de PostgreSQL | [README](pgadmin4/README.md) |
 | [`stirlingpdf`](stirlingpdf/) | Ferramentas de PDF | [README](stirlingpdf/README.md) |
 | [`excalidraw`](excalidraw/) | Quadro branco / desenho | [README](excalidraw/README.md) |
