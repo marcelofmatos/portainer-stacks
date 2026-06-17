@@ -10,6 +10,7 @@
 # Crie-o antes do deploy (instruções no README).
 #
 # Serviço stateless (worker, sem volume).
+# Porte: Médio (512 MB → 2 GB RAM)
 # Hardware (1 réplica): mínimo 1 vCPU · 1 GB RAM · 5 GB disco · ideal 2 vCPU · 2 GB RAM · 10 GB disco
 configs:
   litellm_config:

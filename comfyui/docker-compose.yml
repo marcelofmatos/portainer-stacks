@@ -9,6 +9,7 @@
 #
 # Obrigatórias: COMFYUI_FQDN, COMFYUI_AUTH_BASIC (ComfyUI não tem login — protegido por basicauth).
 # NOTA (volume em Swarm): o volume é local ao nó — fixe o serviço no nó com GPU via WORKER_HOSTNAME.
+# Porte: GPU/ML (8 GB+ RAM, GPU recomendada)
 # Hardware (1 réplica): mínimo 4 vCPU · 8 GB RAM · 20 GB disco + GPU (VRAM ≥ 6 GB) · ideal 8 vCPU · 16 GB RAM · 50 GB disco + GPU (VRAM ≥ 8 GB)
 services:
   comfyui:

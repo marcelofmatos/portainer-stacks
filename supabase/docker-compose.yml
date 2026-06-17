@@ -18,6 +18,7 @@
 #
 # NOTA (volumes em Swarm): volumes são locais ao nó. Em cluster com mais de um worker, fixe os
 #   serviços com volume (db) definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+# Porte: Pesado (2 GB → 4–8 GB RAM)
 # Hardware (1 réplica): mínimo 2 vCPU · 4 GB RAM · 40 GB disco · ideal 4 vCPU · 8 GB RAM · 80 GB disco
 
 x-deploy-worker: &deploy-worker

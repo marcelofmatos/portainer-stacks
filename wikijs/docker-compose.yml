@@ -19,6 +19,7 @@
 #
 # VOLUME EM SWARM: volumes são locais ao nó. Em cluster com +1 worker, fixe o serviço `db` no nó
 # definindo WORKER_HOSTNAME e descomentando o constraint `node.hostname` abaixo.
+# Porte: Médio (512 MB → 2 GB RAM)
 # Hardware (1 réplica): mínimo 1 vCPU · 1 GB RAM · 10 GB disco · ideal 2 vCPU · 2 GB RAM · 20 GB disco
 services:
   wikijs:

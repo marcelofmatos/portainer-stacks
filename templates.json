@@ -9,7 +9,8 @@
       "note": "Rode no manager. A rede overlay publica precisa existir: `docker network create --driver overlay --attachable web`. HTTP_AUTH_BASIC no formato usuario:hash (use `htpasswd -nbB`).",
       "categories": [
         "proxy",
-        "networking"
+        "networking",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/traefik.png",
@@ -53,7 +54,8 @@
       "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. Para LDAP, requer a rede `ldap` e a stack account.",
       "categories": [
         "storage",
-        "productivity"
+        "productivity",
+        "Porte: Pesado"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/owncloud.png",
@@ -122,7 +124,8 @@
       "note": "PRE-REQUISITO: crie antes os Docker configs do self-service-password (`docker config create account_ssp_config_v1 ...` e `account_ssp_css_custom_v1 ...`). Veja o README da stack.",
       "categories": [
         "authentication",
-        "ldap"
+        "ldap",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/ldap-account-manager.png",
@@ -187,7 +190,8 @@
       "note": "Gere segredos fortes para LLDAP_JWT_SECRET e LLDAP_KEY_SEED (openssl rand -hex 32). A rede overlay `ldap` precisa existir.",
       "categories": [
         "authentication",
-        "ldap"
+        "ldap",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/lldap.png",
@@ -247,7 +251,8 @@
       "note": "Requer a rede `web` (stack balancer) e a rede `data` (docker network create --driver overlay --attachable data).",
       "categories": [
         "database",
-        "tools"
+        "tools",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/phpmyadmin.png",
@@ -291,7 +296,8 @@
       "note": "Apos o deploy, aplique nas outras stacks o middleware: traefik.http.routers.<r>.middlewares=error-pages@swarm",
       "categories": [
         "proxy",
-        "tools"
+        "tools",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://api.iconify.design/tabler/error-404.svg?color=%23ef4444&height=128",
@@ -326,7 +332,8 @@
       "note": "Requer a rede `web`. Configure os realms apos o primeiro acesso com o admin bootstrap.",
       "categories": [
         "authentication",
-        "identity"
+        "identity",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/keycloak.png",
@@ -370,7 +377,8 @@
       "note": "Requer a rede `web`. Informe o host do banco ao adicionar um server no pgAdmin.",
       "categories": [
         "database",
-        "tools"
+        "tools",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/pgadmin.png",
@@ -408,7 +416,8 @@
       "description": "Stirling-PDF: suite de ferramentas de PDF (merge, split, OCR, conversao...) self-hosted, via Traefik v3 com TLS.",
       "categories": [
         "documents",
-        "tools"
+        "tools",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/stirling-pdf.png",
@@ -446,7 +455,8 @@
       "description": "Monitoramento nativo de Docker Swarm: Prometheus, Grafana, Alertmanager, node-exporter e cAdvisor. Expoe o Grafana via Traefik v3.",
       "note": "node-exporter e cAdvisor rodam em modo global. Prometheus/Grafana podem exigir configuracao adicional (datasources/dashboards) - veja o README.",
       "categories": [
-        "monitoring"
+        "monitoring",
+        "Porte: Pesado"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/grafana.png",
@@ -489,7 +499,8 @@
       "description": "n8n (automacao de workflows low-code) com PostgreSQL, publicado via Traefik v3 com TLS.",
       "note": "Requer a rede `web`. Gere a N8N_ENCRYPTION_KEY com `openssl rand -hex 32` (nao altere depois).",
       "categories": [
-        "automation"
+        "automation",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/n8n.png",
@@ -532,7 +543,8 @@
       "description": "Ollama: executa modelos de linguagem (LLMs) localmente. Exposicao via Traefik opcional.",
       "note": "ATENCAO: o Ollama nao tem autenticacao nativa. Proteja com basicauth no Traefik ou nao exponha publicamente. GPU NVIDIA opcional (ver README).",
       "categories": [
-        "ai"
+        "ai",
+        "Porte: GPU/ML"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/ollama.png",
@@ -566,7 +578,8 @@
       "note": "PRE-REQUISITO: crie o Docker config `authelia_config_v1` a partir de config/configuration.yml. Aplique nas stacks o middleware authelia@swarm. Veja o README.",
       "categories": [
         "authentication",
-        "security"
+        "security",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/authelia.png",
@@ -614,7 +627,8 @@
       "description": "Rocket.Chat (mensageria de equipe) com MongoDB (replica set), publicado via Traefik v3 com TLS.",
       "note": "Na primeira vez e preciso inicializar o replica set do MongoDB (`rs.initiate()`) - veja o README.",
       "categories": [
-        "communication"
+        "communication",
+        "Porte: Pesado"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/rocket-chat.png",
@@ -647,7 +661,8 @@
       "description": "MinIO: armazenamento de objetos compativel com S3, com console web. Dois dominios (API e console) via Traefik v3.",
       "note": "Requer a rede `web` e DNS para os dois FQDNs (API S3 e console).",
       "categories": [
-        "storage"
+        "storage",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/minio.png",
@@ -690,7 +705,8 @@
       "description": "LiteLLM Proxy: gateway OpenAI-compativel para varios provedores de LLM, publicado via Traefik v3 com TLS.",
       "note": "PRE-REQUISITO: crie o Docker config `litellm_config_v1` a partir de config/config.yaml (lista de modelos). Veja o README.",
       "categories": [
-        "ai"
+        "ai",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/selfhst/icons/png/litellm.png",
@@ -739,7 +755,8 @@
       "note": "ATENCAO: sem token a API fica aberta. Defina CHROMA_AUTH_TOKEN (e o provider) ou proteja via Traefik.",
       "categories": [
         "ai",
-        "database"
+        "database",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/chroma.png",
@@ -777,7 +794,8 @@
       "description": "OpenSpeedTest: teste de velocidade de rede self-hosted (HTML5), publicado via Traefik v3 com TLS.",
       "categories": [
         "network",
-        "tools"
+        "tools",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/openspeedtest.png",
@@ -805,7 +823,8 @@
       "description": "Joomla (CMS) com MySQL, publicado via Traefik v3 com TLS.",
       "note": "Requer a rede `web` e DNS do FQDN apontando para o host.",
       "categories": [
-        "cms"
+        "cms",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/joomla.png",
@@ -844,7 +863,8 @@
       "note": "Requer a rede `web` e DNS do FQDN. O primeiro boot pode demorar (instalacao do Moodle).",
       "categories": [
         "education",
-        "cms"
+        "cms",
+        "Porte: Pesado"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/moodle.png",
@@ -897,7 +917,8 @@
       "description": "Excalidraw: quadro branco / desenho colaborativo (imagem oficial), publicado via Traefik v3 com TLS.",
       "categories": [
         "productivity",
-        "tools"
+        "tools",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/excalidraw.png",
@@ -925,7 +946,8 @@
       "description": "Banco de dados MariaDB compartilhado (sem proxy). Entra na rede overlay `data` para outras stacks conectarem por `mariadb:3306`.",
       "note": "PRE-REQUISITO: crie a rede compartilhada: `docker network create --driver overlay --attachable data`. Para acesso externo, descomente o bloco ports no compose.",
       "categories": [
-        "database"
+        "database",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/mariadb.png",
@@ -969,7 +991,8 @@
       "note": "PRE-REQUISITO: crie a rede `data` (docker network create --driver overlay --attachable data). A extensao e por banco: rode CREATE EXTENSION IF NOT EXISTS vector; em cada banco que usar vetores (ver README).",
       "categories": [
         "database",
-        "ai"
+        "ai",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/postgresql.png",
@@ -1013,7 +1036,8 @@
       "note": "PRE-REQUISITO: crie a rede `data` (docker network create --driver overlay --attachable data). Defina REDIS_PASSWORD para proteger o cache.",
       "categories": [
         "database",
-        "cache"
+        "cache",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/redis.png",
@@ -1057,7 +1081,8 @@
       "note": "PRE-REQUISITO: redes `web` e `data`; stacks postgres-pgvector e redis na `data`; e o banco `evolution` criado no PostgreSQL (CREATE DATABASE evolution).",
       "categories": [
         "communication",
-        "api"
+        "api",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/whatsapp.png",
@@ -1116,7 +1141,8 @@
       "description": "WordPress via Traefik v3 com TLS, com MariaDB embarcado (banco proprio da stack, na rede `data` so para ferramentas de admin).",
       "note": "PRE-REQUISITO: redes `web` e `data`. O banco sobe junto (nao precisa da stack mariadb). Veja o README.",
       "categories": [
-        "cms"
+        "cms",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/wordpress.png",
@@ -1175,7 +1201,8 @@
       "note": "PRE-REQUISITO: redes `web` e `data`. O banco sobe junto (nao precisa da stack postgres-pgvector). Veja o README.",
       "categories": [
         "documentation",
-        "wiki"
+        "wiki",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/wikijs.png",
@@ -1230,7 +1257,8 @@
       "categories": [
         "database",
         "ai",
-        "backend"
+        "backend",
+        "Porte: Pesado"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/supabase.png",
@@ -1309,7 +1337,8 @@
       "note": "Sink efemero (sem persistencia). Os apps que enviam e-mail precisam estar na rede `web`. SMTP sem TLS e sem autenticacao.",
       "categories": [
         "mail",
-        "development"
+        "development",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://api.iconify.design/tabler/mailbox.svg?color=%230ea5e9&height=128",
@@ -1338,7 +1367,8 @@
       "note": "Requer a rede `web`. Primeiro boot demora (instala o banco). Grafana sob /grafana; atalho /atendente.",
       "categories": [
         "helpdesk",
-        "itsm"
+        "itsm",
+        "Porte: Pesado"
       ],
       "platform": "linux",
       "logo": "https://avatars.githubusercontent.com/LigeroSmart",
@@ -1387,7 +1417,8 @@
       "note": "Roda no MANAGER (acessa /var/run/docker.sock). Requer a rede `web` (stack balancer). O endpoint forca re-deploy de qualquer servico: UPDATE_AUTH_BASIC obrigatorio, formato usuario:hash (htpasswd -nbB).",
       "categories": [
         "ci-cd",
-        "tools"
+        "tools",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/docker.png",
@@ -1426,7 +1457,8 @@
       "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `mariadb` com um banco/usuario para o EspoCRM. DNS do FQDN apontando para o host.",
       "categories": [
         "crm",
-        "productivity"
+        "productivity",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/espocrm.png",
@@ -1481,7 +1513,8 @@
       "note": "Requer a rede `web` (stack balancer), a rede `data`, a stack `postgres-pgvector` com um banco e a stack `redis`. DNS do FQDN apontando para o host. Recomenda-se fixar TWENTY_IMAGE_TAG em producao.",
       "categories": [
         "crm",
-        "productivity"
+        "productivity",
+        "Porte: Pesado"
       ],
       "platform": "linux",
       "logo": "https://api.iconify.design/tabler/address-book.svg?color=%23a855f7&height=128",
@@ -1542,7 +1575,8 @@
       "categories": [
         "crm",
         "support",
-        "communication"
+        "communication",
+        "Porte: Pesado"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/chatwoot.png",
@@ -1602,7 +1636,8 @@
       "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `postgres-pgvector` com um banco. Use DOIS FQDNs (builder e viewer) com DNS apontando para o host. Armazenamento de midia via MinIO e opcional.",
       "categories": [
         "chatbot",
-        "automation"
+        "automation",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://api.iconify.design/tabler/message-chatbot.svg?color=%230ea5e9&height=128",
@@ -1663,7 +1698,8 @@
       "categories": [
         "ai",
         "chatbot",
-        "automation"
+        "automation",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/flowise.png",
@@ -1701,7 +1737,8 @@
       "description": "MongoDB como banco NoSQL interno/compartilhado do cluster. NAO usa Traefik nem a rede web: fica na rede overlay `data` e outras stacks conectam pelo host mongodb:27017. Admin via web pela stack mongo-express.",
       "note": "Banco interno. Requer a rede `data`: docker network create --driver overlay --attachable data. Nao exponha 27017 na internet.",
       "categories": [
-        "database"
+        "database",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/mongodb.png",
@@ -1740,7 +1777,8 @@
       "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `mongodb`. DNS do FQDN apontando para o host.",
       "categories": [
         "database",
-        "tools"
+        "tools",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/mongodb.png",
@@ -1789,7 +1827,8 @@
       "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `redis`. REDISINSIGHT_AUTH_BASIC no formato usuario:hash (htpasswd -nbB). DNS do FQDN apontando para o host.",
       "categories": [
         "database",
-        "tools"
+        "tools",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/redis.png",
@@ -1822,7 +1861,8 @@
       "description": "Zabbix (monitoramento de infraestrutura/servicos): server + web + agent. Publicado via Traefik v3 com TLS e reaproveita o PostgreSQL compartilhado (stack postgres-pgvector) na rede data. O server importa o schema automaticamente num banco vazio.",
       "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `postgres-pgvector` com um banco `zabbix`. Login inicial padrao Admin/zabbix (troque na hora). DNS do FQDN apontando para o host.",
       "categories": [
-        "monitoring"
+        "monitoring",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/zabbix.png",
@@ -1877,7 +1917,8 @@
       "note": "Backend interno. Requer a rede `data` e `vm.max_map_count=262144` no host (ver README). Nao exponha 9200 na internet.",
       "categories": [
         "database",
-        "search"
+        "search",
+        "Porte: Pesado"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/elasticsearch.png",
@@ -1915,7 +1956,8 @@
       "description": "ProtonMail Bridge: expoe a conta ProtonMail como SMTP/IMAP interno para outras stacks enviarem/lerem e-mail. UI web (porta 3000) publicada via Traefik v3 com TLS e protegida pelo WEBUI_AUTH_TOKEN.",
       "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. Apos o deploy, faca login na conta Proton pela UI. Relay interno em protonmail-bridge_smtp:25 (SMTP) e :143 (IMAP).",
       "categories": [
-        "mail"
+        "mail",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/proton-mail.png",
@@ -1949,7 +1991,8 @@
       "note": "Publica a porta SSH_PORT no no (libere no firewall). Prefira SSH_PUBLIC_KEY; senha so com SSH_PASSWORD_ACCESS=true.",
       "categories": [
         "tools",
-        "networking"
+        "networking",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://api.iconify.design/tabler/terminal-2.svg?color=%2310b981&height=128",
@@ -1993,7 +2036,8 @@
       "note": "Anexa as redes data e web. SOCAT_TARGET no formato host:porta (ex.: mariadb:3306). NAO autentica nem cifra: proteja a porta no firewall.",
       "categories": [
         "networking",
-        "tools"
+        "tools",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://api.iconify.design/tabler/transfer.svg?color=%23f59e0b&height=128",
@@ -2027,7 +2071,8 @@
       "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. REDIRECT_TYPE: redirect (302) ou 'redirect permanent' (301).",
       "categories": [
         "networking",
-        "tools"
+        "tools",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://api.iconify.design/tabler/external-link.svg?color=%238b5cf6&height=128",
@@ -2061,7 +2106,8 @@
       "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `postgres-pgvector` com um banco `botpress`. DNS do FQDN apontando para o host.",
       "categories": [
         "chatbot",
-        "automation"
+        "automation",
+        "Porte: Pesado"
       ],
       "platform": "linux",
       "logo": "https://api.iconify.design/tabler/robot.svg?color=%230ea5e9&height=128",
@@ -2106,7 +2152,8 @@
       "note": "Requer a rede `web` (stack balancer) e a rede `data`. Crie o Docker config: docker config create haproxy_config_v1 haproxy/config/haproxy.cfg. HAPROXY_AUTH_BASIC no formato usuario:hash (htpasswd -nbB).",
       "categories": [
         "proxy",
-        "networking"
+        "networking",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/haproxy.png",
@@ -2145,7 +2192,8 @@
       "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. O no precisa alcancar os dispositivos via SNMP (UDP/161).",
       "categories": [
         "monitoring",
-        "networking"
+        "networking",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://api.iconify.design/tabler/topology-star-3.svg?color=%2306b6d4&height=128",
@@ -2183,7 +2231,8 @@
       "description": "Open WebUI: interface de chat (estilo ChatGPT) para Ollama e endpoints OpenAI-compatible (stacks ollama/litellm). Publicado via Traefik v3 com TLS; persiste em volume local.",
       "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. Aponte OPENWEBUI_OLLAMA_URL e/ou OPENWEBUI_OPENAI_BASE_URL. Primeiro usuario cadastrado vira admin.",
       "categories": [
-        "ai"
+        "ai",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/open-webui.png",
@@ -2231,7 +2280,8 @@
       "description": "LibreChat: UI de chat multi-provedor (OpenAI/Anthropic/Ollama/litellm) com busca, RAG e agentes. Publicado via Traefik v3 com TLS. Reaproveita o MongoDB compartilhado (stack mongodb) e sobe um Meilisearch proprio.",
       "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `mongodb`. Gere os segredos CREDS_KEY/CREDS_IV/JWT_*/MEILI_MASTER_KEY (ver README). DNS do FQDN apontando para o host.",
       "categories": [
-        "ai"
+        "ai",
+        "Porte: Pesado"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/librechat.png",
@@ -2294,7 +2344,8 @@
       "description": "Dify: plataforma para criar apps de LLM (chatbots, agentes, workflows, RAG, datasets). Servicos api/worker/web/sandbox publicados via Traefik v3 com TLS. Reaproveita PostgreSQL, Redis e Qdrant na rede data.",
       "note": "Requer a rede `web` (stack balancer), a rede `data` e as stacks `postgres-pgvector`, `redis` e `qdrant`. Crie o banco `dify`. Dify evolui rapido: confira as variaveis com a versao. DNS do FQDN apontando para o host.",
       "categories": [
-        "ai"
+        "ai",
+        "Porte: Pesado"
       ],
       "platform": "linux",
       "logo": "https://api.iconify.design/tabler/apps.svg?color=%236366f1&height=128",
@@ -2353,7 +2404,8 @@
       "note": "Requer a rede `web` (stack balancer) e a rede `data`. Defina QDRANT_API_KEY para nao deixar a API aberta. DNS do FQDN apontando para o host.",
       "categories": [
         "ai",
-        "database"
+        "database",
+        "Porte: Médio"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/qdrant.png",
@@ -2387,7 +2439,8 @@
       "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `postgres-pgvector` com um banco `langfuse`. DNS do FQDN apontando para o host. (Langfuse v3 exige ClickHouse/Redis/S3.)",
       "categories": [
         "ai",
-        "monitoring"
+        "monitoring",
+        "Porte: Pesado"
       ],
       "platform": "linux",
       "logo": "https://api.iconify.design/tabler/telescope.svg?color=%2310b981&height=128",
@@ -2446,7 +2499,8 @@
       "description": "ComfyUI: editor por nos para Stable Diffusion / geracao de imagem. Publicado via Traefik v3 com TLS e protegido por basicauth. REQUER GPU NVIDIA no no.",
       "note": "Requer a rede `web` (stack balancer), GPU NVIDIA (nvidia-container-runtime) e DNS do FQDN apontando para o host. A imagem e o caminho de dados dependem do build (ver README). COMFYUI_AUTH_BASIC: usuario:hash (htpasswd -nbB).",
       "categories": [
-        "ai"
+        "ai",
+        "Porte: GPU/ML"
       ],
       "platform": "linux",
       "logo": "https://api.iconify.design/tabler/photo-ai.svg?color=%23ec4899&height=128",
@@ -2484,7 +2538,8 @@
       "description": "RAGFlow: motor de RAG com parsing avancado de documentos (OCR, tabelas, layout) e busca hibrida. Publicado via Traefik v3 com TLS. Reaproveita MariaDB, Redis, Elasticsearch e MinIO na rede data.",
       "note": "Pesado e sensivel a versao. Requer a rede `web` (stack balancer), a rede `data` e as stacks `mariadb`, `redis`, `elasticsearch` e `minio`. Crie o banco `rag_flow` e o acesso ao MinIO. DNS do FQDN apontando para o host.",
       "categories": [
-        "ai"
+        "ai",
+        "Porte: GPU/ML"
       ],
       "platform": "linux",
       "logo": "https://api.iconify.design/tabler/file-search.svg?color=%23f59e0b&height=128",
@@ -2533,7 +2588,8 @@
       "note": "Requer a rede `web` (stack balancer) e a rede `data`. Para uso como API, habilite o formato JSON no settings.yml (ver README). DNS do FQDN apontando para o host.",
       "categories": [
         "ai",
-        "search"
+        "search",
+        "Porte: Leve"
       ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/searxng.png",
@@ -2571,7 +2627,8 @@
       "description": "AnythingLLM: app completo de RAG/chat com documentos e agentes (workspaces, ingestao de arquivos, multiplos provedores de LLM e vector stores). Publicado via Traefik v3 com TLS; LLM/vetor configurados na UI.",
       "note": "Requer a rede `web` (stack balancer) e a rede `data` (para alcancar qdrant/chromadb). Primeiro acesso faz o onboarding do admin. DNS do FQDN apontando para o host.",
       "categories": [
-        "ai"
+        "ai",
+        "Porte: Pesado"
       ],
       "platform": "linux",
       "logo": "https://api.iconify.design/tabler/brain.svg?color=%238b5cf6&height=128",

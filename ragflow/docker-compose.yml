@@ -7,6 +7,7 @@
 # RAGFlow é pesado e sensível à versão — confira as variáveis/host de cada backend no README.
 # NOTA (volume em Swarm): o cache de modelos é local ao nó — em cluster multi-worker fixe o serviço
 # definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+# Porte: GPU/ML (8 GB+ RAM, GPU recomendada)
 # Hardware (1 réplica): mínimo 4 vCPU · 8 GB RAM · 50 GB disco · ideal 8 vCPU · 16 GB RAM · 100 GB disco
 services:
   ragflow:

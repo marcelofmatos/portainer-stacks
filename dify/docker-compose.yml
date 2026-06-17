@@ -5,6 +5,7 @@
 #
 # Obrigatórias: DIFY_FQDN, DIFY_SECRET_KEY, DIFY_DB_PASSWORD, DIFY_SANDBOX_API_KEY.
 # Dify evolui rápido: confira as variáveis com a versão fixada em DIFY_IMAGE_TAG.
+# Porte: Pesado (2 GB → 4–8 GB RAM)
 # Hardware (1 réplica): mínimo 2 vCPU · 4 GB RAM · 20 GB disco · ideal 4 vCPU · 8 GB RAM · 40 GB disco
 x-shared-env: &shared-env
   LOG_LEVEL: INFO

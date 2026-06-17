@@ -6,6 +6,7 @@
 # Obrigatórias: REDISINSIGHT_FQDN, REDISINSIGHT_AUTH_BASIC.
 # NOTA (volume em Swarm): o volume é local ao nó — em cluster multi-worker fixe o serviço
 # definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+# Porte: Leve (64 MB → 512 MB RAM)
 # Hardware (1 réplica): mínimo 0.5 vCPU · 256 MB RAM · 2 GB disco · ideal 1 vCPU · 512 MB RAM · 5 GB disco
 services:
   redisinsight:

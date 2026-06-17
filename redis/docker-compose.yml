@@ -4,6 +4,7 @@
 #
 # NOTA (volume em Swarm): a persistência é local ao nó. Em cluster multi-worker, fixe o serviço
 # definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+# Porte: Leve (64 MB → 512 MB RAM)
 # Hardware (1 réplica): mínimo 0.5 vCPU · 256 MB RAM · 2 GB disco · ideal 1 vCPU · 1 GB RAM · 10 GB disco
 services:
   redis:

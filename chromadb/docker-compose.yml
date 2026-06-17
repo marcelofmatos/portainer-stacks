@@ -11,6 +11,7 @@
 # NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster com mais de um worker,
 # fixe o serviço definindo WORKER_HOSTNAME e descomentando o constraint de hostname,
 # senão o dado pode "sumir" ao reagendar o container em outro nó.
+# Porte: Médio (512 MB → 2 GB RAM)
 # Hardware (1 réplica): mínimo 1 vCPU · 512 MB RAM · 10 GB disco · ideal 2 vCPU · 2 GB RAM · 20 GB disco
 services:
   chroma:

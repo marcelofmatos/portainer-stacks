@@ -10,6 +10,7 @@
 #
 # IMPORTANTE: na PRIMEIRA execução é preciso inicializar o replica set (rs.initiate()).
 # Veja a seção "Uso" do README.
+# Porte: Pesado (2 GB → 4–8 GB RAM)
 # Hardware (1 réplica): mínimo 2 vCPU · 2 GB RAM · 20 GB disco · ideal 2 vCPU · 4 GB RAM · 50 GB disco
 services:
   rocketchat:

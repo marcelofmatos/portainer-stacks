@@ -20,6 +20,7 @@
 #
 # VOLUME EM SWARM: volumes são locais ao nó. Em cluster com +1 worker, fixe o serviço `db` no nó
 # definindo WORKER_HOSTNAME e descomentando o constraint `node.hostname` abaixo.
+# Porte: Pesado (2 GB → 4–8 GB RAM)
 # Hardware (1 réplica): mínimo 2 vCPU · 2 GB RAM · 20 GB disco · ideal 4 vCPU · 4 GB RAM · 40 GB disco
 services:
   langfuse:

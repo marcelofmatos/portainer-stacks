@@ -4,6 +4,7 @@
 # Anexa às redes `data` e `web` para conseguir alcançar serviços internos pelo nome.
 #
 # Obrigatórias: SOCAT_LISTEN_PORT, SOCAT_TARGET (ex.: SOCAT_TARGET=mariadb:3306).
+# Porte: Leve (64 MB → 512 MB RAM)
 # Hardware (1 réplica): mínimo 0.25 vCPU · 32 MB RAM · 1 GB disco · ideal 0.5 vCPU · 64 MB RAM · 2 GB disco
 services:
   socat:

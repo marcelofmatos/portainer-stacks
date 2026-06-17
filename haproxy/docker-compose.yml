@@ -8,6 +8,7 @@
 # PRÉ-REQUISITO: o serviço usa 1 Docker config EXTERNO (nome configurável em HAPROXY_CONFIG_NAME):
 #   <HAPROXY_CONFIG_NAME> -> /usr/local/etc/haproxy/haproxy.cfg  (ver config/haproxy.cfg)
 # Crie-o antes do deploy (instruções no README). Config é imutável: para mudar, crie _v2.
+# Porte: Leve (64 MB → 512 MB RAM)
 # Hardware (1 réplica): mínimo 0.5 vCPU · 128 MB RAM · 2 GB disco · ideal 1 vCPU · 256 MB RAM · 5 GB disco
 configs:
   haproxy_config:

@@ -1,6 +1,7 @@
 # Stack "balancer" — Traefik v3 (reverse proxy + TLS Let's Encrypt) para Docker Swarm
 # Roda no manager. Cria/usa a rede externa pública `web` por onde as demais stacks publicam.
 # Variáveis: DOMAIN, ACME_EMAIL, HTTP_AUTH_BASIC (basicauth do dashboard, formato user:hash bcrypt).
+# Porte: Leve (64 MB → 512 MB RAM)
 # Hardware (1 réplica): mínimo 1 vCPU · 256 MB RAM · 5 GB disco · ideal 1 vCPU · 512 MB RAM · 10 GB disco
 services:
 

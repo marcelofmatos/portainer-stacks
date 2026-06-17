@@ -5,6 +5,7 @@
 # Obrigatórias: SSH_USER. Recomendado: SSH_PUBLIC_KEY (ou habilite senha com SSH_PASSWORD_ACCESS=true).
 # NOTA (volume em Swarm): o volume /config é local ao nó — em cluster multi-worker fixe o serviço
 # definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+# Porte: Leve (64 MB → 512 MB RAM)
 # Hardware (1 réplica): mínimo 0.5 vCPU · 128 MB RAM · 5 GB disco · ideal 1 vCPU · 256 MB RAM · 10 GB disco
 services:
   ssh:

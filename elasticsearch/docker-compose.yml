@@ -8,6 +8,7 @@
 # REQUISITO DO HOST: o kernel precisa de `vm.max_map_count=262144` (ver README).
 # NOTA (volumes em Swarm): o volume é local ao nó — em cluster multi-worker fixe o serviço
 # definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+# Porte: Pesado (2 GB → 4–8 GB RAM)
 # Hardware (1 réplica): mínimo 2 vCPU · 2 GB RAM · 20 GB disco · ideal 2 vCPU · 4 GB RAM · 50 GB disco
 services:
   elasticsearch:

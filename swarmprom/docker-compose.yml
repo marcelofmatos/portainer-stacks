@@ -16,6 +16,7 @@
 # NOTA (config adicional): Prometheus e Grafana sobem com config minima inline (flags/env).
 # Para scrape de Swarm, regras de alerta, datasources e dashboards prontos, monte arquivos
 # de configuracao adicionais — veja o README e o projeto stefanprodan/swarmprom como referencia.
+# Porte: Pesado (2 GB → 4–8 GB RAM)
 # Hardware (1 réplica): mínimo 2 vCPU · 2 GB RAM · 20 GB disco · ideal 2 vCPU · 4 GB RAM · 50 GB disco
 services:
   prometheus:
