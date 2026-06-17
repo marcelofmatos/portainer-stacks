@@ -71,6 +71,8 @@ para o novo nó e subir a stack lá — sem mexer em serviços compartilhados de
 | Sintoma | Causa | Ação |
 |---|---|---|
 | Erro de conexão com o banco | `db` ainda subindo / senha divergente | aguardar o `db`; conferir `TWENTY_DB_PASSWORD` igual no app e no banco |
+| `duplicate key ... pg_namespace_nspname_index` na 1ª subida | `server` e `worker` migrando o banco vazio ao mesmo tempo (Swarm ignora `depends_on`) | já tratado: o `worker` tem `DISABLE_DB_MIGRATIONS=true` (só o `server` migra). Se o banco ficou meio-migrado, **zere o volume `db-data`** e suba de novo |
+| `could not translate host name "postgres"` | `TWENTY_DB_HOST` apontando p/ host inexistente | usar `TWENTY_DB_HOST=db` (serviço desta stack) ou remover a variável (default já é `db`) |
 | Login/sessão falha após restart | `TWENTY_APP_SECRET` mudou ou vazio | definir um `APP_SECRET` fixo e persistente |
 | Jobs/sincronizações travadas | `worker` parado ou sem Redis | garantir o `worker` ativo e o `redis` acessível |
 | 404/sem TLS | fora da `web` / DNS não aponta | conferir rede/labels e DNS |

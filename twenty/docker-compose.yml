@@ -62,6 +62,11 @@ services:
       - REDIS_URL=${TWENTY_REDIS_URL:-redis://redis:6379}
       - APP_SECRET=${TWENTY_APP_SECRET}
       - STORAGE_TYPE=local
+      # As migrações rodam SÓ no `server`. Em Swarm o `depends_on` é ignorado, então sem isto o
+      # worker sobe junto e disputa o CREATE SCHEMA/EXTENSION no banco vazio (erro "duplicate key
+      # ... pg_namespace_nspname_index"). Idem para o registro de cron (só o server registra).
+      - DISABLE_DB_MIGRATIONS=true
+      - DISABLE_CRON_JOBS_REGISTRATION=true
     volumes:
       - twenty-data:/app/packages/twenty-server/.local-storage
     deploy:
