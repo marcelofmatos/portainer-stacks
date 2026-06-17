@@ -5,8 +5,8 @@ armazenar e consultar **embeddings** (vetores) em aplicações de **IA / RAG**: 
 memória de agentes, recomendação, deduplicação, etc.
 
 Usa a imagem oficial `pgvector/pgvector`, que já vem com a extensão `vector` compilada e instalada
-— basta executar `CREATE EXTENSION vector;` no banco (feito automaticamente no primeiro boot, veja
-abaixo).
+— basta executar `CREATE EXTENSION IF NOT EXISTS vector;` **em cada banco** que for usar vetores
+(a extensão é por banco; veja a seção de uso).
 
 Esta é uma stack de **banco interno**: NÃO é publicada via Traefik. O serviço entra na rede overlay
 externa compartilhada `data`. Outras stacks anexam essa mesma rede e conectam pelo host `postgres`.
@@ -21,7 +21,6 @@ externa compartilhada `data`. Outras stacks anexam essa mesma rede e conectam pe
 ```mermaid
 flowchart LR
     apps[Stacks consumidoras] -->|5432 · data| postgres[(postgres · pgvector)]
-    postgres --> cfg[/Docker config · init/]
     postgres --> vol[(volume)]
 ```
 
@@ -32,7 +31,6 @@ flowchart LR
 | `POSTGRES_DB` | não | `vectordb` | nome do banco criado no primeiro boot |
 | `POSTGRES_USER` | não | `postgres` | usuário dono do banco |
 | `PGVECTOR_IMAGE_TAG` | não | `pg16` | tag da imagem (ex.: `pg16`, `pg15`, `pg17`) |
-| `PGVECTOR_INIT_CONFIG` | não | `pgvector_init_v1` | nome do Docker config com o script de init |
 | `POSTGRES_PORT` | não | `5432` | porta publicada no nó (só se descomentar `ports`) |
 | `DATA_NET` | não | `data` | rede overlay externa compartilhada dos bancos |
 | `WORKER_HOSTNAME` | não | — | hostname do worker para fixar o volume (cluster multi-worker) |
@@ -40,7 +38,6 @@ flowchart LR
 ## Pré-requisitos
 - Docker **Swarm** ativo.
 - A rede overlay externa `data` precisa existir **antes** de subir a stack (veja abaixo).
-- O Docker config com o script de init precisa existir **antes** do primeiro deploy (veja abaixo).
 
 ### Criar a rede `data`
 A rede é compartilhada entre todas as stacks que precisam falar com o banco. Crie uma única vez:
@@ -49,26 +46,15 @@ docker network create --driver overlay --attachable data
 ```
 Se você usar outro nome, ajuste a variável `DATA_NET`.
 
-### Criar o Docker config de init (extensão pgvector)
-O arquivo `config/01-pgvector.sql` (nesta pasta) contém `CREATE EXTENSION IF NOT EXISTS vector;`.
-Ele é montado em `/docker-entrypoint-initdb.d/01-pgvector.sql` e executado **apenas no primeiro
-boot, quando o volume está vazio**. Crie o Docker config a partir do arquivo:
+### Habilitar a extensão pgvector (por banco)
+A imagem já traz a extensão instalada, mas o `CREATE EXTENSION` é **por banco** — rode-o uma vez em
+cada banco que for usar vetores (o banco padrão `vectordb` e/ou os bancos das stacks consumidoras,
+como `dify`, `chatwoot`, etc.):
 ```bash
-docker config create pgvector_init_v1 config/01-pgvector.sql
+docker exec -it <container_postgres> psql -U postgres -d <banco> -c "CREATE EXTENSION IF NOT EXISTS vector;"
 ```
-O nome (`pgvector_init_v1`) deve bater com `PGVECTOR_INIT_CONFIG`. Como configs no Swarm são
-imutáveis, para alterar o script crie um novo config (`pgvector_init_v2`) e atualize a variável.
-
-> Pelo Portainer: **Configs → Add config**, nome `pgvector_init_v1`, e cole o conteúdo de
-> `config/01-pgvector.sql`.
-
-### Alternativa: criar a extensão manualmente
-Se preferir não usar o Docker config (ou o banco já existia antes), rode o `CREATE EXTENSION` à mão:
-```bash
-docker exec -it <container_postgres> psql -U postgres -d vectordb -c "CREATE EXTENSION IF NOT EXISTS vector;"
-```
-Lembre que o init automático só roda em banco **novo/vazio**; em banco já existente, use o comando
-manual acima.
+O comando é idempotente (não falha se a extensão já existir). Muitas apps que usam pgvector já rodam
+esse `CREATE EXTENSION` sozinhas na inicialização — confira o README da stack consumidora.
 
 ## Uso
 
@@ -91,7 +77,7 @@ postgresql://postgres:SENHA@postgres:5432/vectordb
 
 ### Exemplo: tabela com coluna vetorial
 ```sql
--- (a extensão já foi criada no init; este comando é idempotente)
+-- Habilite a extensão neste banco (idempotente):
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- 1536 = dimensão de embeddings (ex.: text-embedding-3-small / ada-002).
@@ -123,9 +109,7 @@ Atenção: isso expõe o banco na interface do host — proteja por firewall e u
 | Sintoma | Causa | Ação |
 |---|---|---|
 | `network data not found` no deploy | rede externa não existe | criar com `docker network create --driver overlay --attachable data` |
-| `config pgvector_init_v1 not found` | Docker config ausente | criar o config a partir de `config/01-pgvector.sql` |
-| `ERROR: type "vector" does not exist` | extensão não criada (banco preexistente) | rodar `CREATE EXTENSION vector;` manualmente |
-| extensão não criada apesar do config | banco não estava vazio no boot | o init só roda em volume novo; criar a extensão manualmente |
+| `ERROR: type "vector" does not exist` | extensão não criada naquele banco | rodar `CREATE EXTENSION IF NOT EXISTS vector;` no banco em questão |
 | app não conecta (`could not translate host name "postgres"`) | app não está na rede `data` | anexar a rede externa `data` ao serviço da app |
 | dados sumiram após reagendar serviço | volume é local ao nó (Swarm) | fixar `WORKER_HOSTNAME` e descomentar o constraint de hostname |
 | `password authentication failed` | `POSTGRES_PASSWORD` divergente | conferir a senha; após o primeiro boot ela fica gravada no volume |

@@ -966,7 +966,7 @@
       "title": "postgres-pgvector — PostgreSQL + pgvector",
       "name": "postgres-pgvector",
       "description": "PostgreSQL com a extensao pgvector nativa (imagem oficial pgvector/pgvector), para IA/RAG (embeddings). Entra na rede overlay `data` para outras stacks conectarem por `postgres:5432`.",
-      "note": "PRE-REQUISITO: crie a rede `data` (docker network create --driver overlay --attachable data) e o Docker config de init `pgvector_init_v1` (CREATE EXTENSION vector). Veja o README.",
+      "note": "PRE-REQUISITO: crie a rede `data` (docker network create --driver overlay --attachable data). A extensao e por banco: rode CREATE EXTENSION IF NOT EXISTS vector; em cada banco que usar vetores (ver README).",
       "categories": [
         "database",
         "ai"
@@ -997,11 +997,6 @@
           "name": "PGVECTOR_IMAGE_TAG",
           "label": "Tag pgvector",
           "default": "pg16"
-        },
-        {
-          "name": "PGVECTOR_INIT_CONFIG",
-          "label": "Docker config de init",
-          "default": "pgvector_init_v1"
         },
         {
           "name": "DATA_NET",

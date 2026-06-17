@@ -1,6 +1,7 @@
 # Stack "postgres-pgvector" — PostgreSQL + pgvector (Docker Swarm)
 # Banco de dados INTERNO para IA/RAG (embeddings). NÃO usa Traefik nem a rede `web`.
-# Imagem oficial pgvector/pgvector — já traz a extensão pgvector instalada.
+# Imagem oficial pgvector/pgvector — já traz a extensão pgvector instalada (basta rodar
+# `CREATE EXTENSION IF NOT EXISTS vector;` em CADA banco que usar vetores — ver README).
 #
 # Rede: entra na overlay externa COMPARTILHADA `data`. Outras stacks anexam essa rede
 # e conectam pelo nome do serviço `postgres` (host `postgres`, porta 5432).
@@ -28,11 +29,6 @@ services:
     #     mode: host
     volumes:
       - pg-data:/var/lib/postgresql/data
-    # Script de init rodado SÓ no primeiro boot (banco vazio): cria a extensão vector.
-    # Requer o Docker config externo (ver README para criá-lo).
-    configs:
-      - source: pgvector_init
-        target: /docker-entrypoint-initdb.d/01-pgvector.sql
     deploy:
       mode: replicated
       replicas: 1
@@ -40,11 +36,6 @@ services:
         constraints:
           - node.role == worker
           # - node.hostname == ${WORKER_HOSTNAME:-}
-
-configs:
-  pgvector_init:
-    external: true
-    name: ${PGVECTOR_INIT_CONFIG:-pgvector_init_v1}
 
 networks:
   data:
