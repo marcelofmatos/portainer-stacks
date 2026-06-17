@@ -1478,6 +1478,11 @@
           "description": "Senha do usuario do banco (segredo)"
         },
         {
+          "name": "ESPOCRM_DB_ROOT_PASSWORD",
+          "label": "Senha root do MariaDB",
+          "description": "Obrigatoria: senha do usuario root do banco embarcado (segredo)"
+        },
+        {
           "name": "ESPOCRM_ADMIN_PASSWORD",
           "label": "Senha do admin",
           "description": "Senha do admin criado no primeiro deploy (segredo)"
