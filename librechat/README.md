@@ -34,7 +34,7 @@ flowchart LR
 | `LIBRECHAT_MONGO_USER` | não | `root` | usuário do MongoDB |
 | `LIBRECHAT_MONGO_HOST` | não | `mongodb` | host do MongoDB na rede `data` |
 | `LIBRECHAT_MONGO_DB` | não | `LibreChat` | banco usado pelo LibreChat |
-| `LIBRECHAT_ALLOW_REGISTRATION` | não | `true` | permite cadastro de novos usuários |
+| `LIBRECHAT_ALLOW_REGISTRATION` | não | `false` | cadastro de novos usuários (fechado por padrão; abra só para criar a 1ª conta) |
 | `LIBRECHAT_OPENAI_API_KEY` | não | — | chave OpenAI (ou do litellm) |
 | `LIBRECHAT_OPENAI_REVERSE_PROXY` | não | — | base OpenAI-compatible (ex.: `https://litellm.exemplo.com/v1`) |
 | `LIBRECHAT_IMAGE_TAG` | não | `latest` | tag da imagem librechat |
@@ -49,7 +49,9 @@ flowchart LR
 
 ## Uso
 1. Defina os segredos e faça o deploy. O LibreChat cria as coleções no MongoDB no primeiro start.
-2. Acesse `https://LIBRECHAT_FQDN` e registre o primeiro usuário.
+2. **Criar a 1ª conta:** o registro vem **fechado** (`LIBRECHAT_ALLOW_REGISTRATION=false`). Suba com
+   `LIBRECHAT_ALLOW_REGISTRATION=true`, acesse `https://LIBRECHAT_FQDN`, registre seu usuário e então
+   **volte para `false`** e reimplante (o LibreChat não tem admin pré-criado).
 3. Para usar o `litellm` como backend, defina `LIBRECHAT_OPENAI_REVERSE_PROXY` e a chave; modelos
    adicionais podem ser configurados via `librechat.yaml` (config avançada — ver doc oficial).
 

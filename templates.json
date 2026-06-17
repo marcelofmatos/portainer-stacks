@@ -2216,7 +2216,8 @@
         { "name": "LIBRECHAT_JWT_SECRET", "label": "JWT secret", "description": "openssl rand -hex 32" },
         { "name": "LIBRECHAT_JWT_REFRESH_SECRET", "label": "JWT refresh secret", "description": "openssl rand -hex 32" },
         { "name": "LIBRECHAT_MEILI_MASTER_KEY", "label": "Meili master key", "description": "openssl rand -hex 32" },
-        { "name": "LIBRECHAT_OPENAI_REVERSE_PROXY", "label": "Base OpenAI-compatible", "description": "Ex.: https://litellm.exemplo.com/v1 (opcional)" }
+        { "name": "LIBRECHAT_OPENAI_REVERSE_PROXY", "label": "Base OpenAI-compatible", "description": "Ex.: https://litellm.exemplo.com/v1 (opcional)" },
+        { "name": "LIBRECHAT_ALLOW_REGISTRATION", "label": "Permitir registro", "default": "false" }
       ]
     },
     {
@@ -2263,7 +2264,7 @@
       },
       "env": [
         { "name": "QDRANT_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: qdrant.exemplo.com" },
-        { "name": "QDRANT_API_KEY", "label": "API key", "description": "Exige header api-key (recomendado)" },
+        { "name": "QDRANT_API_KEY", "label": "API key", "description": "Obrigatoria: exige o header api-key (a stack e exposta via Traefik)" },
         { "name": "QDRANT_IMAGE_TAG", "label": "Tag da imagem", "default": "latest" }
       ]
     },
@@ -2290,6 +2291,7 @@
         { "name": "LANGFUSE_SALT", "label": "Salt", "description": "openssl rand -base64 32" },
         { "name": "LANGFUSE_DB_HOST", "label": "Host do PostgreSQL", "default": "postgres" },
         { "name": "LANGFUSE_DB_NAME", "label": "Banco", "default": "langfuse" },
+        { "name": "LANGFUSE_DISABLE_SIGNUP", "label": "Desabilitar signup", "default": "false" },
         { "name": "LANGFUSE_IMAGE_TAG", "label": "Tag da imagem", "default": "2" }
       ]
     },
@@ -2379,7 +2381,7 @@
       },
       "env": [
         { "name": "ANYTHINGLLM_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: rag.exemplo.com" },
-        { "name": "ANYTHINGLLM_JWT_SECRET", "label": "JWT secret", "description": "openssl rand -hex 32 (recomendado)" },
+        { "name": "ANYTHINGLLM_JWT_SECRET", "label": "JWT secret", "description": "Obrigatorio: segredo de sessao (openssl rand -hex 32)" },
         { "name": "ANYTHINGLLM_IMAGE_TAG", "label": "Tag da imagem", "default": "latest" }
       ]
     }

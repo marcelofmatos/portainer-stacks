@@ -3,7 +3,7 @@
 # App completo de RAG/chat com documentos e agentes. LLM e vector store são configurados na UI
 # (ex.: aponte para as stacks `ollama`/`litellm` e `qdrant`/`chromadb`).
 #
-# Obrigatórias: ANYTHINGLLM_FQDN.
+# Obrigatórias: ANYTHINGLLM_FQDN, ANYTHINGLLM_JWT_SECRET.
 # NOTA (volume em Swarm): o volume é local ao nó — em cluster multi-worker fixe o serviço definindo
 # WORKER_HOSTNAME e descomentando o constraint de hostname.
 services:
@@ -15,7 +15,7 @@ services:
       - data
     environment:
       - STORAGE_DIR=/app/server/storage
-      - JWT_SECRET=${ANYTHINGLLM_JWT_SECRET:-}
+      - JWT_SECRET=${ANYTHINGLLM_JWT_SECRET}
       - DISABLE_TELEMETRY=${ANYTHINGLLM_DISABLE_TELEMETRY:-true}
     volumes:
       - anythingllm-data:/app/server/storage

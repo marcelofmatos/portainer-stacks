@@ -19,7 +19,7 @@ flowchart LR
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|
 | `ANYTHINGLLM_FQDN` | sim | — | domínio público (ex.: `rag.exemplo.com`) |
-| `ANYTHINGLLM_JWT_SECRET` | não | — | segredo JWT (recomendado; `openssl rand -hex 32`) |
+| `ANYTHINGLLM_JWT_SECRET` | sim | — | segredo JWT de sessão (`openssl rand -hex 32`) |
 | `ANYTHINGLLM_DISABLE_TELEMETRY` | não | `true` | desativa a telemetria |
 | `ANYTHINGLLM_IMAGE_TAG` | não | `latest` | tag da imagem mintplexlabs/anythingllm |
 | `PROXY_NET` | não | `web` | rede externa do Traefik |

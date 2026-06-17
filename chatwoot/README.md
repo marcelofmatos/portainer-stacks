@@ -16,15 +16,31 @@ de WhatsApp.
 
 ```mermaid
 flowchart LR
-    user((Agente/Cliente)) -->|HTTPS CHATWOOT_FQDN| traefik[Traefik · web]
+    cliente((Cliente)) -.->|WhatsApp| evo[evolution-api]
+    cliente -.->|Instagram DM| meta((Meta · Instagram API))
+    agente((Agente)) -->|HTTPS CHATWOOT_FQDN| traefik[Traefik · web]
     traefik --> rails[rails]
     rails -->|5432 · data| pg[(postgres · pgvector)]
     rails -->|6379 · data| redis[(redis)]
     sidekiq[sidekiq] -->|5432 · data| pg
     sidekiq -->|6379 · data| redis
-    evo[evolution-api] -.->|webhook WhatsApp| rails
-    rails -.->|envio WhatsApp| evo
+    evo <-.->|webhook / envio WhatsApp| rails
+    meta <-.->|webhook / envio Instagram| rails
 ```
+
+## Canais: WhatsApp (Evolution) + Instagram (Meta)
+
+O Chatwoot é o **hub omnichannel**: reúne numa mesma caixa de entrada o **WhatsApp** (via stack
+`evolution-api`) e o **Instagram/Messenger** (via Meta). Importante: a **Evolution API é só WhatsApp** —
+o Instagram **não** passa pela Evolution, e sim pela **Meta Graph / Instagram Messaging API**.
+
+| Canal | Como conecta no Chatwoot |
+|---|---|
+| **WhatsApp** | Na **Evolution**, configure a integração Chatwoot (URL da conta, `account_id` e um token de acesso de agente). As mensagens viram uma inbox de WhatsApp. |
+| **Instagram / Messenger** | No Chatwoot, crie a inbox **Instagram** (ou Facebook) e autorize via **Meta** (app no Meta for Developers + página/conta business vinculada). Requer FQDN público com TLS para os webhooks da Meta. |
+
+> Para **automação** entre os dois canais (bots, roteamento, IA), use `workflows` (n8n) — que tem nó da
+> Evolution + nós da Meta/Instagram — ou os bots `typebot`/`flowise`/`botpress` apontando para a Evolution.
 
 ## Variáveis de ambiente
 | Variável | Obrigatória | Default | Descrição |

@@ -43,7 +43,9 @@ flowchart LR
 ## Uso
 1. Crie o banco `langfuse`, gere os segredos e faça o deploy (migrações aplicadas no start).
 2. Acesse `https://LANGFUSE_FQDN`, crie a conta e um projeto; gere as chaves (public/secret).
-3. Aponte o cliente (ex.: `litellm`, SDK) para `https://LANGFUSE_FQDN` com as chaves do projeto.
+3. **Feche o signup** após criar sua conta: defina `LANGFUSE_DISABLE_SIGNUP=true` e reimplante (a app
+   é exposta publicamente; sem isso qualquer um pode se cadastrar).
+4. Aponte o cliente (ex.: `litellm`, SDK) para `https://LANGFUSE_FQDN` com as chaves do projeto.
 
 ## Troubleshooting
 | Sintoma | Causa | Ação |

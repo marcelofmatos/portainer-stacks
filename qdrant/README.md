@@ -18,7 +18,7 @@ flowchart LR
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|
 | `QDRANT_FQDN` | sim | — | domínio público (ex.: `qdrant.exemplo.com`) |
-| `QDRANT_API_KEY` | recomendado | — | exige o header `api-key`; sem ela a API fica **aberta** |
+| `QDRANT_API_KEY` | sim | — | exige o header `api-key`. **Obrigatória**: a stack é exposta via Traefik |
 | `QDRANT_IMAGE_TAG` | não | `latest` | tag da imagem qdrant/qdrant |
 | `PROXY_NET` | não | `web` | rede externa do Traefik |
 | `DATA_NET` | não | `data` | rede overlay dos serviços compartilhados |
