@@ -34,15 +34,17 @@ fica no repositório.
 | [`excalidraw`](excalidraw/) | Quadro branco / desenho | [README](excalidraw/README.md) |
 | [`openspeedtest`](openspeedtest/) | Teste de velocidade de rede | [README](openspeedtest/README.md) |
 | [`workflows`](workflows/) | n8n (automação) + PostgreSQL | [README](workflows/README.md) |
+| [`evolution-api`](evolution-api/) | API de WhatsApp (usa `postgres-pgvector` + `redis`) | [README](evolution-api/README.md) |
 | [`rocketchat`](rocketchat/) | Chat de equipe + MongoDB | [README](rocketchat/README.md) |
 | [`joomla`](joomla/) | CMS Joomla + MySQL | [README](joomla/README.md) |
 | [`moodle`](moodle/) | LMS Moodle + MariaDB | [README](moodle/README.md) |
 
-### Bancos de dados (compartilhados, rede `data`)
+### Bancos e cache (compartilhados, rede `data`)
 | Stack | Descrição | Doc |
 |---|---|---|
 | [`mariadb`](mariadb/) | MariaDB compartilhado | [README](mariadb/README.md) |
 | [`postgres-pgvector`](postgres-pgvector/) | PostgreSQL + pgvector nativo (IA/RAG) | [README](postgres-pgvector/README.md) |
+| [`redis`](redis/) | Redis (cache/memória) compartilhado | [README](redis/README.md) |
 
 ### IA
 | Stack | Descrição | Doc |

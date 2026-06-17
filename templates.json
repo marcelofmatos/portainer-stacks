@@ -392,6 +392,44 @@
     },
     {
       "type": 2,
+      "title": "redis — cache compartilhado",
+      "name": "redis",
+      "description": "Redis como cache/memoria compartilhado (sem proxy). Entra na rede overlay `data` para outras stacks conectarem por `redis:6379`.",
+      "note": "PRE-REQUISITO: crie a rede `data` (docker network create --driver overlay --attachable data). Defina REDIS_PASSWORD para proteger o cache.",
+      "categories": ["database", "cache"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/redis.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "redis/docker-compose.yml" },
+      "env": [
+        { "name": "REDIS_PASSWORD", "label": "Senha (recomendada)", "description": "AUTH do Redis; vazio = sem senha" },
+        { "name": "REDIS_MAXMEMORY", "label": "Limite de memoria", "default": "256mb" },
+        { "name": "REDIS_MAXMEMORY_POLICY", "label": "Politica de eviccao", "default": "allkeys-lru" },
+        { "name": "REDIS_APPENDONLY", "label": "Persistencia AOF", "default": "yes" },
+        { "name": "DATA_NET", "label": "Rede de dados", "default": "data" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "evolution-api — WhatsApp API",
+      "name": "evolution-api",
+      "description": "Evolution API (gateway de WhatsApp) via Traefik v3. Usa o PostgreSQL (stack postgres-pgvector) e o Redis (stack redis) compartilhados na rede `data`.",
+      "note": "PRE-REQUISITO: redes `web` e `data`; stacks postgres-pgvector e redis na `data`; e o banco `evolution` criado no PostgreSQL (CREATE DATABASE evolution).",
+      "categories": ["communication", "api"],
+      "platform": "linux",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "evolution-api/docker-compose.yml" },
+      "env": [
+        { "name": "EVOLUTION_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: evolution.exemplo.com" },
+        { "name": "EVOLUTION_API_KEY", "label": "API key", "description": "Chave global de autenticacao da API" },
+        { "name": "EVOLUTION_DB_PASSWORD", "label": "Senha do PostgreSQL", "description": "Senha do usuario do banco compartilhado" },
+        { "name": "EVOLUTION_DB_HOST", "label": "Host do PostgreSQL", "default": "postgres" },
+        { "name": "EVOLUTION_DB_NAME", "label": "Banco", "default": "evolution" },
+        { "name": "EVOLUTION_REDIS_URI", "label": "URI do Redis", "default": "redis://redis:6379/6" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" },
+        { "name": "DATA_NET", "label": "Rede de dados", "default": "data" }
+      ]
+    },
+    {
+      "type": 2,
       "title": "supabase — backend self-hosted",
       "name": "supabase",
       "description": "Supabase self-hosted (Postgres + Studio + Kong/API + Auth + REST + Realtime + Storage + Functions...) adaptado para Docker Swarm. Studio e API expostos via Traefik v3.",

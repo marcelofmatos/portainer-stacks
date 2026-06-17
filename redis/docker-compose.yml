@@ -1,0 +1,43 @@
+# Stack "redis" — cache Redis compartilhado (Docker Swarm)
+# Sem proxy (não é HTTP). Entra na rede overlay externa `data` para outras stacks
+# conectarem pelo host `redis:6379`. Senha opcional (REDIS_PASSWORD) — recomendada.
+#
+# NOTA (volume em Swarm): a persistência é local ao nó. Em cluster multi-worker, fixe o serviço
+# definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+services:
+  redis:
+    image: redis:${REDIS_IMAGE_TAG:-7-alpine}
+    command:
+      - redis-server
+      - --maxmemory
+      - ${REDIS_MAXMEMORY:-256mb}
+      - --maxmemory-policy
+      - ${REDIS_MAXMEMORY_POLICY:-allkeys-lru}
+      - --appendonly
+      - ${REDIS_APPENDONLY:-yes}
+      - --requirepass
+      - ${REDIS_PASSWORD:-}
+    volumes:
+      - redis-data:/data
+    networks:
+      - data
+    # ports:                       # acesso externo opcional (cuidado: exponha só com senha)
+    #   - target: 6379
+    #     published: ${REDIS_PORT:-6379}
+    #     mode: host
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+networks:
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+
+volumes:
+  redis-data:
+    driver: local

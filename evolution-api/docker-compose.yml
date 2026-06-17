@@ -1,0 +1,64 @@
+# Stack "evolution-api" — Evolution API (WhatsApp API) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt.
+# Usa serviços compartilhados da rede `data`: PostgreSQL (stack postgres-pgvector) e Redis (stack redis).
+# NÃO sobe banco/cache próprios — depende das stacks `postgres-pgvector` e `redis` na rede `data`.
+#
+# NOTA (volume em Swarm): em cluster multi-worker fixe o serviço definindo WORKER_HOSTNAME e
+# descomentando o constraint de hostname.
+services:
+  evolution-api:
+    image: atendai/evolution-api:${EVOLUTION_IMAGE_TAG:-v2.2.3}
+    networks:
+      - default
+      - web
+      - data
+    environment:
+      - SERVER_URL=https://${EVOLUTION_FQDN}
+      - AUTHENTICATION_API_KEY=${EVOLUTION_API_KEY}
+      - LANGUAGE=${EVOLUTION_LANGUAGE:-pt-BR}
+      # Banco (PostgreSQL compartilhado na rede `data`)
+      - DATABASE_ENABLED=true
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_CONNECTION_URI=postgresql://${EVOLUTION_DB_USER:-postgres}:${EVOLUTION_DB_PASSWORD}@${EVOLUTION_DB_HOST:-postgres}:${EVOLUTION_DB_PORT:-5432}/${EVOLUTION_DB_NAME:-evolution}
+      - DATABASE_CONNECTION_CLIENT_NAME=evolution
+      - DATABASE_SAVE_DATA_INSTANCE=true
+      - DATABASE_SAVE_DATA_NEW_MESSAGE=true
+      - DATABASE_SAVE_MESSAGE_UPDATE=true
+      - DATABASE_SAVE_DATA_CONTACTS=true
+      - DATABASE_SAVE_DATA_CHATS=true
+      # Cache (Redis compartilhado na rede `data`)
+      - CACHE_REDIS_ENABLED=true
+      - CACHE_REDIS_URI=${EVOLUTION_REDIS_URI:-redis://redis:6379/6}
+      - CACHE_REDIS_PREFIX_KEY=evolution
+      - CACHE_REDIS_SAVE_INSTANCES=false
+      - CACHE_LOCAL_ENABLED=false
+    volumes:
+      - evolution-instances:/evolution/instances
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.evolution-api.rule=Host(`${EVOLUTION_FQDN}`)
+        - traefik.http.routers.evolution-api.entrypoints=websecure
+        - traefik.http.routers.evolution-api.tls=true
+        - traefik.http.routers.evolution-api.tls.certresolver=letsencryptresolver
+        - traefik.http.services.evolution-api.loadbalancer.server.port=8080
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: overlay
+
+volumes:
+  evolution-instances:
+    driver: local
