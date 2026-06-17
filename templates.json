@@ -1376,6 +1376,45 @@
           "default": "web"
         }
       ]
+    },
+    {
+      "type": 2,
+      "title": "docker-service-update — webhook de deploy Swarm",
+      "name": "docker-service-update",
+      "description": "Webhook HTTP que recebe o nome de uma imagem e forca o re-deploy (service update --force) dos servicos Swarm que a usam. Para chamar de pipelines de CI/CD apos publicar a imagem. Publicado via Traefik v3 com TLS e protegido por basicauth.",
+      "note": "Roda no MANAGER (acessa /var/run/docker.sock). Requer a rede `web` (stack balancer). O endpoint forca re-deploy de qualquer servico: UPDATE_AUTH_BASIC obrigatorio, formato usuario:hash (htpasswd -nbB).",
+      "categories": [
+        "ci-cd",
+        "tools"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/docker.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "docker-service-update/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "UPDATE_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: deploy.exemplo.com"
+        },
+        {
+          "name": "UPDATE_AUTH_BASIC",
+          "label": "Basicauth do webhook",
+          "description": "Formato usuario:hash_bcrypt (htpasswd -nbB)"
+        },
+        {
+          "name": "APP_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "latest"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
+      ]
     }
   ]
 }

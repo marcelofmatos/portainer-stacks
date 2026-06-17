@@ -15,6 +15,7 @@ fica no repositório.
 | [`balancer`](balancer/) | Reverse proxy Traefik v3 + TLS Let's Encrypt | [README](balancer/README.md) |
 | [`error-pages`](error-pages/) | Páginas de erro customizadas (middleware do Traefik) | [README](error-pages/README.md) |
 | [`swarmprom`](swarmprom/) | Monitoramento Swarm (Prometheus/Grafana/cAdvisor/node-exporter) | [README](swarmprom/README.md) |
+| [`docker-service-update`](docker-service-update/) | Webhook de deploy (re-deploy de serviços Swarm via CI/CD) — roda no manager | [README](docker-service-update/README.md) |
 
 ### Identidade / acesso
 | Stack | Descrição | Doc |
