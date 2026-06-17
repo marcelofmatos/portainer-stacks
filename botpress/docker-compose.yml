@@ -1,0 +1,50 @@
+# Stack "botpress" — Botpress (plataforma de chatbots) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Usa o PostgreSQL compartilhado (stack postgres-pgvector) na rede `data` — não sobe banco próprio.
+# Pode entregar respostas no WhatsApp via stack `evolution-api`.
+#
+# Obrigatórias: BOTPRESS_FQDN, BOTPRESS_DB_PASSWORD.
+# NOTA (volume em Swarm): o volume /botpress/data é local ao nó — em cluster multi-worker fixe o
+# serviço definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+services:
+  botpress:
+    image: botpress/server:${BOTPRESS_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+      - data
+    environment:
+      - EXTERNAL_URL=https://${BOTPRESS_FQDN}
+      - DATABASE_URL=postgres://${BOTPRESS_DB_USER:-postgres}:${BOTPRESS_DB_PASSWORD}@${BOTPRESS_DB_HOST:-postgres}:${BOTPRESS_DB_PORT:-5432}/${BOTPRESS_DB_NAME:-botpress}
+      - BP_PRODUCTION=true
+      - PORT=3000
+    volumes:
+      - botpress-data:/botpress/data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.botpress.rule=Host(`${BOTPRESS_FQDN}`)
+        - traefik.http.routers.botpress.entrypoints=websecure
+        - traefik.http.routers.botpress.tls=true
+        - traefik.http.routers.botpress.tls.certresolver=letsencryptresolver
+        - traefik.http.services.botpress.loadbalancer.server.port=3000
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: overlay
+
+volumes:
+  botpress-data:
+    driver: local

@@ -1,0 +1,47 @@
+# Stack "redisinsight" — RedisInsight (GUI do Redis) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Conecta no Redis compartilhado (stack `redis`) na rede `data`.
+# RedisInsight não tem login próprio: protegido por basicauth do Traefik (REDISINSIGHT_AUTH_BASIC).
+#
+# Obrigatórias: REDISINSIGHT_FQDN, REDISINSIGHT_AUTH_BASIC.
+# NOTA (volume em Swarm): o volume é local ao nó — em cluster multi-worker fixe o serviço
+# definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+services:
+  redisinsight:
+    image: redis/redisinsight:${REDISINSIGHT_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+      - data
+    volumes:
+      - redisinsight-data:/data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.redisinsight.rule=Host(`${REDISINSIGHT_FQDN}`)
+        - traefik.http.routers.redisinsight.entrypoints=websecure
+        - traefik.http.routers.redisinsight.tls=true
+        - traefik.http.routers.redisinsight.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.redisinsight.middlewares=redisinsight-auth
+        - traefik.http.middlewares.redisinsight-auth.basicauth.users=${REDISINSIGHT_AUTH_BASIC}
+        - traefik.http.services.redisinsight.loadbalancer.server.port=5540
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: overlay
+
+volumes:
+  redisinsight-data:
+    driver: local

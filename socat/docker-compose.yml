@@ -1,0 +1,34 @@
+# Stack "socat" — socat (relay TCP) — Docker Swarm
+# Encaminha uma porta publicada no nó para um destino alcançável pelo container — útil para expor um
+# serviço interno (ex.: um banco na rede `data`) para fora do cluster de forma controlada.
+# Anexa às redes `data` e `web` para conseguir alcançar serviços internos pelo nome.
+#
+# Obrigatórias: SOCAT_LISTEN_PORT, SOCAT_TARGET (ex.: SOCAT_TARGET=mariadb:3306).
+services:
+  socat:
+    image: alpine/socat:${SOCAT_IMAGE_TAG:-latest}
+    command: TCP-LISTEN:${SOCAT_LISTEN_PORT},fork,reuseaddr TCP:${SOCAT_TARGET}
+    networks:
+      - default
+      - data
+      - web
+    ports:
+      - target: ${SOCAT_LISTEN_PORT}
+        published: ${SOCAT_LISTEN_PORT}
+        mode: host
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: overlay

@@ -1,0 +1,53 @@
+# Stack "elasticsearch" — Elasticsearch (single-node) — Docker Swarm
+# Backend de busca/índice INTERNO. NÃO usa Traefik nem a rede `web`: fica na rede overlay
+# compartilhada `data` e as outras stacks conectam pelo host `elasticsearch:9200`.
+# Expor o Elasticsearch cru na internet é inseguro — mantenha-o só na `data`.
+#
+# Obrigatórias (segredo): ELASTIC_PASSWORD.
+#
+# REQUISITO DO HOST: o kernel precisa de `vm.max_map_count=262144` (ver README).
+# NOTA (volumes em Swarm): o volume é local ao nó — em cluster multi-worker fixe o serviço
+# definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_IMAGE_TAG:-8.15.3}
+    hostname: elasticsearch
+    networks:
+      - data
+    # Acesso externo opcional (modo host publica 9200 no nó). Descomente só se precisar.
+    # ports:
+    #   - target: 9200
+    #     published: ${ELASTIC_PORT:-9200}
+    #     mode: host
+    environment:
+      - discovery.type=single-node
+      - cluster.name=${ELASTIC_CLUSTER_NAME:-portainer-stacks}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - xpack.security.enabled=${ELASTIC_SECURITY:-true}
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=${ELASTIC_JAVA_OPTS:--Xms512m -Xmx512m}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+networks:
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+
+volumes:
+  elasticsearch-data:
+    driver: local

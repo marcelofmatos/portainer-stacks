@@ -1,0 +1,55 @@
+# Stack "haproxy" — HAProxy (load balancer TCP/HTTP) — Docker Swarm
+# A página de stats (porta 8404) é publicada via Traefik v3 com TLS e protegida por basicauth.
+# Para balanceamento TCP de serviços internos (ex.: bancos na rede `data`), defina frontends/backends
+# no haproxy.cfg e publique as portas correspondentes no bloco `ports` abaixo.
+#
+# Obrigatórias: HAPROXY_FQDN, HAPROXY_AUTH_BASIC.
+#
+# PRÉ-REQUISITO: o serviço usa 1 Docker config EXTERNO (nome configurável em HAPROXY_CONFIG_NAME):
+#   <HAPROXY_CONFIG_NAME> -> /usr/local/etc/haproxy/haproxy.cfg  (ver config/haproxy.cfg)
+# Crie-o antes do deploy (instruções no README). Config é imutável: para mudar, crie _v2.
+configs:
+  haproxy_config:
+    name: ${HAPROXY_CONFIG_NAME:-haproxy_config_v1}
+    external: true
+
+services:
+  haproxy:
+    image: haproxy:${HAPROXY_IMAGE_TAG:-lts-alpine}
+    networks:
+      - default
+      - web
+      - data
+    configs:
+      - source: haproxy_config
+        target: /usr/local/etc/haproxy/haproxy.cfg
+    # Frontends TCP definidos no haproxy.cfg precisam ser publicados aqui. Ex.:
+    # ports:
+    #   - target: 3306
+    #     published: 3306
+    #     mode: host
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.haproxy.rule=Host(`${HAPROXY_FQDN}`)
+        - traefik.http.routers.haproxy.entrypoints=websecure
+        - traefik.http.routers.haproxy.tls=true
+        - traefik.http.routers.haproxy.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.haproxy.middlewares=haproxy-auth
+        - traefik.http.middlewares.haproxy-auth.basicauth.users=${HAPROXY_AUTH_BASIC}
+        - traefik.http.services.haproxy.loadbalancer.server.port=8404
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: overlay

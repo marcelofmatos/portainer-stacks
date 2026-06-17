@@ -15,6 +15,12 @@ fica no repositório.
 | [`balancer`](balancer/) | Reverse proxy Traefik v3 + TLS Let's Encrypt | [README](balancer/README.md) |
 | [`error-pages`](error-pages/) | Páginas de erro customizadas (middleware do Traefik) | [README](error-pages/README.md) |
 | [`swarmprom`](swarmprom/) | Monitoramento Swarm (Prometheus/Grafana/cAdvisor/node-exporter) | [README](swarmprom/README.md) |
+| [`zabbix`](zabbix/) | Monitoramento (server+web+agent) — usa `postgres-pgvector` | [README](zabbix/README.md) |
+| [`phpnetmap`](phpnetmap/) | Mapa/monitoramento de rede via SNMP | [README](phpnetmap/README.md) |
+| [`haproxy`](haproxy/) | Load balancer TCP/HTTP + página de stats | [README](haproxy/README.md) |
+| [`socat`](socat/) | Relay TCP (expõe serviço interno para fora) | [README](socat/README.md) |
+| [`web-redirect`](web-redirect/) | Redirecionador HTTP (301/302) | [README](web-redirect/README.md) |
+| [`ssh-server`](ssh-server/) | Servidor OpenSSH/SFTP | [README](ssh-server/README.md) |
 | [`docker-service-update`](docker-service-update/) | Webhook de deploy (re-deploy de serviços Swarm via CI/CD) — roda no manager | [README](docker-service-update/README.md) |
 
 ### Identidade / acesso
@@ -48,6 +54,8 @@ fica no repositório.
 | [`twenty`](twenty/) | CRM moderno — usa `postgres-pgvector` + `redis` | [README](twenty/README.md) |
 | [`chatwoot`](chatwoot/) | Atendimento omnichannel + WhatsApp (integra `evolution-api`) | [README](chatwoot/README.md) |
 | [`typebot`](typebot/) | Construtor de chatbots (builder + viewer) — usa `postgres-pgvector` | [README](typebot/README.md) |
+| [`botpress`](botpress/) | Plataforma de chatbots — usa `postgres-pgvector` | [README](botpress/README.md) |
+| [`protonmail-bridge`](protonmail-bridge/) | Ponte SMTP/IMAP da conta ProtonMail | [README](protonmail-bridge/README.md) |
 
 ### Bancos e cache (compartilhados, rede `data`)
 | Stack | Descrição | Doc |
@@ -55,6 +63,10 @@ fica no repositório.
 | [`mariadb`](mariadb/) | MariaDB compartilhado | [README](mariadb/README.md) |
 | [`postgres-pgvector`](postgres-pgvector/) | PostgreSQL + pgvector nativo (IA/RAG) | [README](postgres-pgvector/README.md) |
 | [`redis`](redis/) | Redis (cache/memória) compartilhado | [README](redis/README.md) |
+| [`mongodb`](mongodb/) | MongoDB (NoSQL) compartilhado | [README](mongodb/README.md) |
+| [`mongo-express`](mongo-express/) | Admin web do MongoDB | [README](mongo-express/README.md) |
+| [`redisinsight`](redisinsight/) | GUI de administração do Redis | [README](redisinsight/README.md) |
+| [`elasticsearch`](elasticsearch/) | Busca/índice (single-node) compartilhado | [README](elasticsearch/README.md) |
 
 ### IA
 | Stack | Descrição | Doc |

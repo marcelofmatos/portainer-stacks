@@ -1,0 +1,44 @@
+# Stack "phpnetmap" — PHPNetMap (mapa/monitoramento de rede via SNMP) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# App PHP (Yii) que descobre topologia de rede via SNMP (FIB/CAM/ARP). Banco SQLite embutido,
+# persistido em /app/protected/data (volume semeado a partir da imagem no primeiro deploy).
+#
+# Obrigatórias: PHPNETMAP_FQDN, PHPNETMAP_ADMIN_PASSWORD.
+# NOTA (volume em Swarm): o volume é local ao nó — em cluster multi-worker fixe o serviço definindo
+# WORKER_HOSTNAME e descomentando o constraint de hostname.
+services:
+  phpnetmap:
+    image: ghcr.io/marcelofmatos/phpnetmap:${PHPNETMAP_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+    environment:
+      - ADMIN_USER=${PHPNETMAP_ADMIN_USER:-admin}
+      - ADMIN_PASSWORD=${PHPNETMAP_ADMIN_PASSWORD}
+    volumes:
+      - phpnetmap-data:/app/protected/data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.phpnetmap.rule=Host(`${PHPNETMAP_FQDN}`)
+        - traefik.http.routers.phpnetmap.entrypoints=websecure
+        - traefik.http.routers.phpnetmap.tls=true
+        - traefik.http.routers.phpnetmap.tls.certresolver=letsencryptresolver
+        - traefik.http.services.phpnetmap.loadbalancer.server.port=80
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay
+
+volumes:
+  phpnetmap-data:
+    driver: local

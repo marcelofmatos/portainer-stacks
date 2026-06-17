@@ -1688,6 +1688,486 @@
           "default": "latest"
         }
       ]
+    },
+    {
+      "type": 2,
+      "title": "mongodb — banco NoSQL compartilhado",
+      "name": "mongodb",
+      "description": "MongoDB como banco NoSQL interno/compartilhado do cluster. NAO usa Traefik nem a rede web: fica na rede overlay `data` e outras stacks conectam pelo host mongodb:27017. Admin via web pela stack mongo-express.",
+      "note": "Banco interno. Requer a rede `data`: docker network create --driver overlay --attachable data. Nao exponha 27017 na internet.",
+      "categories": [
+        "database"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/mongodb.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "mongodb/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "MONGO_ROOT_PASSWORD",
+          "label": "Senha do root",
+          "description": "Senha do usuario root do MongoDB (segredo)"
+        },
+        {
+          "name": "MONGO_ROOT_USERNAME",
+          "label": "Usuario root",
+          "default": "root"
+        },
+        {
+          "name": "MONGO_DATABASE",
+          "label": "Banco inicial",
+          "default": "appdb"
+        },
+        {
+          "name": "MONGO_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "7"
+        }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "mongo-express — admin do MongoDB",
+      "name": "mongo-express",
+      "description": "Mongo Express: interface web de administracao do MongoDB. Publicado via Traefik v3 com TLS, conecta no MongoDB compartilhado (stack mongodb) na rede data. Protegido por basicauth proprio.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `mongodb`. DNS do FQDN apontando para o host.",
+      "categories": [
+        "database",
+        "tools"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/mongodb.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "mongo-express/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "MONGOEXPRESS_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: mongo.exemplo.com"
+        },
+        {
+          "name": "MONGOEXPRESS_MONGO_PASSWORD",
+          "label": "Senha do MongoDB",
+          "description": "Senha do usuario do MongoDB (segredo)"
+        },
+        {
+          "name": "MONGOEXPRESS_PASSWORD",
+          "label": "Senha de login",
+          "description": "Senha de login do Mongo Express (segredo)"
+        },
+        {
+          "name": "MONGOEXPRESS_USERNAME",
+          "label": "Usuario de login",
+          "default": "admin"
+        },
+        {
+          "name": "MONGOEXPRESS_MONGO_USER",
+          "label": "Usuario do MongoDB",
+          "default": "root"
+        },
+        {
+          "name": "MONGOEXPRESS_MONGO_HOST",
+          "label": "Host do MongoDB",
+          "default": "mongodb"
+        }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "redisinsight — GUI do Redis",
+      "name": "redisinsight",
+      "description": "RedisInsight: interface grafica de administracao do Redis. Publicado via Traefik v3 com TLS, conecta no Redis compartilhado (stack redis) na rede data. Como nao tem login proprio, e protegido por basicauth do Traefik.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `redis`. REDISINSIGHT_AUTH_BASIC no formato usuario:hash (htpasswd -nbB). DNS do FQDN apontando para o host.",
+      "categories": [
+        "database",
+        "tools"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/redis.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "redisinsight/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "REDISINSIGHT_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: redis.exemplo.com"
+        },
+        {
+          "name": "REDISINSIGHT_AUTH_BASIC",
+          "label": "Basicauth do Traefik",
+          "description": "Formato usuario:hash_bcrypt (htpasswd -nbB)"
+        },
+        {
+          "name": "REDISINSIGHT_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "latest"
+        }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "zabbix — monitoramento",
+      "name": "zabbix",
+      "description": "Zabbix (monitoramento de infraestrutura/servicos): server + web + agent. Publicado via Traefik v3 com TLS e reaproveita o PostgreSQL compartilhado (stack postgres-pgvector) na rede data. O server importa o schema automaticamente num banco vazio.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `postgres-pgvector` com um banco `zabbix`. Login inicial padrao Admin/zabbix (troque na hora). DNS do FQDN apontando para o host.",
+      "categories": [
+        "monitoring"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/zabbix.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "zabbix/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "ZABBIX_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: zabbix.exemplo.com"
+        },
+        {
+          "name": "ZABBIX_DB_PASSWORD",
+          "label": "Senha do PostgreSQL",
+          "description": "Senha do usuario do banco (segredo)"
+        },
+        {
+          "name": "ZABBIX_DB_HOST",
+          "label": "Host do PostgreSQL",
+          "default": "postgres"
+        },
+        {
+          "name": "ZABBIX_DB_NAME",
+          "label": "Banco",
+          "default": "zabbix"
+        },
+        {
+          "name": "ZABBIX_DB_USER",
+          "label": "Usuario do PostgreSQL",
+          "default": "postgres"
+        },
+        {
+          "name": "ZABBIX_TIMEZONE",
+          "label": "Fuso horario (PHP)",
+          "default": "America/Sao_Paulo"
+        },
+        {
+          "name": "ZABBIX_IMAGE_TAG",
+          "label": "Tag das imagens",
+          "default": "alpine-7.0-latest"
+        }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "elasticsearch — busca/indice",
+      "name": "elasticsearch",
+      "description": "Elasticsearch single-node como backend interno de busca/indice. NAO usa Traefik nem a rede web: fica na rede overlay data e outras stacks conectam pelo host elasticsearch:9200.",
+      "note": "Backend interno. Requer a rede `data` e `vm.max_map_count=262144` no host (ver README). Nao exponha 9200 na internet.",
+      "categories": [
+        "database",
+        "search"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/elasticsearch.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "elasticsearch/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "ELASTIC_PASSWORD",
+          "label": "Senha do elastic",
+          "description": "Senha do usuario elastic (segredo)"
+        },
+        {
+          "name": "ELASTIC_JAVA_OPTS",
+          "label": "Heap da JVM",
+          "default": "-Xms512m -Xmx512m"
+        },
+        {
+          "name": "ELASTIC_SECURITY",
+          "label": "xpack security",
+          "default": "true"
+        },
+        {
+          "name": "ELASTIC_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "8.15.3"
+        }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "protonmail-bridge — SMTP/IMAP ProtonMail",
+      "name": "protonmail-bridge",
+      "description": "ProtonMail Bridge: expoe a conta ProtonMail como SMTP/IMAP interno para outras stacks enviarem/lerem e-mail. UI web (porta 3000) publicada via Traefik v3 com TLS e protegida pelo WEBUI_AUTH_TOKEN.",
+      "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. Apos o deploy, faca login na conta Proton pela UI. Relay interno em protonmail-bridge_smtp:25 (SMTP) e :143 (IMAP).",
+      "categories": [
+        "mail"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/proton-mail.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "protonmail-bridge/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "PROTONMAIL_FQDN",
+          "label": "Dominio da UI (FQDN)",
+          "description": "Ex.: proton.exemplo.com"
+        },
+        {
+          "name": "PROTONMAIL_WEBUI_AUTH_TOKEN",
+          "label": "Token da UI web",
+          "description": "Token de acesso a UI (segredo; openssl rand -hex 32)"
+        },
+        {
+          "name": "PROTONMAIL_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "latest"
+        }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "ssh-server — OpenSSH/SFTP",
+      "name": "ssh-server",
+      "description": "Servidor OpenSSH (imagem linuxserver) para acesso SSH/SFTP ao cluster. NAO usa Traefik (SSH e TCP): publica a porta no no. Recomenda-se autenticacao por chave publica.",
+      "note": "Publica a porta SSH_PORT no no (libere no firewall). Prefira SSH_PUBLIC_KEY; senha so com SSH_PASSWORD_ACCESS=true.",
+      "categories": [
+        "tools",
+        "networking"
+      ],
+      "platform": "linux",
+      "logo": "https://api.iconify.design/tabler/terminal-2.svg?color=%2310b981&height=128",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "ssh-server/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "SSH_USER",
+          "label": "Usuario",
+          "default": "sftp"
+        },
+        {
+          "name": "SSH_PUBLIC_KEY",
+          "label": "Chave publica SSH",
+          "description": "Conteudo da sua id_*.pub (login por chave)"
+        },
+        {
+          "name": "SSH_PORT",
+          "label": "Porta SSH",
+          "default": "2222"
+        },
+        {
+          "name": "SSH_PASSWORD_ACCESS",
+          "label": "Permitir senha",
+          "default": "false"
+        },
+        {
+          "name": "SSH_SUDO_ACCESS",
+          "label": "Conceder sudo",
+          "default": "false"
+        }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "socat — relay TCP",
+      "name": "socat",
+      "description": "socat encaminha uma porta publicada no no para um destino alcancavel pelo container. Util para expor de forma controlada um servico interno (ex.: um banco na rede data) para fora do cluster.",
+      "note": "Anexa as redes data e web. SOCAT_TARGET no formato host:porta (ex.: mariadb:3306). NAO autentica nem cifra: proteja a porta no firewall.",
+      "categories": [
+        "networking",
+        "tools"
+      ],
+      "platform": "linux",
+      "logo": "https://api.iconify.design/tabler/transfer.svg?color=%23f59e0b&height=128",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "socat/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "SOCAT_LISTEN_PORT",
+          "label": "Porta de escuta",
+          "description": "Porta que o socat escuta e publica no no (ex.: 3306)"
+        },
+        {
+          "name": "SOCAT_TARGET",
+          "label": "Destino (host:porta)",
+          "description": "Ex.: mariadb:3306"
+        },
+        {
+          "name": "SOCAT_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "latest"
+        }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "web-redirect — redirecionador HTTP",
+      "name": "web-redirect",
+      "description": "Redireciona todo o trafego de um dominio para uma URL de destino (301/302). Publicado via Traefik v3 com TLS. Util para dominios antigos/alternativos ou apontar um host para outro servico.",
+      "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. REDIRECT_TYPE: redirect (302) ou 'redirect permanent' (301).",
+      "categories": [
+        "networking",
+        "tools"
+      ],
+      "platform": "linux",
+      "logo": "https://api.iconify.design/tabler/external-link.svg?color=%238b5cf6&height=128",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "web-redirect/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "REDIRECT_FQDN",
+          "label": "Dominio de origem",
+          "description": "Ex.: antigo.exemplo.com"
+        },
+        {
+          "name": "REDIRECT_TARGET",
+          "label": "URL de destino",
+          "description": "Ex.: https://novo.exemplo.com"
+        },
+        {
+          "name": "REDIRECT_TYPE",
+          "label": "Tipo",
+          "default": "redirect"
+        }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "botpress — plataforma de chatbots",
+      "name": "botpress",
+      "description": "Botpress (plataforma open source para criar chatbots/assistentes). Publicado via Traefik v3 com TLS e reaproveita o PostgreSQL compartilhado (stack postgres-pgvector) na rede data. Pode entregar respostas no WhatsApp via stack evolution-api.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `postgres-pgvector` com um banco `botpress`. DNS do FQDN apontando para o host.",
+      "categories": [
+        "chatbot",
+        "automation"
+      ],
+      "platform": "linux",
+      "logo": "https://api.iconify.design/tabler/robot.svg?color=%230ea5e9&height=128",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "botpress/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "BOTPRESS_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: botpress.exemplo.com"
+        },
+        {
+          "name": "BOTPRESS_DB_PASSWORD",
+          "label": "Senha do PostgreSQL",
+          "description": "Senha do usuario do banco (segredo)"
+        },
+        {
+          "name": "BOTPRESS_DB_HOST",
+          "label": "Host do PostgreSQL",
+          "default": "postgres"
+        },
+        {
+          "name": "BOTPRESS_DB_NAME",
+          "label": "Banco",
+          "default": "botpress"
+        },
+        {
+          "name": "BOTPRESS_DB_USER",
+          "label": "Usuario do PostgreSQL",
+          "default": "postgres"
+        }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "haproxy — load balancer TCP/HTTP",
+      "name": "haproxy",
+      "description": "HAProxy para balanceamento/proxy TCP ou HTTP de servicos internos. A pagina de stats (porta 8404) e publicada via Traefik v3 com TLS e protegida por basicauth. Configuracao via Docker config externo.",
+      "note": "Requer a rede `web` (stack balancer) e a rede `data`. Crie o Docker config: docker config create haproxy_config_v1 haproxy/config/haproxy.cfg. HAPROXY_AUTH_BASIC no formato usuario:hash (htpasswd -nbB).",
+      "categories": [
+        "proxy",
+        "networking"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/haproxy.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "haproxy/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "HAPROXY_FQDN",
+          "label": "Dominio das stats (FQDN)",
+          "description": "Ex.: haproxy.exemplo.com"
+        },
+        {
+          "name": "HAPROXY_AUTH_BASIC",
+          "label": "Basicauth do Traefik",
+          "description": "Formato usuario:hash_bcrypt (htpasswd -nbB)"
+        },
+        {
+          "name": "HAPROXY_CONFIG_NAME",
+          "label": "Nome do Docker config",
+          "default": "haproxy_config_v1"
+        },
+        {
+          "name": "HAPROXY_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "lts-alpine"
+        }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "phpnetmap — mapa de rede (SNMP)",
+      "name": "phpnetmap",
+      "description": "PHPNetMap descobre e mapeia a topologia da rede via SNMP (tabelas FIB/CAM e ARP), exibindo conexoes entre hosts e status das portas. App PHP (Yii) com SQLite embutido, publicado via Traefik v3 com TLS.",
+      "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. O no precisa alcancar os dispositivos via SNMP (UDP/161).",
+      "categories": [
+        "monitoring",
+        "networking"
+      ],
+      "platform": "linux",
+      "logo": "https://api.iconify.design/tabler/topology-star-3.svg?color=%2306b6d4&height=128",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "phpnetmap/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "PHPNETMAP_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: netmap.exemplo.com"
+        },
+        {
+          "name": "PHPNETMAP_ADMIN_PASSWORD",
+          "label": "Senha do admin",
+          "description": "Senha do usuario admin (segredo)"
+        },
+        {
+          "name": "PHPNETMAP_ADMIN_USER",
+          "label": "Usuario admin",
+          "default": "admin"
+        },
+        {
+          "name": "PHPNETMAP_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "latest"
+        }
+      ]
     }
   ]
 }

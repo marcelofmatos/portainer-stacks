@@ -1,0 +1,53 @@
+# Stack "protonmail-bridge" — ProtonMail Bridge (SMTP/IMAP local) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Expõe a conta ProtonMail como SMTP/IMAP em texto interno para outras stacks enviarem/lerem e-mail.
+# A UI web (porta 3000) é protegida pelo WEBUI_AUTH_TOKEN da própria imagem.
+#
+# Outras stacks na rede `web` usam o relay SMTP pelo host `protonmail-bridge_smtp` (porta 25) e IMAP 143.
+#
+# Obrigatórias (segredo): PROTONMAIL_FQDN, PROTONMAIL_WEBUI_AUTH_TOKEN.
+# NOTA (volume em Swarm): o login/keychain do Bridge fica em /root (volume local ao nó). Fixe o serviço
+# definindo WORKER_HOSTNAME e descomentando o constraint — senão será preciso refazer o login ao migrar.
+services:
+  smtp:
+    image: pattertj/protonmail-bridge:${PROTONMAIL_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+    environment:
+      - WEBUI_AUTH_TOKEN=${PROTONMAIL_WEBUI_AUTH_TOKEN}
+    # Acesso externo opcional p/ clientes de e-mail (modo host). Descomente se precisar.
+    # ports:
+    #   - target: 25
+    #     published: ${PROTONMAIL_SMTP_PORT:-1025}
+    #     mode: host
+    #   - target: 143
+    #     published: ${PROTONMAIL_IMAP_PORT:-1143}
+    #     mode: host
+    volumes:
+      - protonmail-bridge-data:/root
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.protonmail-bridge.rule=Host(`${PROTONMAIL_FQDN}`)
+        - traefik.http.routers.protonmail-bridge.entrypoints=websecure
+        - traefik.http.routers.protonmail-bridge.tls=true
+        - traefik.http.routers.protonmail-bridge.tls.certresolver=letsencryptresolver
+        - traefik.http.services.protonmail-bridge.loadbalancer.server.port=3000
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay
+
+volumes:
+  protonmail-bridge-data:
+    driver: local
