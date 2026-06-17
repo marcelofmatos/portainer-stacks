@@ -1327,6 +1327,55 @@
           "default": "web"
         }
       ]
+    },
+    {
+      "type": 2,
+      "title": "ligerosmart — help desk / ITSM",
+      "name": "ligerosmart",
+      "description": "LigeroSmart (central de serviços / help desk, base OTRS) com MariaDB, Elasticsearch e Grafana. Adaptado do projeto público LigeroSmart/ligerosmart-stack para Traefik v3.",
+      "note": "Requer a rede `web`. Primeiro boot demora (instala o banco). Grafana sob /grafana; atalho /atendente.",
+      "categories": [
+        "helpdesk",
+        "itsm"
+      ],
+      "platform": "linux",
+      "logo": "https://avatars.githubusercontent.com/LigeroSmart",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "ligerosmart/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "LIGEROSMART_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: suporte.exemplo.com"
+        },
+        {
+          "name": "LIGEROSMART_DB_PASSWORD",
+          "label": "Senha do banco",
+          "description": "Senha do usuario do MariaDB"
+        },
+        {
+          "name": "LIGEROSMART_DB_ROOT_PASSWORD",
+          "label": "Senha root MariaDB",
+          "description": "Senha root do MariaDB"
+        },
+        {
+          "name": "LIGEROSMART_LANGUAGE",
+          "label": "Idioma",
+          "default": "pt_BR"
+        },
+        {
+          "name": "ES_JAVA_OPTS",
+          "label": "Heap do Elasticsearch",
+          "default": "-Xms512m -Xmx512m"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,136 @@
+# Stack "ligerosmart" — LigeroSmart (help desk / ITSM, base OTRS) — Docker Swarm
+# Baseada no projeto público https://github.com/LigeroSmart/ligerosmart-stack, adaptada a
+# Traefik v3 (rede externa `web`) + TLS Let's Encrypt. Inclui MariaDB, Elasticsearch e Grafana.
+#
+# NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster multi-worker, fixe os
+# serviços com volume definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+services:
+  web:
+    image: ligero/ligerosmart:${LIGEROSMART_IMAGE_TAG:-6.1-nginx}
+    networks:
+      - default
+      - web
+    environment:
+      APP_FQDN: ${LIGEROSMART_FQDN}
+      APP_DatabaseType: mysql
+      APP_DatabaseHost: database
+      APP_Database: ${LIGEROSMART_DB_NAME:-ligerosmart}
+      APP_DatabaseUser: ${LIGEROSMART_DB_USER:-ligerosmart}
+      APP_DatabasePw: ${LIGEROSMART_DB_PASSWORD}
+      APP_NodeID: "1"
+      APP_LigeroSmart_Node: elasticsearch
+      APP_CustomerID: ${LIGEROSMART_CUSTOMER_ID:-ligerosmart}
+      APP_DefaultLanguage: ${LIGEROSMART_LANGUAGE:-pt_BR}
+      TZ: ${TZ:-America/Sao_Paulo}
+      START_WEBSERVER: "1"
+      START_SCHEDULER: "1"
+    volumes:
+      - core:/opt/otrs
+      - custom:/opt/otrs/Custom
+      - tmp:/opt/otrs/var/tmp/
+      - article:/opt/otrs/var/article
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        # App principal (atende /, /otrs, /customer...)
+        - traefik.http.routers.ligerosmart.rule=Host(`${LIGEROSMART_FQDN}`)
+        - traefik.http.routers.ligerosmart.entrypoints=websecure
+        - traefik.http.routers.ligerosmart.tls=true
+        - traefik.http.routers.ligerosmart.tls.certresolver=letsencryptresolver
+        - traefik.http.services.ligerosmart.loadbalancer.server.port=80
+        # Atalho /atendente -> /otrs/index.pl
+        - traefik.http.routers.ligerosmart-agent.rule=Host(`${LIGEROSMART_FQDN}`) && Path(`/atendente`)
+        - traefik.http.routers.ligerosmart-agent.entrypoints=websecure
+        - traefik.http.routers.ligerosmart-agent.tls=true
+        - traefik.http.routers.ligerosmart-agent.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.ligerosmart-agent.service=ligerosmart
+        - traefik.http.routers.ligerosmart-agent.middlewares=ligerosmart-agent
+        - traefik.http.middlewares.ligerosmart-agent.replacepath.path=/otrs/index.pl
+
+  database:
+    image: mariadb:${MARIADB_IMAGE_TAG:-10.3}
+    networks:
+      - default
+    environment:
+      MYSQL_ROOT_PASSWORD: ${LIGEROSMART_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${LIGEROSMART_DB_NAME:-ligerosmart}
+      MYSQL_USER: ${LIGEROSMART_DB_USER:-ligerosmart}
+      MYSQL_PASSWORD: ${LIGEROSMART_DB_PASSWORD}
+    command:
+      - --max-allowed-packet=64M
+      - --innodb-buffer-pool-size=1G
+      - --innodb-log-file-size=256M
+      - --character-set-server=utf8
+      - --bind-address=0.0.0.0
+    volumes:
+      - mysql-data:/var/lib/mysql
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+  elasticsearch:
+    image: ligero/elasticsearch:${ELASTICSEARCH_IMAGE_TAG:-6.8.23}
+    networks:
+      - default
+    environment:
+      - cluster.name=ligerosmart-cluster
+      - bootstrap.memory_lock=${ES_MEMORY_LOCK:-false}
+      - ES_JAVA_OPTS=${ES_JAVA_OPTS:--Xms512m -Xmx512m}
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+  grafana:
+    image: ligero/grafana:${LIGERO_GRAFANA_IMAGE_TAG:-8}
+    networks:
+      - default
+      - web
+    environment:
+      - GF_SERVER_ROOT_URL=https://${LIGEROSMART_FQDN}/grafana/
+      - GF_AUTH_BASIC_ENABLED=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.ligerosmart-grafana.rule=Host(`${LIGEROSMART_FQDN}`) && PathPrefix(`/grafana`)
+        - traefik.http.routers.ligerosmart-grafana.entrypoints=websecure
+        - traefik.http.routers.ligerosmart-grafana.tls=true
+        - traefik.http.routers.ligerosmart-grafana.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.ligerosmart-grafana.middlewares=ligerosmart-grafana
+        - traefik.http.middlewares.ligerosmart-grafana.stripprefix.prefixes=/grafana
+        - traefik.http.services.ligerosmart-grafana.loadbalancer.server.port=3000
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay
+
+volumes:
+  core: { driver: local }
+  custom: { driver: local }
+  tmp: { driver: local }
+  article: { driver: local }
+  mysql-data: { driver: local }
+  elasticsearch-data: { driver: local }
+  grafana-data: { driver: local }
