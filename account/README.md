@@ -13,6 +13,19 @@ Expõe uma rede externa `ldap` para que outras stacks (ex.: `drive`/ownCloud) au
 | `ldap` | `osixia/openldap` | interno (`account_ldap:389`) | diretório |
 | `user` | `ltbproject/self-service-password` | `SSP_FQDN` | troca de senha |
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    admin((Admin)) -->|HTTPS LAM_FQDN| traefik[Traefik · web]
+    usuario((Usuário)) -->|HTTPS SSP_FQDN| traefik
+    traefik --> manager[manager · LAM]
+    traefik --> user[user · self-service-password]
+    manager -->|389 · default| ldap[(ldap · OpenLDAP)]
+    user -->|389 · default| ldap
+    apps[Outras stacks] -.->|389 · ldap account_ldap| ldap
+```
+
 ## Variáveis de ambiente
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|

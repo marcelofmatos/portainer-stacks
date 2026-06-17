@@ -10,6 +10,17 @@ TLS Let's Encrypt. Pode autenticar usuários de um diretório LDAP (ver stack `a
 | `db` | `mysql:5.7` | banco de dados |
 | `redis` | `webhippie/redis` | cache/locking |
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    usuario((Usuário)) -->|HTTPS DRIVE_FQDN| traefik[Traefik · web]
+    traefik --> www[www · ownCloud]
+    www -->|3306 · default| db[(db · MySQL)]
+    www -->|6379 · default| redis[(redis)]
+    www -.->|LDAP opcional · ldap| account[(account_ldap)]
+```
+
 ## Variáveis de ambiente
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|

@@ -11,6 +11,15 @@ proxy: o TLS é terminado no Traefik e o Keycloak confia nos cabeçalhos `X-Forw
 | `keycloak` | `quay.io/keycloak/keycloak` | `default` + `web` | servidor IAM/SSO (porta interna 8080) |
 | `db` | `postgres` | `default` | banco de dados PostgreSQL (volume `pgdata`) |
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    usuario((Usuário/App OIDC)) -->|HTTPS KEYCLOAK_FQDN| traefik[Traefik · web]
+    traefik --> kc[keycloak]
+    kc -->|5432 · default| db[(db · PostgreSQL)]
+```
+
 ## Variáveis de ambiente
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|

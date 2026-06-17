@@ -9,6 +9,15 @@ exposto na rede `web`; o banco fica apenas na rede interna `default`.
 | `joomla` | `joomla` | CMS Joomla (porta interna 80, exposto via Traefik) |
 | `db` | `mysql` | Banco de dados MySQL (somente rede interna) |
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    usuario((Usuário)) -->|HTTPS JOOMLA_FQDN| traefik[Traefik · web]
+    traefik --> joomla[joomla]
+    joomla -->|3306 · default| db[(db · MySQL)]
+```
+
 ## Variáveis de ambiente
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|

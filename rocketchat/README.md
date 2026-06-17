@@ -10,6 +10,15 @@ Rocket.Chat para usar o oplog (mensagens em tempo real).
 | `rocketchat` | `rocketchat/rocket.chat` | aplicação web (porta 3000) | `default`, `web` |
 | `db` | `mongo` | banco MongoDB em replica set (`rs0`) | `default` |
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    usuario((Usuário)) -->|HTTPS ROCKETCHAT_FQDN| traefik[Traefik · web]
+    traefik --> rc[Rocket.Chat]
+    rc -->|27017 · default| db[(db · MongoDB)]
+```
+
 ## Variáveis de ambiente
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|

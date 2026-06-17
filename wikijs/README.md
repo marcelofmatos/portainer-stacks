@@ -5,6 +5,15 @@ controle de acesso). Publicado via Traefik v3 com TLS. Reaproveita o **PostgreSQ
 (stack `postgres-pgvector`) na rede `data` — não sobe banco próprio. O conteúdo fica no banco, então
 o serviço é stateless.
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    usuario((Usuário)) -->|HTTPS WIKIJS_FQDN| traefik[Traefik · web]
+    traefik --> wiki[Wiki.js]
+    wiki -->|5432 · data| pg[(postgres · pgvector)]
+```
+
 ## Variáveis de ambiente
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|

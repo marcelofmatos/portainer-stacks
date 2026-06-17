@@ -11,6 +11,15 @@ dados, publicado via Traefik v3 com TLS Let's Encrypt. O Moodle roda atrás do r
 | `moodle` | `bitnami/moodle` | Aplicação LMS (porta interna 8080) | `default`, `web` |
 | `db` | `bitnami/mariadb` | Banco de dados MariaDB | `default` |
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    usuario((Usuário)) -->|HTTPS MOODLE_FQDN| traefik[Traefik · web]
+    traefik --> moodle[moodle]
+    moodle -->|3306 · default| db[(db · MariaDB)]
+```
+
 ## Variáveis de ambiente
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|

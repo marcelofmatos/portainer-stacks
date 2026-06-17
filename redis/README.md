@@ -3,6 +3,14 @@
 **Redis** como cache/armazenamento em memória compartilhado entre stacks. Sem proxy (não é HTTP):
 entra na rede overlay `data` e é alcançado por outras stacks pelo host `redis:6379`.
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    apps[Stacks consumidoras] -->|6379 · data| redis[(redis)]
+    redis --> vol[(volume)]
+```
+
 ## Variáveis de ambiente
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|

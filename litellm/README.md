@@ -5,6 +5,16 @@ endpoint (`/v1/...`) para vários provedores de LLM (OpenAI, Anthropic, Azure, e
 disponíveis são definidos em um `config.yaml` montado como **Docker config externo**. Serviço
 **stateless** (sem volume).
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    cliente((Cliente API)) -->|HTTPS LITELLM_FQDN| traefik[Traefik · web]
+    traefik --> proxy[litellm · proxy]
+    proxy --> cfg[/Docker config · config.yaml/]
+    proxy -.->|DATABASE_URL opcional| db[(PostgreSQL externo)]
+```
+
 ## Variáveis de ambiente
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|

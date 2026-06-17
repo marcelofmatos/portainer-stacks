@@ -22,6 +22,18 @@ via Traefik v3 com TLS; os demais serviços ficam só na rede interna `default`.
 > incluindo o manager) e montam paths do host (`/proc`, `/sys`, `/`, `/var/run`,
 > `/var/lib/docker`). Por isso **não** têm constraint `node.role == worker`.
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    usuario((Usuário)) -->|HTTPS GRAFANA_FQDN| traefik[Traefik · web]
+    traefik --> grafana[grafana]
+    grafana -->|9090 · default| prometheus[prometheus]
+    prometheus -->|9100| node[node-exporter]
+    prometheus -->|8080| cadvisor[cadvisor]
+    prometheus -->|9093| alertmanager[alertmanager]
+```
+
 ## Variáveis de ambiente
 
 | Variável | Obrigatória | Default | Descrição |

@@ -5,6 +5,14 @@ Traefik nem fica na rede `web`. O serviço entra numa rede overlay externa compa
 `data`; outras stacks anexam essa mesma rede e conectam ao banco pelo nome do serviço
 (`mariadb`, porta `3306`).
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    apps[Stacks consumidoras] -->|3306 · data| mariadb[(mariadb)]
+    mariadb --> vol[(volume)]
+```
+
 ## Variáveis de ambiente
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|

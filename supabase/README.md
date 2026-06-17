@@ -29,6 +29,30 @@ demais serviços ficam só na rede interna.
 | `vector` | `timberio/vector` | Coletor de logs dos containers | interno |
 | `db` | `supabase/postgres` | PostgreSQL (com pgvector) | interno |
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    usuario((Usuário)) -->|HTTPS API/Studio FQDN| traefik[Traefik · web]
+    traefik --> kong[kong · gateway]
+    traefik --> studio[studio]
+    kong --> auth[auth · GoTrue]
+    kong --> rest[rest · PostgREST]
+    kong --> storage[storage]
+    kong --> functions[functions · edge]
+    kong --> realtime[realtime]
+    studio --> meta[meta]
+    auth --> db[(db · Postgres)]
+    rest --> db
+    storage --> db
+    realtime --> db
+    meta --> db
+    functions --> db
+    analytics[analytics] --> db
+    storage --> imgproxy[imgproxy]
+    vector[vector] --> analytics
+```
+
 ## Variáveis de ambiente
 
 ### Segredos (obrigatórios — sem default)

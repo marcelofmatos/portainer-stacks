@@ -4,6 +4,15 @@
 então alcança a stack `mariadb` direto pelo host `mariadb`. `PMA_ARBITRARY=1` ainda permite
 informar outro host do banco na própria tela de login (para administrar vários MySQL/MariaDB).
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    usuario((Usuário)) -->|HTTPS PMA_FQDN| traefik[Traefik · web]
+    traefik --> pma[phpMyAdmin]
+    pma -->|3306 · data| mariadb[(mariadb · PMA_HOSTS)]
+```
+
 ## Variáveis de ambiente
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|

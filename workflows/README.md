@@ -10,6 +10,15 @@ como banco de dados persistente.
 | `n8n` | `n8nio/n8n` | editor + execução de workflows (porta interna 5678) | `default` + `web` |
 | `db` | `postgres` | banco de dados do n8n | `default` |
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    usuario((Usuário/Webhook)) -->|HTTPS N8N_FQDN| traefik[Traefik · web]
+    traefik --> n8n[n8n]
+    n8n -->|5432 · default| db[(db · PostgreSQL)]
+```
+
 ## Variáveis de ambiente
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|

@@ -11,6 +11,16 @@ rede externa `ldap` para que outras stacks autentiquem no diretório
 |---|---|---|---|
 | `server` | `lldap/lldap` | `LLDAP_FQDN` (UI) · `lldap_server:3890` (LDAP) | diretório + administração web |
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    admin((Admin)) -->|HTTPS LLDAP_FQDN| traefik[Traefik · web]
+    traefik -->|UI 17170| lldap[lldap · server]
+    apps[Outras stacks] -.->|LDAP 3890 · ldap lldap_server| lldap
+    lldap --> vol[(volume · SQLite)]
+```
+
 ## Variáveis de ambiente
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|

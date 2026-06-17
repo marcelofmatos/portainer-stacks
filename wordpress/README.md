@@ -3,6 +3,15 @@
 **WordPress** (CMS/blog) publicado via Traefik v3 com TLS. Reaproveita o **MariaDB compartilhado**
 (stack `mariadb`) na rede `data` — não sobe banco próprio.
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    usuario((Usuário)) -->|HTTPS WORDPRESS_FQDN| traefik[Traefik · web]
+    traefik --> wp[WordPress]
+    wp -->|3306 · data| mariadb[(mariadb)]
+```
+
 ## Variáveis de ambiente
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|

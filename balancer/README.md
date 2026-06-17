@@ -4,6 +4,16 @@ Reverse proxy **Traefik v3** para Docker Swarm, com TLS automático via Let's En
 (httpchallenge) e dashboard protegido por basicauth. Cria o ponto de entrada (`:80`/`:443`) e
 usa a rede externa pública por onde as demais stacks publicam.
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    internet((Internet)) -->|80/443| traefik[Traefik v3]
+    admin((Admin)) -->|HTTPS dashboard| traefik
+    traefik -.->|TLS Let's Encrypt| acme[ACME httpchallenge]
+    traefik -->|rede web| stacks[Stacks expostas]
+```
+
 ## Variáveis de ambiente
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|

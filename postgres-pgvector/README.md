@@ -16,6 +16,15 @@ externa compartilhada `data`. Outras stacks anexam essa mesma rede e conectam pe
 |---|---|---|
 | `postgres` | `pgvector/pgvector` | PostgreSQL com extensão `vector` |
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    apps[Stacks consumidoras] -->|5432 · data| postgres[(postgres · pgvector)]
+    postgres --> cfg[/Docker config · init/]
+    postgres --> vol[(volume)]
+```
+
 ## Variáveis de ambiente
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|

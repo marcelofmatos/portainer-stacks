@@ -10,6 +10,17 @@ Usa **Redis** (rede interna) para sessões.
 | `authelia` | `authelia/authelia` | `AUTHELIA_FQDN` | portal de login / forward-auth |
 | `redis` | `redis` | interno (`redis:6379`) | armazenamento de sessões |
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    usuario((Usuário)) -->|HTTPS AUTHELIA_FQDN| traefik[Traefik · web]
+    traefik --> authelia[authelia]
+    authelia -->|sessões · default| redis[(redis)]
+    apps[Outras stacks] -.->|forward-auth authelia@swarm| traefik
+    authelia -.->|LDAP opcional · ldap| account[(account_ldap)]
+```
+
 ## Variáveis de ambiente
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|

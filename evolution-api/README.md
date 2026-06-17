@@ -4,6 +4,16 @@
 serviços compartilhados da rede `data`: **PostgreSQL** (stack `postgres-pgvector`) e **Redis**
 (stack `redis`) — não sobe banco/cache próprios.
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    cliente((Usuário/Webhook)) -->|HTTPS EVOLUTION_FQDN| traefik[Traefik · web]
+    traefik --> evo[evolution-api]
+    evo -->|5432 · data| pg[(postgres · pgvector)]
+    evo -->|6379 · data| redis[(redis)]
+```
+
 ## Variáveis de ambiente
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|
