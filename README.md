@@ -37,6 +37,8 @@ fica no repositório.
 | [`evolution-api`](evolution-api/) | API de WhatsApp (usa `postgres-pgvector` + `redis`) | [README](evolution-api/README.md) |
 | [`rocketchat`](rocketchat/) | Chat de equipe + MongoDB | [README](rocketchat/README.md) |
 | [`joomla`](joomla/) | CMS Joomla + MySQL | [README](joomla/README.md) |
+| [`wordpress`](wordpress/) | CMS/blog WordPress (usa `mariadb`) | [README](wordpress/README.md) |
+| [`wikijs`](wikijs/) | Wiki em Markdown (usa `postgres-pgvector`) | [README](wikijs/README.md) |
 | [`moodle`](moodle/) | LMS Moodle + MariaDB | [README](moodle/README.md) |
 
 ### Bancos e cache (compartilhados, rede `data`)

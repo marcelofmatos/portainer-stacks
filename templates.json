@@ -430,6 +430,46 @@
     },
     {
       "type": 2,
+      "title": "wordpress — CMS/blog",
+      "name": "wordpress",
+      "description": "WordPress via Traefik v3 com TLS. Usa o MariaDB compartilhado (stack mariadb) na rede `data` — nao sobe banco proprio.",
+      "note": "PRE-REQUISITO: redes `web` e `data`; stack mariadb na `data`; e o banco/usuario `wordpress` criado no MariaDB. Veja o README.",
+      "categories": ["cms"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/wordpress.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "wordpress/docker-compose.yml" },
+      "env": [
+        { "name": "WORDPRESS_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: blog.exemplo.com" },
+        { "name": "WORDPRESS_DB_PASSWORD", "label": "Senha do banco", "description": "Senha do usuario do MariaDB" },
+        { "name": "WORDPRESS_DB_HOST", "label": "Host do banco", "default": "mariadb" },
+        { "name": "WORDPRESS_DB_NAME", "label": "Banco", "default": "wordpress" },
+        { "name": "WORDPRESS_DB_USER", "label": "Usuario do banco", "default": "wordpress" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" },
+        { "name": "DATA_NET", "label": "Rede de dados", "default": "data" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "wikijs — wiki em Markdown",
+      "name": "wikijs",
+      "description": "Wiki.js: wiki moderno baseado em Markdown (busca, versionamento, ACL). Via Traefik v3. Usa o PostgreSQL compartilhado (stack postgres-pgvector) na rede `data`.",
+      "note": "PRE-REQUISITO: redes `web` e `data`; stack postgres-pgvector na `data`; e o banco/usuario `wikijs` criado no PostgreSQL. Veja o README.",
+      "categories": ["documentation", "wiki"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/wikijs.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "wikijs/docker-compose.yml" },
+      "env": [
+        { "name": "WIKIJS_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: wiki.exemplo.com" },
+        { "name": "WIKIJS_DB_PASSWORD", "label": "Senha do banco", "description": "Senha do usuario do PostgreSQL" },
+        { "name": "WIKIJS_DB_HOST", "label": "Host do banco", "default": "postgres" },
+        { "name": "WIKIJS_DB_NAME", "label": "Banco", "default": "wikijs" },
+        { "name": "WIKIJS_DB_USER", "label": "Usuario do banco", "default": "wikijs" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" },
+        { "name": "DATA_NET", "label": "Rede de dados", "default": "data" }
+      ]
+    },
+    {
+      "type": 2,
       "title": "supabase — backend self-hosted",
       "name": "supabase",
       "description": "Supabase self-hosted (Postgres + Studio + Kong/API + Auth + REST + Realtime + Storage + Functions...) adaptado para Docker Swarm. Studio e API expostos via Traefik v3.",

@@ -1,0 +1,41 @@
+# Stack "wikijs" — Wiki.js (wiki em Markdown) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt.
+# Usa o PostgreSQL compartilhado (stack `postgres-pgvector`) na rede `data` — não sobe banco próprio.
+# O conteúdo (markdown) fica no banco; serviço stateless.
+services:
+  wikijs:
+    image: requarks/wiki:${WIKIJS_IMAGE_TAG:-2}
+    networks:
+      - default
+      - web
+      - data
+    environment:
+      - DB_TYPE=postgres
+      - DB_HOST=${WIKIJS_DB_HOST:-postgres}
+      - DB_PORT=${WIKIJS_DB_PORT:-5432}
+      - DB_USER=${WIKIJS_DB_USER:-wikijs}
+      - DB_PASS=${WIKIJS_DB_PASSWORD}
+      - DB_NAME=${WIKIJS_DB_NAME:-wikijs}
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.wikijs.rule=Host(`${WIKIJS_FQDN}`)
+        - traefik.http.routers.wikijs.entrypoints=websecure
+        - traefik.http.routers.wikijs.tls=true
+        - traefik.http.routers.wikijs.tls.certresolver=letsencryptresolver
+        - traefik.http.services.wikijs.loadbalancer.server.port=3000
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: overlay
