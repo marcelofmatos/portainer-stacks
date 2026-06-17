@@ -1482,6 +1482,7 @@
         "productivity"
       ],
       "platform": "linux",
+      "logo": "https://api.iconify.design/tabler/address-book.svg?color=%23a855f7&height=128",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
         "stackfile": "twenty/docker-compose.yml"
@@ -1600,6 +1601,7 @@
         "automation"
       ],
       "platform": "linux",
+      "logo": "https://api.iconify.design/tabler/message-chatbot.svg?color=%230ea5e9&height=128",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
         "stackfile": "typebot/docker-compose.yml"
