@@ -1,0 +1,77 @@
+# Stack "espocrm" — EspoCRM (CRM open source) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Usa o MariaDB compartilhado (stack `mariadb`) na rede `data` — não sobe banco próprio.
+#
+# O serviço `espocrm-daemon` roda o cron/jobs do EspoCRM e compartilha o mesmo volume do web.
+# NOTA (volume em Swarm): o volume é local ao nó e é compartilhado por dois serviços — em cluster
+# multi-worker fixe AMBOS no mesmo nó definindo WORKER_HOSTNAME e descomentando o constraint.
+services:
+  espocrm:
+    image: espocrm/espocrm:${ESPOCRM_IMAGE_TAG:-8.4}
+    networks:
+      - default
+      - web
+      - data
+    environment:
+      - ESPOCRM_DATABASE_PLATFORM=Mysql
+      - ESPOCRM_DATABASE_HOST=${ESPOCRM_DB_HOST:-mariadb}
+      - ESPOCRM_DATABASE_PORT=${ESPOCRM_DB_PORT:-3306}
+      - ESPOCRM_DATABASE_NAME=${ESPOCRM_DB_NAME:-espocrm}
+      - ESPOCRM_DATABASE_USER=${ESPOCRM_DB_USER:-espocrm}
+      - ESPOCRM_DATABASE_PASSWORD=${ESPOCRM_DB_PASSWORD}
+      - ESPOCRM_ADMIN_USERNAME=${ESPOCRM_ADMIN_USERNAME:-admin}
+      - ESPOCRM_ADMIN_PASSWORD=${ESPOCRM_ADMIN_PASSWORD}
+      - ESPOCRM_SITE_URL=https://${ESPOCRM_FQDN}
+    volumes:
+      - espocrm-data:/var/www/html
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}   # fixe em cluster multi-worker (volume local ao nó)
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.espocrm.rule=Host(`${ESPOCRM_FQDN}`)
+        - traefik.http.routers.espocrm.entrypoints=websecure
+        - traefik.http.routers.espocrm.tls=true
+        - traefik.http.routers.espocrm.tls.certresolver=letsencryptresolver
+        - traefik.http.services.espocrm.loadbalancer.server.port=80
+
+  espocrm-daemon:
+    image: espocrm/espocrm:${ESPOCRM_IMAGE_TAG:-8.4}
+    command: docker-daemon.sh
+    networks:
+      - default
+      - data
+    environment:
+      - ESPOCRM_DATABASE_PLATFORM=Mysql
+      - ESPOCRM_DATABASE_HOST=${ESPOCRM_DB_HOST:-mariadb}
+      - ESPOCRM_DATABASE_PORT=${ESPOCRM_DB_PORT:-3306}
+      - ESPOCRM_DATABASE_NAME=${ESPOCRM_DB_NAME:-espocrm}
+      - ESPOCRM_DATABASE_USER=${ESPOCRM_DB_USER:-espocrm}
+      - ESPOCRM_DATABASE_PASSWORD=${ESPOCRM_DB_PASSWORD}
+    volumes:
+      - espocrm-data:/var/www/html
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}   # fixe no MESMO nó do serviço espocrm
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: overlay
+
+volumes:
+  espocrm-data:
+    driver: local

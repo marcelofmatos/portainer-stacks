@@ -44,6 +44,10 @@ fica no repositório.
 | [`moodle`](moodle/) | LMS Moodle + MariaDB | [README](moodle/README.md) |
 | [`ligerosmart`](ligerosmart/) | Help desk / ITSM (base OTRS) + MariaDB + Elasticsearch | [README](ligerosmart/README.md) |
 | [`mailtester`](mailtester/) | MailCatcher (captura de e-mails em dev) | [README](mailtester/README.md) |
+| [`espocrm`](espocrm/) | CRM (contas/contatos/funil) — usa `mariadb` | [README](espocrm/README.md) |
+| [`twenty`](twenty/) | CRM moderno — usa `postgres-pgvector` + `redis` | [README](twenty/README.md) |
+| [`chatwoot`](chatwoot/) | Atendimento omnichannel + WhatsApp (integra `evolution-api`) | [README](chatwoot/README.md) |
+| [`typebot`](typebot/) | Construtor de chatbots (builder + viewer) — usa `postgres-pgvector` | [README](typebot/README.md) |
 
 ### Bancos e cache (compartilhados, rede `data`)
 | Stack | Descrição | Doc |
@@ -59,6 +63,7 @@ fica no repositório.
 | [`litellm`](litellm/) | Gateway OpenAI-compatible para LLMs | [README](litellm/README.md) |
 | [`chromadb`](chromadb/) | Vector database (RAG) | [README](chromadb/README.md) |
 | [`supabase`](supabase/) | Backend self-hosted (Postgres+Auth+API+Studio...) | [README](supabase/README.md) |
+| [`flowise`](flowise/) | Builder de agentes de IA (LLM/RAG) — usa `litellm`/`ollama` | [README](flowise/README.md) |
 
 > Ordem sugerida de deploy: **balancer** primeiro (cria o ponto de entrada). Depois as demais em qualquer ordem; `error-pages`/`authelia` viram middlewares que você aplica nas outras stacks.
 

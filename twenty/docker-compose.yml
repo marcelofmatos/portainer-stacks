@@ -1,0 +1,74 @@
+# Stack "twenty" — Twenty (CRM open source moderno) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Usa os serviços compartilhados da rede `data`: PostgreSQL (stack postgres-pgvector) e Redis (stack redis).
+# NÃO sobe banco/cache próprios.
+#
+# O serviço `worker` processa filas/jobs assíncronos (BullMQ no Redis) e usa a mesma config do server.
+# NOTA (volume em Swarm): o volume de anexos é local ao nó — em cluster multi-worker fixe o `server`
+# definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+services:
+  server:
+    image: twentycrm/twenty:${TWENTY_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+      - data
+    environment:
+      - NODE_PORT=3000
+      - SERVER_URL=https://${TWENTY_FQDN}
+      - PG_DATABASE_URL=postgres://${TWENTY_DB_USER:-postgres}:${TWENTY_DB_PASSWORD}@${TWENTY_DB_HOST:-postgres}:${TWENTY_DB_PORT:-5432}/${TWENTY_DB_NAME:-twenty}
+      - REDIS_URL=${TWENTY_REDIS_URL:-redis://redis:6379}
+      - APP_SECRET=${TWENTY_APP_SECRET}
+      - STORAGE_TYPE=local
+    volumes:
+      - twenty-data:/app/packages/twenty-server/.local-storage
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}   # fixe em cluster multi-worker (volume local ao nó)
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.twenty.rule=Host(`${TWENTY_FQDN}`)
+        - traefik.http.routers.twenty.entrypoints=websecure
+        - traefik.http.routers.twenty.tls=true
+        - traefik.http.routers.twenty.tls.certresolver=letsencryptresolver
+        - traefik.http.services.twenty.loadbalancer.server.port=3000
+
+  worker:
+    image: twentycrm/twenty:${TWENTY_IMAGE_TAG:-latest}
+    command: ["yarn", "worker:prod"]
+    networks:
+      - default
+      - data
+    environment:
+      - SERVER_URL=https://${TWENTY_FQDN}
+      - PG_DATABASE_URL=postgres://${TWENTY_DB_USER:-postgres}:${TWENTY_DB_PASSWORD}@${TWENTY_DB_HOST:-postgres}:${TWENTY_DB_PORT:-5432}/${TWENTY_DB_NAME:-twenty}
+      - REDIS_URL=${TWENTY_REDIS_URL:-redis://redis:6379}
+      - APP_SECRET=${TWENTY_APP_SECRET}
+      - STORAGE_TYPE=local
+    volumes:
+      - twenty-data:/app/packages/twenty-server/.local-storage
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}   # fixe no MESMO nó do server
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: overlay
+
+volumes:
+  twenty-data:
+    driver: local

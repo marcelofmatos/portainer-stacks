@@ -1415,6 +1415,276 @@
           "default": "web"
         }
       ]
+    },
+    {
+      "type": 2,
+      "title": "espocrm — CRM",
+      "name": "espocrm",
+      "description": "EspoCRM (CRM open source: contas, contatos, oportunidades, funil, e-mail, automacoes). Publicado via Traefik v3 com TLS e reaproveita o MariaDB compartilhado (stack mariadb) na rede data. Inclui o daemon de jobs agendados.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `mariadb` com um banco/usuario para o EspoCRM. DNS do FQDN apontando para o host.",
+      "categories": [
+        "crm",
+        "productivity"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/espocrm.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "espocrm/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "ESPOCRM_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: crm.exemplo.com"
+        },
+        {
+          "name": "ESPOCRM_DB_PASSWORD",
+          "label": "Senha do MariaDB",
+          "description": "Senha do usuario do banco (segredo)"
+        },
+        {
+          "name": "ESPOCRM_ADMIN_PASSWORD",
+          "label": "Senha do admin",
+          "description": "Senha do admin criado no primeiro deploy (segredo)"
+        },
+        {
+          "name": "ESPOCRM_ADMIN_USERNAME",
+          "label": "Usuario admin",
+          "default": "admin"
+        },
+        {
+          "name": "ESPOCRM_DB_HOST",
+          "label": "Host do MariaDB",
+          "default": "mariadb"
+        },
+        {
+          "name": "ESPOCRM_DB_NAME",
+          "label": "Banco",
+          "default": "espocrm"
+        },
+        {
+          "name": "ESPOCRM_DB_USER",
+          "label": "Usuario do MariaDB",
+          "default": "espocrm"
+        }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "twenty — CRM",
+      "name": "twenty",
+      "description": "Twenty (CRM open source moderno, UI estilo Notion/Airtable: contatos, empresas, oportunidades, workflows). Publicado via Traefik v3 com TLS e reaproveita PostgreSQL (stack postgres-pgvector) e Redis (stack redis) na rede data. Inclui worker de jobs assincronos.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data`, a stack `postgres-pgvector` com um banco e a stack `redis`. DNS do FQDN apontando para o host. Recomenda-se fixar TWENTY_IMAGE_TAG em producao.",
+      "categories": [
+        "crm",
+        "productivity"
+      ],
+      "platform": "linux",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "twenty/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "TWENTY_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: twenty.exemplo.com"
+        },
+        {
+          "name": "TWENTY_APP_SECRET",
+          "label": "App secret",
+          "description": "Segredo da aplicacao (openssl rand -base64 32)"
+        },
+        {
+          "name": "TWENTY_DB_PASSWORD",
+          "label": "Senha do PostgreSQL",
+          "description": "Senha do usuario do banco (segredo)"
+        },
+        {
+          "name": "TWENTY_DB_HOST",
+          "label": "Host do PostgreSQL",
+          "default": "postgres"
+        },
+        {
+          "name": "TWENTY_DB_NAME",
+          "label": "Banco",
+          "default": "twenty"
+        },
+        {
+          "name": "TWENTY_DB_USER",
+          "label": "Usuario do PostgreSQL",
+          "default": "postgres"
+        },
+        {
+          "name": "TWENTY_REDIS_URL",
+          "label": "URI do Redis",
+          "default": "redis://redis:6379"
+        },
+        {
+          "name": "TWENTY_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "latest"
+        }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "chatwoot — atendimento omnichannel",
+      "name": "chatwoot",
+      "description": "Chatwoot (atendimento ao cliente / CRM de conversas: caixa de entrada compartilhada, WhatsApp, e-mail, chat de site). Publicado via Traefik v3 com TLS e reaproveita PostgreSQL (stack postgres-pgvector) e Redis (stack redis) na rede data. Integra com a stack evolution-api como canal de WhatsApp.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data`, a stack `postgres-pgvector` (com a extensao vector) e a stack `redis`. Na PRIMEIRA execucao rode `rails db:chatwoot_prepare` (ver README). DNS do FQDN apontando para o host.",
+      "categories": [
+        "crm",
+        "support",
+        "communication"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/chatwoot.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "chatwoot/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "CHATWOOT_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: chat.exemplo.com"
+        },
+        {
+          "name": "CHATWOOT_SECRET_KEY_BASE",
+          "label": "Secret key base",
+          "description": "Chave de sessao Rails (openssl rand -hex 64)"
+        },
+        {
+          "name": "CHATWOOT_DB_PASSWORD",
+          "label": "Senha do PostgreSQL",
+          "description": "Senha do usuario do banco (segredo)"
+        },
+        {
+          "name": "CHATWOOT_DB_HOST",
+          "label": "Host do PostgreSQL",
+          "default": "postgres"
+        },
+        {
+          "name": "CHATWOOT_DB_NAME",
+          "label": "Banco",
+          "default": "chatwoot"
+        },
+        {
+          "name": "CHATWOOT_DB_USER",
+          "label": "Usuario do PostgreSQL",
+          "default": "postgres"
+        },
+        {
+          "name": "CHATWOOT_REDIS_URL",
+          "label": "URI do Redis",
+          "default": "redis://redis:6379"
+        },
+        {
+          "name": "CHATWOOT_ENABLE_SIGNUP",
+          "label": "Permitir auto-cadastro",
+          "default": "false"
+        }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "typebot — construtor de chatbots",
+      "name": "typebot",
+      "description": "Typebot (builder visual de chatbots/fluxos conversacionais) com builder e viewer. Publicado via Traefik v3 com TLS e reaproveita o PostgreSQL compartilhado (stack postgres-pgvector) na rede data. Os fluxos publicados podem ser entregues no WhatsApp via stack evolution-api.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `postgres-pgvector` com um banco. Use DOIS FQDNs (builder e viewer) com DNS apontando para o host. Armazenamento de midia via MinIO e opcional.",
+      "categories": [
+        "chatbot",
+        "automation"
+      ],
+      "platform": "linux",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "typebot/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "TYPEBOT_BUILDER_FQDN",
+          "label": "Dominio do builder",
+          "description": "Ex.: typebot.exemplo.com"
+        },
+        {
+          "name": "TYPEBOT_VIEWER_FQDN",
+          "label": "Dominio do viewer",
+          "description": "Ex.: bot.exemplo.com"
+        },
+        {
+          "name": "TYPEBOT_ENCRYPTION_SECRET",
+          "label": "Encryption secret",
+          "description": "32 chars (openssl rand -base64 24)"
+        },
+        {
+          "name": "TYPEBOT_DB_PASSWORD",
+          "label": "Senha do PostgreSQL",
+          "description": "Senha do usuario do banco (segredo)"
+        },
+        {
+          "name": "TYPEBOT_ADMIN_EMAIL",
+          "label": "E-mail do admin",
+          "description": "E-mail que vira admin no primeiro acesso"
+        },
+        {
+          "name": "TYPEBOT_DB_HOST",
+          "label": "Host do PostgreSQL",
+          "default": "postgres"
+        },
+        {
+          "name": "TYPEBOT_DB_NAME",
+          "label": "Banco",
+          "default": "typebot"
+        },
+        {
+          "name": "TYPEBOT_DB_USER",
+          "label": "Usuario do PostgreSQL",
+          "default": "postgres"
+        }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "flowise — agentes de IA (LLM)",
+      "name": "flowise",
+      "description": "Flowise (construtor visual de chatbots/agentes LLM, RAG e fluxos). Publicado via Traefik v3 com TLS, persiste em SQLite no volume local e protege o acesso por usuario/senha. Consome LLMs das stacks litellm/ollama e pode entregar respostas no WhatsApp via stack evolution-api.",
+      "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. LLMs (litellm/ollama) e WhatsApp (evolution-api) sao opcionais.",
+      "categories": [
+        "ai",
+        "chatbot",
+        "automation"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/flowise.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "flowise/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "FLOWISE_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: flowise.exemplo.com"
+        },
+        {
+          "name": "FLOWISE_PASSWORD",
+          "label": "Senha de login",
+          "description": "Senha da UI (segredo)"
+        },
+        {
+          "name": "FLOWISE_USERNAME",
+          "label": "Usuario de login",
+          "default": "admin"
+        },
+        {
+          "name": "FLOWISE_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "latest"
+        }
+      ]
     }
   ]
 }

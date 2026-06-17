@@ -1,0 +1,91 @@
+# Stack "chatwoot" — Chatwoot (atendimento omnichannel) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Usa os serviços compartilhados da rede `data`: PostgreSQL (stack postgres-pgvector) e Redis (stack redis).
+# NÃO sobe banco/cache próprios.
+#
+# `rails` = web/API (porta 3000); `sidekiq` = jobs assíncronos. Integra com a stack `evolution-api`
+# como canal de WhatsApp (configurado na UI / via integração da Evolution).
+#
+# IMPORTANTE: na PRIMEIRA execução prepare o banco (migrações + seed). Veja a seção "Uso" do README.
+services:
+  rails:
+    image: chatwoot/chatwoot:${CHATWOOT_IMAGE_TAG:-v4.6.0}
+    entrypoint: docker/entrypoints/rails.sh
+    command: ["bundle", "exec", "rails", "s", "-p", "3000", "-b", "0.0.0.0"]
+    networks:
+      - default
+      - web
+      - data
+    environment:
+      - INSTALLATION_ENV=docker
+      - RAILS_ENV=production
+      - NODE_ENV=production
+      - RAILS_LOG_TO_STDOUT=true
+      - SECRET_KEY_BASE=${CHATWOOT_SECRET_KEY_BASE}
+      - FRONTEND_URL=https://${CHATWOOT_FQDN}
+      - POSTGRES_HOST=${CHATWOOT_DB_HOST:-postgres}
+      - POSTGRES_PORT=${CHATWOOT_DB_PORT:-5432}
+      - POSTGRES_USERNAME=${CHATWOOT_DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${CHATWOOT_DB_PASSWORD}
+      - POSTGRES_DATABASE=${CHATWOOT_DB_NAME:-chatwoot}
+      - REDIS_URL=${CHATWOOT_REDIS_URL:-redis://redis:6379}
+      - ENABLE_ACCOUNT_SIGNUP=${CHATWOOT_ENABLE_SIGNUP:-false}
+    volumes:
+      - chatwoot-storage:/app/storage
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}   # fixe em cluster multi-worker (volume local ao nó)
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.chatwoot.rule=Host(`${CHATWOOT_FQDN}`)
+        - traefik.http.routers.chatwoot.entrypoints=websecure
+        - traefik.http.routers.chatwoot.tls=true
+        - traefik.http.routers.chatwoot.tls.certresolver=letsencryptresolver
+        - traefik.http.services.chatwoot.loadbalancer.server.port=3000
+
+  sidekiq:
+    image: chatwoot/chatwoot:${CHATWOOT_IMAGE_TAG:-v4.6.0}
+    command: ["bundle", "exec", "sidekiq", "-C", "config/sidekiq.yml"]
+    networks:
+      - default
+      - data
+    environment:
+      - INSTALLATION_ENV=docker
+      - RAILS_ENV=production
+      - NODE_ENV=production
+      - RAILS_LOG_TO_STDOUT=true
+      - SECRET_KEY_BASE=${CHATWOOT_SECRET_KEY_BASE}
+      - FRONTEND_URL=https://${CHATWOOT_FQDN}
+      - POSTGRES_HOST=${CHATWOOT_DB_HOST:-postgres}
+      - POSTGRES_PORT=${CHATWOOT_DB_PORT:-5432}
+      - POSTGRES_USERNAME=${CHATWOOT_DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${CHATWOOT_DB_PASSWORD}
+      - POSTGRES_DATABASE=${CHATWOOT_DB_NAME:-chatwoot}
+      - REDIS_URL=${CHATWOOT_REDIS_URL:-redis://redis:6379}
+    volumes:
+      - chatwoot-storage:/app/storage
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}   # fixe no MESMO nó do rails
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: overlay
+
+volumes:
+  chatwoot-storage:
+    driver: local

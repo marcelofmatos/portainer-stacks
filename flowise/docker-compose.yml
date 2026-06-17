@@ -1,0 +1,50 @@
+# Stack "flowise" — Flowise (builder de agentes de IA / LLM) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Persistência em SQLite no volume local (/root/.flowise). Login protegido por usuário/senha.
+#
+# Consome LLMs das stacks `litellm`/`ollama` (via FQDN público) e pode entregar respostas no
+# WhatsApp chamando a stack `evolution-api`.
+# NOTA (volume em Swarm): o volume é local ao nó — em cluster multi-worker fixe o serviço definindo
+# WORKER_HOSTNAME e descomentando o constraint de hostname.
+services:
+  flowise:
+    image: flowiseai/flowise:${FLOWISE_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+    environment:
+      - PORT=3000
+      - FLOWISE_USERNAME=${FLOWISE_USERNAME:-admin}
+      - FLOWISE_PASSWORD=${FLOWISE_PASSWORD}
+      - DATABASE_PATH=/root/.flowise
+      - APIKEY_PATH=/root/.flowise
+      - SECRETKEY_PATH=/root/.flowise
+      - LOG_PATH=/root/.flowise/logs
+      - BLOB_STORAGE_PATH=/root/.flowise/storage
+    volumes:
+      - flowise-data:/root/.flowise
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}   # fixe em cluster multi-worker (volume local ao nó)
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.flowise.rule=Host(`${FLOWISE_FQDN}`)
+        - traefik.http.routers.flowise.entrypoints=websecure
+        - traefik.http.routers.flowise.tls=true
+        - traefik.http.routers.flowise.tls.certresolver=letsencryptresolver
+        - traefik.http.services.flowise.loadbalancer.server.port=3000
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay
+
+volumes:
+  flowise-data:
+    driver: local
