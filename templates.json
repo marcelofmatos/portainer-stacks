@@ -1299,6 +1299,34 @@
           "default": "web"
         }
       ]
+    },
+    {
+      "type": 2,
+      "title": "mailtester — MailCatcher",
+      "name": "mailtester",
+      "description": "Servidor SMTP de captura para dev/homologacao: os apps enviam e-mail, nada sai de verdade e tudo cai numa UI web. Apps na rede `web` usam o host mailtester_mailcatcher:1025.",
+      "note": "Sink efemero (sem persistencia). Os apps que enviam e-mail precisam estar na rede `web`. SMTP sem TLS e sem autenticacao.",
+      "categories": [
+        "mail",
+        "development"
+      ],
+      "platform": "linux",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "mailtester/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "MAILTESTER_FQDN",
+          "label": "Dominio da UI",
+          "description": "Ex.: mail.exemplo.com"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
+      ]
     }
   ]
 }

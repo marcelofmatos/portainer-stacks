@@ -41,6 +41,7 @@ fica no repositório.
 | [`wordpress`](wordpress/) | CMS/blog WordPress (usa `mariadb`) | [README](wordpress/README.md) |
 | [`wikijs`](wikijs/) | Wiki em Markdown (usa `postgres-pgvector`) | [README](wikijs/README.md) |
 | [`moodle`](moodle/) | LMS Moodle + MariaDB | [README](moodle/README.md) |
+| [`mailtester`](mailtester/) | MailCatcher (captura de e-mails em dev) | [README](mailtester/README.md) |
 
 ### Bancos e cache (compartilhados, rede `data`)
 | Stack | Descrição | Doc |

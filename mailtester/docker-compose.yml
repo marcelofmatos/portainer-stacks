@@ -1,0 +1,36 @@
+# Stack "mailtester" — MailCatcher (captura de e-mails em dev/homologação) (Docker Swarm)
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Sink SMTP que captura tudo que os apps enviam (nada sai de verdade) e mostra numa UI web.
+#
+# Outras stacks na rede `web` enviam SMTP para `mailtester_mailcatcher:1025`;
+# a interface de leitura fica em MAILTESTER_FQDN.
+#
+# Customização por variáveis de ambiente (ver README). Obrigatória: MAILTESTER_FQDN.
+
+services:
+
+  mailcatcher:
+    image: jeanberu/mailcatcher:${MAILCATCHER_IMAGE_TAG:-latest}
+    command: mailcatcher --foreground --ip=0.0.0.0 --smtp-port=1025 --http-port=1080
+    environment:
+      - TZ=${TZ:-UTC}
+    networks:
+      - web
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.mailtester.rule=Host(`${MAILTESTER_FQDN}`)
+        - traefik.http.routers.mailtester.entrypoints=websecure
+        - traefik.http.routers.mailtester.tls=true
+        - traefik.http.routers.mailtester.tls.certresolver=letsencryptresolver
+        - traefik.http.services.mailtester.loadbalancer.server.port=1080
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
