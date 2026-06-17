@@ -27,6 +27,8 @@ flowchart LR
 | `WORKER_HOSTNAME` | não | — | fixa o volume num nó (cluster multi-worker) |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 2 vCPU · 2 GB RAM · 10 GB disco
+- **Hardware ideal:** 2 vCPU · 4 GB RAM · 20 GB disco
 - Stack `balancer` (Traefik) + rede `web`; DNS de `ANYTHINGLLM_FQDN` apontando para o host.
 - Rede `data` (para alcançar `qdrant`/`chromadb` internamente, se usados).
 - Um backend de LLM (`ollama`/`litellm`) e, opcionalmente, um vector store (`qdrant`/`chromadb`).

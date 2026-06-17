@@ -26,6 +26,8 @@ flowchart LR
 | `WORKER_HOSTNAME` | não | — | fixa o serviço no nó com GPU |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 4 vCPU · 8 GB RAM · 20 GB disco + GPU (VRAM ≥ 6 GB)
+- **Hardware ideal:** 8 vCPU · 16 GB RAM · 50 GB disco + GPU (VRAM ≥ 8 GB)
 - Stack `balancer` (Traefik) + rede `web`; DNS de `COMFYUI_FQDN` apontando para o host.
 - Nó com **GPU NVIDIA**: driver + `nvidia-container-runtime`. Para expor a GPU ao Swarm, configure
   `node-generic-resources` no `daemon.json` do nó e descomente o bloco `generic_resources` do compose:

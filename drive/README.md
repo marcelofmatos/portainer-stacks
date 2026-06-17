@@ -41,6 +41,8 @@ flowchart LR
 | `WORKER_HOSTNAME` | não | — | hostname do worker para fixar volumes (multi-worker) |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 2 vCPU · 2 GB RAM · 20 GB disco
+- **Hardware ideal:** 2 vCPU · 4 GB RAM · 50 GB disco
 - Rede externa do proxy (`web`) e o Traefik (stack `balancer`) já em execução.
 - DNS de `DRIVE_FQDN` apontando para o host público (o Let's Encrypt usa httpchallenge na porta 80).
 - Para autenticação LDAP: rede externa `ldap` e a stack `account` no ar.

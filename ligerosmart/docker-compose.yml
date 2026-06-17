@@ -4,6 +4,7 @@
 #
 # NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster multi-worker, fixe os
 # serviços com volume definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+# Hardware (1 réplica): mínimo 2 vCPU · 4 GB RAM · 20 GB disco · ideal 4 vCPU · 8 GB RAM · 40 GB disco
 services:
   web:
     image: ligero/ligerosmart:${LIGEROSMART_IMAGE_TAG:-6.1-nginx}

@@ -8,6 +8,7 @@
 #
 # NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster com mais de um worker,
 # fixe os serviços com volume definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+# Hardware (1 réplica): mínimo 1 vCPU · 1 GB RAM · 10 GB disco · ideal 2 vCPU · 2 GB RAM · 20 GB disco
 services:
   keycloak:
     image: quay.io/keycloak/keycloak:${KEYCLOAK_IMAGE_TAG:-latest}

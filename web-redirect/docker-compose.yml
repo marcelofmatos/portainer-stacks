@@ -4,6 +4,7 @@
 # antigos, encurtadores simples ou apontar um host para outro serviço.
 #
 # Obrigatórias: REDIRECT_FQDN, REDIRECT_TARGET.
+# Hardware (1 réplica): mínimo 0.25 vCPU · 64 MB RAM · 1 GB disco · ideal 0.5 vCPU · 128 MB RAM · 2 GB disco
 services:
   web-redirect:
     image: morbz/docker-web-redirect:${REDIRECT_IMAGE_TAG:-latest}

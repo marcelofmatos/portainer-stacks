@@ -10,6 +10,7 @@
 #
 # NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster multi-worker, fixe este serviço
 # definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+# Hardware (1 réplica): mínimo 1 vCPU · 1 GB RAM · 10 GB disco · ideal 2 vCPU · 2 GB RAM · 20 GB disco
 services:
   mongodb:
     image: mongo:${MONGO_IMAGE_TAG:-7}

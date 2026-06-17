@@ -23,6 +23,8 @@ flowchart LR
 | `PROXY_NET` | não | `web` | rede externa do Traefik |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 0.25 vCPU · 64 MB RAM · 1 GB disco
+- **Hardware ideal:** 0.5 vCPU · 128 MB RAM · 2 GB disco
 - Stack `balancer` (Traefik) + rede `web`; DNS de `REDIRECT_FQDN` apontando para o host.
 
 ## Uso

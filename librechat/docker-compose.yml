@@ -5,6 +5,7 @@
 #
 # Obrigatórias: LIBRECHAT_FQDN, LIBRECHAT_MONGO_PASSWORD, LIBRECHAT_CREDS_KEY, LIBRECHAT_CREDS_IV,
 #               LIBRECHAT_JWT_SECRET, LIBRECHAT_JWT_REFRESH_SECRET, LIBRECHAT_MEILI_MASTER_KEY.
+# Hardware (1 réplica): mínimo 2 vCPU · 2 GB RAM · 10 GB disco · ideal 2 vCPU · 4 GB RAM · 20 GB disco
 services:
   api:
     image: ghcr.io/danny-avila/librechat:${LIBRECHAT_IMAGE_TAG:-latest}

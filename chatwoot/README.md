@@ -68,6 +68,8 @@ o Instagram **não** passa pela Evolution, e sim pela **Meta Graph / Instagram M
 | `WORKER_HOSTNAME` | não | — | fixa os serviços num nó (cluster multi-worker) |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 2 vCPU · 4 GB RAM · 20 GB disco
+- **Hardware ideal:** 4 vCPU · 8 GB RAM · 40 GB disco
 - Stack `balancer` (Traefik) + rede `web`; DNS de `CHATWOOT_FQDN` apontando para o host.
 - Rede `data`: `docker network create --driver overlay --attachable data` (usada pelas ferramentas de admin).
 - **Não** precisa das stacks `postgres-pgvector` nem `redis`: o banco e o cache sobem junto. Para

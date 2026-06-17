@@ -7,6 +7,25 @@ variáveis de ambiente e troubleshooting.
 Toda a customização é feita por **variáveis de ambiente** (com defaults sensatos); nenhum segredo
 fica no repositório.
 
+## Requisitos de hardware
+
+Cada stack documenta o **hardware mínimo** (sobe e funciona) e o **ideal** (folga para uso real) na
+seção `## Pré-requisitos` do seu README, e repete um resumo no comentário de cabeçalho do
+`docker-compose.yml`. Os números são por **1 réplica** e cobrem os serviços da própria stack — stacks
+que reaproveitam bancos/cache compartilhados (`mariadb`, `postgres-pgvector`, `redis`, `mongodb`) somam
+o consumo dessas stacks por cima. Use-os para dimensionar o nó **worker** antes do deploy: subir uma
+stack pesada num nó sem RAM/CPU suficiente costuma resultar em `502 Bad Gateway` (container reiniciando,
+OOM ou nó sobrecarregado).
+
+Porte das stacks (por RAM, do mínimo ao ideal):
+
+| Porte | RAM (mín → ideal) | Stacks |
+|---|---|---|
+| **Leve** | 64 MB → 512 MB | `error-pages`, `socat`, `web-redirect`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis` |
+| **Médio** | 512 MB → 2 GB | `account`, `keycloak`, `zabbix`, `mariadb`, `postgres-pgvector`, `mongodb`, `chromadb`, `qdrant`, `minio`, `workflows`, `evolution-api`, `joomla`, `wordpress`, `wikijs`, `espocrm`, `typebot`, `stirlingpdf`, `flowise`, `litellm`, `open-webui` |
+| **Pesado** | 2 GB → 4–8 GB | `swarmprom`, `elasticsearch`, `drive`, `rocketchat`, `moodle`, `twenty`, `botpress`, `langfuse`, `librechat`, `anythingllm`, `chatwoot`, `ligerosmart`, `dify`, `supabase` |
+| **GPU / ML** | 8 GB+ (GPU recomendada) | `ollama`, `comfyui`, `ragflow` |
+
 ## Stacks
 
 ### Infra / proxy

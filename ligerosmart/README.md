@@ -45,6 +45,8 @@ flowchart LR
 | `WORKER_HOSTNAME` | não | — | fixa os volumes num nó (cluster multi-worker) |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 2 vCPU · 4 GB RAM · 20 GB disco
+- **Hardware ideal:** 4 vCPU · 8 GB RAM · 40 GB disco
 - Stack `balancer` (Traefik) + rede `web`; DNS de `LIGEROSMART_FQDN` apontando para o host.
 - Recursos: Elasticsearch e o app consomem RAM (ajuste `ES_JAVA_OPTS` conforme o nó).
 

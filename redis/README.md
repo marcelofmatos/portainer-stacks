@@ -24,6 +24,8 @@ flowchart LR
 | `WORKER_HOSTNAME` | não | — | fixa o volume num nó (cluster multi-worker) |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 0.5 vCPU · 256 MB RAM · 2 GB disco
+- **Hardware ideal:** 1 vCPU · 1 GB RAM · 10 GB disco
 - Rede `data` criada: `docker network create --driver overlay --attachable data`.
 
 ## Uso

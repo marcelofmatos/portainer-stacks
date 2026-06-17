@@ -15,6 +15,8 @@ de preview com TLS para visualizar as páginas no navegador.
 | `PROXY_NET` | não | `web` | rede externa do Traefik |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 0.25 vCPU · 64 MB RAM · 2 GB disco
+- **Hardware ideal:** 0.5 vCPU · 128 MB RAM · 5 GB disco
 - Traefik (stack `balancer`) e rede `web` ativos.
 - Para usar o router de preview: DNS de `ERRORPAGES_FQDN` apontando para o host (porta 80 acessível
   para o desafio HTTP do Let's Encrypt).

@@ -10,6 +10,7 @@
 #
 # NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster com mais de um worker,
 # fixe o serviço com volume definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+# Hardware (1 réplica): mínimo 1 vCPU · 512 MB RAM · 20 GB disco · ideal 2 vCPU · 1 GB RAM · 100 GB disco
 services:
   minio:
     image: minio/minio:${MINIO_IMAGE_TAG:-latest}

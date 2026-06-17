@@ -36,6 +36,8 @@ flowchart LR
 > Se for perdida, todas as credenciais salvas no n8n ficam ilegíveis.
 
 ## Pré-requisitos
+- **Hardware mínimo:** 1 vCPU · 1 GB RAM · 10 GB disco
+- **Hardware ideal:** 2 vCPU · 2 GB RAM · 20 GB disco
 - Docker Swarm inicializado.
 - Traefik (stack `balancer`) e rede `web` ativos.
 - DNS de `N8N_FQDN` apontando para o host (porta 80 acessível para o desafio HTTP do Let's Encrypt).

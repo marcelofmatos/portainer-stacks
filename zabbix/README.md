@@ -44,6 +44,8 @@ flowchart LR
 | `DATA_NET` | não | `data` | rede externa p/ ferramentas de admin alcançarem o banco |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 1 vCPU · 1 GB RAM · 10 GB disco
+- **Hardware ideal:** 2 vCPU · 2 GB RAM · 20 GB disco
 - Stack `balancer` (Traefik) + rede `web`; DNS de `ZABBIX_FQDN` apontando para o host.
 - Rede `data`: `docker network create --driver overlay --attachable data` (usada pelas ferramentas de admin).
 - **Não** precisa da stack `postgres-pgvector`: o banco sobe junto. Para administrá-lo, aponte o

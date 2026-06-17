@@ -23,6 +23,7 @@
 #
 # VOLUME EM SWARM: volumes são locais ao nó. Em cluster com +1 worker, fixe `db`/`redis`/apps no mesmo
 # nó definindo WORKER_HOSTNAME e descomentando os constraints `node.hostname` abaixo.
+# Hardware (1 réplica): mínimo 2 vCPU · 4 GB RAM · 20 GB disco · ideal 4 vCPU · 8 GB RAM · 40 GB disco
 services:
   rails:
     image: chatwoot/chatwoot:${CHATWOOT_IMAGE_TAG:-v4.6.0}

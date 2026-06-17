@@ -6,6 +6,7 @@
 # a interface de leitura fica em MAILTESTER_FQDN.
 #
 # Customização por variáveis de ambiente (ver README). Obrigatória: MAILTESTER_FQDN.
+# Hardware (1 réplica): mínimo 0.5 vCPU · 128 MB RAM · 2 GB disco · ideal 0.5 vCPU · 256 MB RAM · 5 GB disco
 
 services:
 

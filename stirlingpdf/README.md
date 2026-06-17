@@ -15,6 +15,8 @@ Todo o processamento acontece no próprio container — nenhum arquivo sai para 
 | `WORKER_HOSTNAME` | não | — | hostname do worker para fixar o serviço (cluster multi-worker; ver NOTA) |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 1 vCPU · 1 GB RAM · 5 GB disco
+- **Hardware ideal:** 2 vCPU · 2 GB RAM · 10 GB disco
 - Docker Swarm inicializado e stack `balancer` (Traefik) com a rede `web` ativos.
 - DNS de `STIRLING_FQDN` apontando para o host (porta 80 acessível para o desafio Let's Encrypt).
 

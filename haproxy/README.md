@@ -26,6 +26,8 @@ flowchart LR
 | `DATA_NET` | não | `data` | rede overlay dos serviços compartilhados |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 0.5 vCPU · 128 MB RAM · 2 GB disco
+- **Hardware ideal:** 1 vCPU · 256 MB RAM · 5 GB disco
 - Stack `balancer` (Traefik) + rede `web`; DNS de `HAPROXY_FQDN` apontando para o host.
 - Rede `data` (se for balancear serviços internos): `docker network create --driver overlay --attachable data`.
 - Gere o basicauth: `htpasswd -nbB usuario senha` → `HAPROXY_AUTH_BASIC`.

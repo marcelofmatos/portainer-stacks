@@ -26,6 +26,8 @@ Os apps na rede `web` apontam o SMTP deles para **`mailtester_mailcatcher:1025`*
 | `TZ` | não | `UTC` | fuso horário |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 0.5 vCPU · 128 MB RAM · 2 GB disco
+- **Hardware ideal:** 0.5 vCPU · 256 MB RAM · 5 GB disco
 - Swarm com a stack `balancer` (Traefik) e a rede overlay `web`.
 - Os apps que vão enviar e-mail precisam estar anexados à mesma rede `web`.
 

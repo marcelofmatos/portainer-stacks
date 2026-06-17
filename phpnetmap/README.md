@@ -25,6 +25,8 @@ flowchart LR
 | `WORKER_HOSTNAME` | não | — | fixa o volume num nó (cluster multi-worker) |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 0.5 vCPU · 256 MB RAM · 5 GB disco
+- **Hardware ideal:** 1 vCPU · 512 MB RAM · 10 GB disco
 - Stack `balancer` (Traefik) + rede `web`; DNS de `PHPNETMAP_FQDN` apontando para o host.
 - Acesso de rede do nó aos dispositivos a monitorar via SNMP (UDP/161) com a community correta.
 

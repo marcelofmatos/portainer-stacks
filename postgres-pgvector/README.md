@@ -36,6 +36,8 @@ flowchart LR
 | `WORKER_HOSTNAME` | não | — | hostname do worker para fixar o volume (cluster multi-worker) |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 1 vCPU · 512 MB RAM · 10 GB disco
+- **Hardware ideal:** 2 vCPU · 2 GB RAM · 20 GB disco
 - Docker **Swarm** ativo.
 - A rede overlay externa `data` precisa existir **antes** de subir a stack (veja abaixo).
 

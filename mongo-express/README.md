@@ -28,6 +28,8 @@ flowchart LR
 | `DATA_NET` | não | `data` | rede overlay dos serviços compartilhados |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 0.5 vCPU · 256 MB RAM · 2 GB disco
+- **Hardware ideal:** 1 vCPU · 512 MB RAM · 5 GB disco
 - Stack `balancer` (Traefik) + rede `web`; DNS de `MONGOEXPRESS_FQDN` apontando para o host.
 - Rede `data` e stack **`mongodb`** ativa.
 

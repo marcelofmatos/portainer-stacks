@@ -13,6 +13,7 @@
 #
 # NOTA (volumes em Swarm): em cluster multi-worker, fixe os serviços definindo WORKER_HOSTNAME
 # e descomentando o constraint de hostname.
+# Hardware (1 réplica): mínimo 1 vCPU · 512 MB RAM · 5 GB disco · ideal 1 vCPU · 1 GB RAM · 10 GB disco
 configs:
   account_ssp_config:
     name: ${SSP_CONFIG_NAME:-account_ssp_config_v1}

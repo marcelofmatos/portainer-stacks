@@ -27,6 +27,8 @@ flowchart LR
 | `WORKER_HOSTNAME` | não | — | fixa o volume/login num nó (cluster multi-worker) |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 0.5 vCPU · 256 MB RAM · 2 GB disco
+- **Hardware ideal:** 1 vCPU · 512 MB RAM · 5 GB disco
 - Stack `balancer` (Traefik) + rede `web`; DNS de `PROTONMAIL_FQDN` apontando para o host.
 - Uma conta ProtonMail (plano com Bridge habilitado).
 

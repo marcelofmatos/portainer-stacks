@@ -24,6 +24,8 @@ flowchart LR
 | `DATA_NET` | não | `data` | rede overlay externa dos bancos compartilhados |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 0.5 vCPU · 256 MB RAM · 2 GB disco
+- **Hardware ideal:** 1 vCPU · 512 MB RAM · 5 GB disco
 - Traefik (stack `balancer`) e rede `web` ativos.
 - Rede `data` criada: `docker network create --driver overlay --attachable data` (usada pela stack `mariadb`).
 - DNS de `PMA_FQDN` apontando para o host.

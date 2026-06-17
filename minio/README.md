@@ -21,6 +21,8 @@ outro para o **Console** web de administração.
 | `WORKER_HOSTNAME` | não | — | hostname do nó para fixar o volume em cluster multi-worker |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 1 vCPU · 512 MB RAM · 20 GB disco
+- **Hardware ideal:** 2 vCPU · 1 GB RAM · 100 GB disco
 - Docker Swarm inicializado e stack `balancer` (Traefik) em execução.
 - Rede overlay externa `web`: `docker network create --driver overlay --attachable web`.
 - DNS de `MINIO_S3_FQDN` **e** `MINIO_CONSOLE_FQDN` apontando para o host (porta 80 acessível

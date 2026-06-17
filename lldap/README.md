@@ -37,6 +37,8 @@ flowchart LR
 | `WORKER_HOSTNAME` | não | — | hostname do worker para fixar o volume (multi-worker) |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 0.25 vCPU · 128 MB RAM · 2 GB disco
+- **Hardware ideal:** 0.5 vCPU · 256 MB RAM · 5 GB disco
 - Swarm com a stack `balancer` (Traefik) ativa e a rede overlay `web`.
 - Rede overlay compartilhada do LDAP:
   `docker network create --driver overlay --attachable ldap`.

@@ -32,6 +32,8 @@ flowchart LR
 | `WORKER_HOSTNAME` | não | — | fixa o volume num nó (cluster multi-worker) |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 2 vCPU · 2 GB RAM · 10 GB disco
+- **Hardware ideal:** 2 vCPU · 4 GB RAM · 20 GB disco
 - Stack `balancer` (Traefik) + rede `web`; DNS de `BOTPRESS_FQDN` apontando para o host.
 - Rede `data`: `docker network create --driver overlay --attachable data` (usada pelas ferramentas de admin).
 - **Não** precisa da stack `postgres-pgvector`: o banco sobe junto. Para administrá-lo, aponte o

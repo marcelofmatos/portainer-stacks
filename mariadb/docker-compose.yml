@@ -13,6 +13,7 @@
 # worker, fixe este serviço definindo WORKER_HOSTNAME e descomentando o constraint
 # de hostname abaixo — caso contrário, ao reagendar em outro nó os dados ficam
 # inacessíveis (volume vazio no novo nó).
+# Hardware (1 réplica): mínimo 1 vCPU · 512 MB RAM · 10 GB disco · ideal 2 vCPU · 2 GB RAM · 20 GB disco
 services:
   mariadb:
     image: mariadb:${MARIADB_IMAGE_TAG:-11}

@@ -51,6 +51,8 @@ flowchart LR
 | `PROXY_NET` | não | `web` | rede externa do Traefik |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 2 vCPU · 2 GB RAM · 20 GB disco
+- **Hardware ideal:** 2 vCPU · 4 GB RAM · 50 GB disco
 - Docker Swarm inicializado.
 - Traefik (stack `balancer`) e rede `web` ativos: `docker network create --driver overlay --attachable web`.
 - DNS de `SWARMPROM_GRAFANA_FQDN` apontando para o host (porta 80 acessível para o desafio ACME).

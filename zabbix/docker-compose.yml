@@ -7,6 +7,7 @@
 # O zabbix-server importa o schema automaticamente num banco vazio na primeira subida.
 #
 # Obrigatórias: ZABBIX_FQDN, ZABBIX_DB_PASSWORD.
+# Hardware (1 réplica): mínimo 1 vCPU · 1 GB RAM · 10 GB disco · ideal 2 vCPU · 2 GB RAM · 20 GB disco
 services:
   zabbix-server:
     image: zabbix/zabbix-server-pgsql:${ZABBIX_IMAGE_TAG:-alpine-7.0-latest}

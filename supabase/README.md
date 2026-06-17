@@ -128,6 +128,8 @@ flowchart LR
 | `WORKER_HOSTNAME` | (vazio) — hostname do worker para fixar `db`/`storage`/`imgproxy` em multi-worker |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 2 vCPU · 4 GB RAM · 40 GB disco
+- **Hardware ideal:** 4 vCPU · 8 GB RAM · 80 GB disco
 - Docker Swarm inicializado; stack `balancer` (Traefik) e rede `web` ativas.
 - DNS de `SUPABASE_STUDIO_FQDN` e `SUPABASE_API_FQDN` apontando para o host.
 - Arquivos de config em `./config/` (o Portainer clona o repo, então os caminhos relativos

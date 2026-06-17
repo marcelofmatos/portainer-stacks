@@ -8,6 +8,7 @@
 # Obrigatórias (segredo): PROTONMAIL_FQDN, PROTONMAIL_WEBUI_AUTH_TOKEN.
 # NOTA (volume em Swarm): o login/keychain do Bridge fica em /root (volume local ao nó). Fixe o serviço
 # definindo WORKER_HOSTNAME e descomentando o constraint — senão será preciso refazer o login ao migrar.
+# Hardware (1 réplica): mínimo 0.5 vCPU · 256 MB RAM · 2 GB disco · ideal 1 vCPU · 512 MB RAM · 5 GB disco
 services:
   smtp:
     image: pattertj/protonmail-bridge:${PROTONMAIL_IMAGE_TAG:-latest}

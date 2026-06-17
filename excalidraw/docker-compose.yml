@@ -5,6 +5,7 @@
 # Serviço único e STATELESS: sem volume, sem banco, sem segredos.
 # Toda customização é feita por variáveis de ambiente (ver README).
 # Obrigatória: EXCALIDRAW_FQDN.
+# Hardware (1 réplica): mínimo 0.5 vCPU · 256 MB RAM · 2 GB disco · ideal 1 vCPU · 512 MB RAM · 5 GB disco
 services:
   excalidraw:
     image: excalidraw/excalidraw:${EXCALIDRAW_IMAGE_TAG:-latest}

@@ -26,6 +26,8 @@ flowchart LR
 | `DATA_NET` | não | `data` | nome da rede overlay externa compartilhada |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 1 vCPU · 512 MB RAM · 10 GB disco
+- **Hardware ideal:** 2 vCPU · 2 GB RAM · 20 GB disco
 - Docker Swarm ativo.
 - Rede overlay externa `data` criada (compartilhada com as stacks que consomem o banco):
   ```

@@ -2,6 +2,7 @@
 # Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt.
 # Também entra na rede overlay externa `data` para alcançar bancos compartilhados (ex.: a stack `mariadb`, host `mariadb`).
 # PMA_ARBITRARY=1 permite informar o host do banco na tela de login.
+# Hardware (1 réplica): mínimo 0.5 vCPU · 256 MB RAM · 2 GB disco · ideal 1 vCPU · 512 MB RAM · 5 GB disco
 services:
   pma:
     image: phpmyadmin/phpmyadmin:${PMA_IMAGE_TAG:-latest}

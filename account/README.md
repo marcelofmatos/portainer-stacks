@@ -43,6 +43,8 @@ flowchart LR
 | `WORKER_HOSTNAME` | não | — | hostname do worker para fixar volumes (multi-worker) |
 
 ## Pré-requisito: Docker configs externos do self-service-password
+- **Hardware mínimo:** 1 vCPU · 512 MB RAM · 5 GB disco
+- **Hardware ideal:** 1 vCPU · 1 GB RAM · 10 GB disco
 O serviço `user` espera 2 Docker configs já existentes no Swarm. Crie-os a partir dos arquivos em
 [`config/`](config/) (ajuste domínio/segredos antes):
 

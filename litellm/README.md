@@ -31,6 +31,8 @@ flowchart LR
 > adicione a variável correspondente na seção `environment` do serviço no `docker-compose.yml`.
 
 ## Pré-requisitos
+- **Hardware mínimo:** 1 vCPU · 1 GB RAM · 5 GB disco
+- **Hardware ideal:** 2 vCPU · 2 GB RAM · 10 GB disco
 - Traefik (stack `balancer`) e rede `web` ativos.
 - DNS de `LITELLM_FQDN` apontando para o host (porta 80 acessível para o desafio Let's Encrypt).
 - Docker config externo com o `config.yaml` criado (abaixo).

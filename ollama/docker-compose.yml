@@ -8,6 +8,7 @@
 # NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster com mais de um worker,
 # fixe o serviço com volume definindo WORKER_HOSTNAME e descomentando o constraint de hostname,
 # senão o estado (modelos baixados) pode "trocar" de nó a cada reagendamento.
+# Hardware (1 réplica): mínimo 2 vCPU · 8 GB RAM · 20 GB disco (CPU, modelos pequenos) · ideal 4 vCPU · 16 GB RAM · 50 GB disco + GPU (VRAM ≥ 8 GB)
 services:
   ollama:
     image: ollama/ollama:${OLLAMA_IMAGE_TAG:-latest}

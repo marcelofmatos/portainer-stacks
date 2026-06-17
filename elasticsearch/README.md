@@ -23,6 +23,8 @@ flowchart LR
 | `WORKER_HOSTNAME` | não | — | fixa o volume num nó (cluster multi-worker) |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 2 vCPU · 2 GB RAM · 20 GB disco
+- **Hardware ideal:** 2 vCPU · 4 GB RAM · 50 GB disco
 - Rede `data`: `docker network create --driver overlay --attachable data`.
 - **`vm.max_map_count`** no host (exigido pelo Elasticsearch):
   ```bash

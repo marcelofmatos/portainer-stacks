@@ -30,6 +30,8 @@ flowchart LR
 | `WORKER_HOSTNAME` | não | — | hostname do worker para fixar o serviço com volume (multi-worker) |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 2 vCPU · 2 GB RAM · 20 GB disco
+- **Hardware ideal:** 2 vCPU · 4 GB RAM · 50 GB disco
 - Docker Swarm inicializado.
 - Stack `balancer` (Traefik) e rede `web` ativos.
 - DNS de `ROCKETCHAT_FQDN` apontando para o host (porta 80 acessível para o desafio HTTP do

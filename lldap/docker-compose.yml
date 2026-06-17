@@ -7,6 +7,7 @@
 #
 # NOTA (volumes em Swarm): o volume é local ao nó. Em cluster com mais de um worker,
 # fixe o serviço definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+# Hardware (1 réplica): mínimo 0.25 vCPU · 128 MB RAM · 2 GB disco · ideal 0.5 vCPU · 256 MB RAM · 5 GB disco
 
 services:
 

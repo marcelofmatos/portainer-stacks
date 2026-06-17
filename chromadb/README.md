@@ -21,6 +21,8 @@ A API HTTP responde internamente na porta `8000`.
 | `WORKER_HOSTNAME` | não | — | hostname do worker para fixar o volume (cluster multi-worker) |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 1 vCPU · 512 MB RAM · 10 GB disco
+- **Hardware ideal:** 2 vCPU · 2 GB RAM · 20 GB disco
 - Docker Swarm inicializado e stack `balancer` (Traefik) + rede `web` ativos.
 - DNS de `CHROMA_FQDN` apontando para o host (porta 80 acessível para o desafio Let's Encrypt).
 

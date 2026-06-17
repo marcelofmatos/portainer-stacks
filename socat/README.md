@@ -22,6 +22,8 @@ flowchart LR
 | `DATA_NET` | não | `data` | rede overlay dos serviços compartilhados |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 0.25 vCPU · 32 MB RAM · 1 GB disco
+- **Hardware ideal:** 0.5 vCPU · 64 MB RAM · 2 GB disco
 - O destino (`SOCAT_TARGET`) precisa estar numa rede que o socat alcança (`data` ou `web`).
 - Porta `SOCAT_LISTEN_PORT` liberada no firewall do host.
 

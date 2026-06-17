@@ -12,6 +12,7 @@
 # NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster com mais de um worker,
 # fixe o serviço definindo WORKER_HOSTNAME e descomentando o constraint de hostname,
 # senão o Swarm pode reagendar o container em outro nó e perder o acesso aos dados.
+# Hardware (1 réplica): mínimo 1 vCPU · 512 MB RAM · 10 GB disco · ideal 2 vCPU · 2 GB RAM · 20 GB disco
 services:
   postgres:
     image: pgvector/pgvector:${PGVECTOR_IMAGE_TAG:-pg16}

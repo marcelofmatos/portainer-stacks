@@ -27,6 +27,8 @@ flowchart LR
 | `WORKER_HOSTNAME` | não | — | fixa o volume num nó (cluster multi-worker) |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 0.5 vCPU · 128 MB RAM · 5 GB disco
+- **Hardware ideal:** 1 vCPU · 256 MB RAM · 10 GB disco
 - Porta `SSH_PORT` liberada no firewall do host (e DNS/IP conhecido para conectar).
 
 ## Uso

@@ -37,6 +37,8 @@ flowchart LR
 | `WORKER_HOSTNAME` | não | — | hostname do worker para fixar serviços com volume (multi-worker) |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 2 vCPU · 2 GB RAM · 20 GB disco
+- **Hardware ideal:** 4 vCPU · 4 GB RAM · 40 GB disco
 - Docker Swarm inicializado.
 - Traefik (stack `balancer`) e rede `web` ativos.
 - DNS de `MOODLE_FQDN` apontando para o host (porta 80 acessível para o desafio HTTP do Let's Encrypt).

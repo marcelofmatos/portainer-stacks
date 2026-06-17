@@ -6,6 +6,7 @@
 # Obrigatórias: PHPNETMAP_FQDN, PHPNETMAP_ADMIN_PASSWORD.
 # NOTA (volume em Swarm): o volume é local ao nó — em cluster multi-worker fixe o serviço definindo
 # WORKER_HOSTNAME e descomentando o constraint de hostname.
+# Hardware (1 réplica): mínimo 0.5 vCPU · 256 MB RAM · 5 GB disco · ideal 1 vCPU · 512 MB RAM · 10 GB disco
 services:
   phpnetmap:
     image: ghcr.io/marcelofmatos/phpnetmap:${PHPNETMAP_IMAGE_TAG:-latest}

@@ -7,6 +7,7 @@
 #
 # NOTA (volume em Swarm): volumes são locais ao nó. Em cluster multi-worker fixe os serviços
 # `db`/`redis` definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+# Hardware (1 réplica): mínimo 1 vCPU · 1 GB RAM · 10 GB disco · ideal 2 vCPU · 2 GB RAM · 20 GB disco
 services:
   evolution-api:
     image: atendai/evolution-api:${EVOLUTION_IMAGE_TAG:-v2.2.3}

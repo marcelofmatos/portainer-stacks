@@ -52,6 +52,8 @@ flowchart LR
 | `DATA_NET` | não | `data` | rede externa p/ ferramentas de admin alcançarem o banco |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 1 vCPU · 1 GB RAM · 10 GB disco
+- **Hardware ideal:** 2 vCPU · 2 GB RAM · 20 GB disco
 - Stack `balancer` (Traefik) + rede `web`; DNS de `TYPEBOT_BUILDER_FQDN` e `TYPEBOT_VIEWER_FQDN`
   apontando para o host.
 - Rede `data`: `docker network create --driver overlay --attachable data` (usada pelas ferramentas de admin).

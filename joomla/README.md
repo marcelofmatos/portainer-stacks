@@ -32,6 +32,8 @@ flowchart LR
 | `WORKER_HOSTNAME` | não | — | nó fixo para os volumes em cluster multi-worker |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 1 vCPU · 1 GB RAM · 10 GB disco
+- **Hardware ideal:** 2 vCPU · 2 GB RAM · 20 GB disco
 - Docker Swarm inicializado.
 - Stack `balancer` (Traefik) e rede `web` ativos.
 - DNS de `JOOMLA_FQDN` apontando para o host (porta 80 acessível para o desafio Let's Encrypt).

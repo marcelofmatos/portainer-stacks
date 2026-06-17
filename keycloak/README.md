@@ -35,6 +35,8 @@ flowchart LR
 | `PROXY_NET` | não | `web` | rede externa do Traefik |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 1 vCPU · 1 GB RAM · 10 GB disco
+- **Hardware ideal:** 2 vCPU · 2 GB RAM · 20 GB disco
 - Docker Swarm inicializado e stack `balancer` (Traefik) em execução.
 - Rede overlay pública `web`: `docker network create --driver overlay --attachable web`.
 - DNS de `KEYCLOAK_FQDN` apontando para o host (porta 80 acessível para o desafio HTTP do

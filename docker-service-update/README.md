@@ -29,6 +29,8 @@ flowchart LR
 | `APP_IMAGE_TAG` | não | `latest` | tag da imagem `ghcr.io/marcelofmatos/docker-service-update` |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 0.25 vCPU · 64 MB RAM · 1 GB disco
+- **Hardware ideal:** 0.5 vCPU · 128 MB RAM · 2 GB disco
 - Stack `balancer` (Traefik) em execução e a rede `web` criada (`docker network create --driver overlay --attachable web`).
 - O serviço roda no nó **manager** (acessa `/var/run/docker.sock` para gerenciar o Swarm).
 - DNS de `UPDATE_FQDN` apontando para o host (httpchallenge valida na porta 80).

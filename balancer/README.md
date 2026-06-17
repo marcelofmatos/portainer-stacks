@@ -25,6 +25,8 @@ flowchart LR
 | `TRAEFIK_LOG_LEVEL` | não | `WARN` | nível de log (`DEBUG`/`INFO`/`WARN`/`ERROR`) |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 1 vCPU · 256 MB RAM · 5 GB disco
+- **Hardware ideal:** 1 vCPU · 512 MB RAM · 10 GB disco
 - Roda no nó **manager** (acessa o socket do Docker).
 - A rede overlay pública precisa existir e ser **attachable**:
   ```bash

@@ -3,6 +3,7 @@
 # Swarm que a utilizam (`docker service update --force`). Projeto OSS: marcelofmatos/docker-service-update.
 # Roda no MANAGER (precisa do socket do Docker para gerenciar serviços) e é publicada via Traefik v3 + TLS.
 # Protegida por basicauth: o endpoint força re-deploy de qualquer serviço — nao deixe sem auth na internet.
+# Hardware (1 réplica): mínimo 0.25 vCPU · 64 MB RAM · 1 GB disco · ideal 0.5 vCPU · 128 MB RAM · 2 GB disco
 services:
   api:
     image: ghcr.io/marcelofmatos/docker-service-update:${APP_IMAGE_TAG:-latest}

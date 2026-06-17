@@ -42,6 +42,8 @@ flowchart LR
 | `DATA_NET` | não | `data` | rede overlay dos serviços compartilhados |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 4 vCPU · 8 GB RAM · 50 GB disco
+- **Hardware ideal:** 8 vCPU · 16 GB RAM · 100 GB disco
 - Stack `balancer` (Traefik) + rede `web`; DNS de `RAGFLOW_FQDN` apontando para o host.
 - Rede `data` e as stacks **`mariadb`**, **`redis`**, **`elasticsearch`** e **`minio`** ativas.
 - No MariaDB, crie o banco do RAGFlow:

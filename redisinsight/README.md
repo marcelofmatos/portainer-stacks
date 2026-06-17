@@ -24,6 +24,8 @@ flowchart LR
 | `WORKER_HOSTNAME` | não | — | fixa o volume num nó (cluster multi-worker) |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 0.5 vCPU · 256 MB RAM · 2 GB disco
+- **Hardware ideal:** 1 vCPU · 512 MB RAM · 5 GB disco
 - Stack `balancer` (Traefik) + rede `web`; DNS de `REDISINSIGHT_FQDN` apontando para o host.
 - Rede `data` e stack **`redis`** ativa.
 - Gere o basicauth: `htpasswd -nbB usuario senha` → use a saída em `REDISINSIGHT_AUTH_BASIC`.

@@ -14,6 +14,8 @@ fica no volume `ollama-data` em `/root/.ollama`. A exposição pública via Trae
 | `PROXY_NET` | não | `web` | rede externa do Traefik |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 2 vCPU · 8 GB RAM · 20 GB disco (CPU, modelos pequenos)
+- **Hardware ideal:** 4 vCPU · 16 GB RAM · 50 GB disco + GPU (VRAM ≥ 8 GB)
 - Docker Swarm inicializado.
 - Para expor via Traefik: stack `balancer` (Traefik) e rede `web` ativos, e DNS de `OLLAMA_FQDN`
   apontando para o host.

@@ -49,6 +49,8 @@ flowchart LR
 | `DATA_NET` | não | `data` | rede overlay dos serviços compartilhados |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 2 vCPU · 4 GB RAM · 20 GB disco
+- **Hardware ideal:** 4 vCPU · 8 GB RAM · 40 GB disco
 - Stack `balancer` (Traefik) + rede `web`; DNS de `DIFY_FQDN` apontando para o host.
 - Rede `data` e as stacks **`postgres-pgvector`**, **`redis`** e **`qdrant`** ativas.
 - Banco para o Dify:

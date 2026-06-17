@@ -17,6 +17,8 @@ público da Excalidraw (não incluso nesta stack).
 | `PROXY_NET` | não | `web` | rede externa do Traefik |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 0.5 vCPU · 256 MB RAM · 2 GB disco
+- **Hardware ideal:** 1 vCPU · 512 MB RAM · 5 GB disco
 - Docker Swarm inicializado.
 - Traefik (stack `balancer`) e rede `web` ativos.
 - DNS de `EXCALIDRAW_FQDN` apontando para o host (porta 80 acessível para o Let's Encrypt).

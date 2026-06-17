@@ -3,6 +3,7 @@
 # Conecta no MongoDB compartilhado (stack `mongodb`) na rede `data`. Protegido por basicauth próprio.
 #
 # Obrigatórias: MONGOEXPRESS_FQDN, MONGOEXPRESS_MONGO_PASSWORD, MONGOEXPRESS_PASSWORD.
+# Hardware (1 réplica): mínimo 0.5 vCPU · 256 MB RAM · 2 GB disco · ideal 1 vCPU · 512 MB RAM · 5 GB disco
 services:
   mongo-express:
     image: mongo-express:${MONGO_EXPRESS_IMAGE_TAG:-1.0.2}

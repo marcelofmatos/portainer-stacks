@@ -15,6 +15,8 @@ cluster**: ao adicionar um *server* na interface, informe o host do banco (ex.: 
 | `WORKER_HOSTNAME` | não | — | hostname do worker para fixar o volume (multi-worker) |
 
 ## Pré-requisitos
+- **Hardware mínimo:** 0.5 vCPU · 256 MB RAM · 2 GB disco
+- **Hardware ideal:** 1 vCPU · 512 MB RAM · 5 GB disco
 - Traefik (stack `balancer`) e rede `web` ativos.
 - DNS de `PGADMIN_FQDN` apontando para o host.
 - O serviço precisa enxergar o(s) banco(s): para acessar bancos em outras stacks, anexe também a

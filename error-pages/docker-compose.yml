@@ -8,6 +8,7 @@
 #
 # Como outra stack usa este middleware (referência via provider swarm):
 #   - traefik.http.routers.<r>.middlewares=error-pages@swarm
+# Hardware (1 réplica): mínimo 0.25 vCPU · 64 MB RAM · 2 GB disco · ideal 0.5 vCPU · 128 MB RAM · 5 GB disco
 services:
   error-pages:
     image: ghcr.io/tarampampam/error-pages:${ERRORPAGES_IMAGE_TAG:-3}

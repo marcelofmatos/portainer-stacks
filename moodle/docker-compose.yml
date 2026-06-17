@@ -6,6 +6,7 @@
 #
 # NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster com mais de um worker,
 # fixe os serviços com volume definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+# Hardware (1 réplica): mínimo 2 vCPU · 2 GB RAM · 20 GB disco · ideal 4 vCPU · 4 GB RAM · 40 GB disco
 services:
   moodle:
     image: bitnami/moodle:${MOODLE_IMAGE_TAG:-latest}
