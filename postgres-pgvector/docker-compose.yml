@@ -1,0 +1,56 @@
+# Stack "postgres-pgvector" — PostgreSQL + pgvector (Docker Swarm)
+# Banco de dados INTERNO para IA/RAG (embeddings). NÃO usa Traefik nem a rede `web`.
+# Imagem oficial pgvector/pgvector — já traz a extensão pgvector instalada.
+#
+# Rede: entra na overlay externa COMPARTILHADA `data`. Outras stacks anexam essa rede
+# e conectam pelo nome do serviço `postgres` (host `postgres`, porta 5432).
+#
+# Toda customização é feita por variáveis de ambiente (ver README e bloco abaixo).
+# Obrigatório: POSTGRES_PASSWORD (segredo, sem default — o usuário fornece).
+#
+# NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster com mais de um worker,
+# fixe o serviço definindo WORKER_HOSTNAME e descomentando o constraint de hostname,
+# senão o Swarm pode reagendar o container em outro nó e perder o acesso aos dados.
+services:
+  postgres:
+    image: pgvector/pgvector:${PGVECTOR_IMAGE_TAG:-pg16}
+    networks:
+      - data
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB:-vectordb}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+    # Acesso externo opcional (modo host publica 5432 no nó). Descomente se precisar
+    # conectar de fora do cluster (ex.: psql/ferramenta de BI). Veja README.
+    # ports:
+    #   - target: 5432
+    #     published: ${POSTGRES_PORT:-5432}
+    #     mode: host
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    # Script de init rodado SÓ no primeiro boot (banco vazio): cria a extensão vector.
+    # Requer o Docker config externo (ver README para criá-lo).
+    configs:
+      - source: pgvector_init
+        target: /docker-entrypoint-initdb.d/01-pgvector.sql
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+configs:
+  pgvector_init:
+    external: true
+    name: ${PGVECTOR_INIT_CONFIG:-pgvector_init_v1}
+
+networks:
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+
+volumes:
+  pg-data:
+    driver: local

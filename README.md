@@ -38,12 +38,19 @@ fica no repositório.
 | [`joomla`](joomla/) | CMS Joomla + MySQL | [README](joomla/README.md) |
 | [`moodle`](moodle/) | LMS Moodle + MariaDB | [README](moodle/README.md) |
 
+### Bancos de dados (compartilhados, rede `data`)
+| Stack | Descrição | Doc |
+|---|---|---|
+| [`mariadb`](mariadb/) | MariaDB compartilhado | [README](mariadb/README.md) |
+| [`postgres-pgvector`](postgres-pgvector/) | PostgreSQL + pgvector nativo (IA/RAG) | [README](postgres-pgvector/README.md) |
+
 ### IA
 | Stack | Descrição | Doc |
 |---|---|---|
 | [`ollama`](ollama/) | Runtime de LLMs | [README](ollama/README.md) |
 | [`litellm`](litellm/) | Gateway OpenAI-compatible para LLMs | [README](litellm/README.md) |
 | [`chromadb`](chromadb/) | Vector database (RAG) | [README](chromadb/README.md) |
+| [`supabase`](supabase/) | Backend self-hosted (Postgres+Auth+API+Studio...) | [README](supabase/README.md) |
 
 > Ordem sugerida de deploy: **balancer** primeiro (cria o ponto de entrada). Depois as demais em qualquer ordem; `error-pages`/`authelia` viram middlewares que você aplica nas outras stacks.
 
@@ -75,6 +82,7 @@ docker stack deploy -c drive/docker-compose.yml drive
 - Docker Swarm inicializado.
 - Rede overlay pública: `docker network create --driver overlay --attachable web`.
 - Para integração LDAP entre stacks: `docker network create --driver overlay --attachable ldap`.
+- Para bancos compartilhados (`mariadb`, `postgres-pgvector`): `docker network create --driver overlay --attachable data`.
 - Stack `balancer` (Traefik) em execução no manager.
 
 ## Segurança

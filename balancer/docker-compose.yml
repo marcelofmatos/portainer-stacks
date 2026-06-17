@@ -34,6 +34,7 @@ services:
       labels:
         - traefik.enable=true
         - traefik.http.services.balancer-traefik.loadbalancer.server.port=8080
+        - traefik.http.routers.balancer-traefik.entrypoints=websecure
         - traefik.http.routers.balancer-traefik.tls=true
         - traefik.http.routers.balancer-traefik.tls.certresolver=letsencryptresolver
         - traefik.http.routers.balancer-traefik.rule=Host(`traefik.balancer.${DOMAIN}`)

@@ -1,0 +1,51 @@
+# Stack "mariadb" — MariaDB (Docker Swarm) — banco de dados INTERNO
+# NÃO usa Traefik nem a rede `web`. O serviço fica numa rede overlay externa
+# compartilhada `data`; outras stacks anexam essa rede e conectam pelo nome do
+# serviço `mariadb` (host `mariadb`, porta 3306).
+#
+# Crie a rede antes de subir a stack:
+#   docker network create --driver overlay --attachable data
+#
+# Toda customização é feita por variáveis de ambiente (ver README e bloco abaixo).
+# Obrigatórias (segredos): MARIADB_ROOT_PASSWORD, MARIADB_PASSWORD.
+#
+# NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster com mais de um
+# worker, fixe este serviço definindo WORKER_HOSTNAME e descomentando o constraint
+# de hostname abaixo — caso contrário, ao reagendar em outro nó os dados ficam
+# inacessíveis (volume vazio no novo nó).
+services:
+  mariadb:
+    image: mariadb:${MARIADB_IMAGE_TAG:-11}
+    hostname: mariadb
+    networks:
+      - data
+    # Acesso externo opcional (modo host publica 3306 no nó). Descomente se precisar
+    # conectar de fora do cluster. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 3306
+    #     published: ${MARIADB_PORT:-3306}
+    #     mode: host
+    environment:
+      - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      - MARIADB_DATABASE=${MARIADB_DATABASE:-appdb}
+      - MARIADB_USER=${MARIADB_USER:-app}
+      - MARIADB_PASSWORD=${MARIADB_PASSWORD}
+      - MARIADB_AUTO_UPGRADE=1
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+networks:
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+
+volumes:
+  mariadb-data:
+    driver: local

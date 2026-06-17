@@ -350,6 +350,68 @@
         { "name": "EXCALIDRAW_FQDN", "label": "Dominio (FQDN)", "description": "Ex.: draw.exemplo.com" },
         { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
       ]
+    },
+    {
+      "type": 2,
+      "title": "mariadb — banco MariaDB",
+      "name": "mariadb",
+      "description": "Banco de dados MariaDB compartilhado (sem proxy). Entra na rede overlay `data` para outras stacks conectarem por `mariadb:3306`.",
+      "note": "PRE-REQUISITO: crie a rede compartilhada: `docker network create --driver overlay --attachable data`. Para acesso externo, descomente o bloco ports no compose.",
+      "categories": ["database"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/mariadb.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "mariadb/docker-compose.yml" },
+      "env": [
+        { "name": "MARIADB_ROOT_PASSWORD", "label": "Senha root", "description": "Senha do usuario root" },
+        { "name": "MARIADB_PASSWORD", "label": "Senha do app", "description": "Senha do usuario de aplicacao" },
+        { "name": "MARIADB_DATABASE", "label": "Banco inicial", "default": "appdb" },
+        { "name": "MARIADB_USER", "label": "Usuario do app", "default": "app" },
+        { "name": "DATA_NET", "label": "Rede de dados", "default": "data" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "postgres-pgvector — PostgreSQL + pgvector",
+      "name": "postgres-pgvector",
+      "description": "PostgreSQL com a extensao pgvector nativa (imagem oficial pgvector/pgvector), para IA/RAG (embeddings). Entra na rede overlay `data` para outras stacks conectarem por `postgres:5432`.",
+      "note": "PRE-REQUISITO: crie a rede `data` (docker network create --driver overlay --attachable data) e o Docker config de init `pgvector_init_v1` (CREATE EXTENSION vector). Veja o README.",
+      "categories": ["database", "ai"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/postgresql.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "postgres-pgvector/docker-compose.yml" },
+      "env": [
+        { "name": "POSTGRES_PASSWORD", "label": "Senha do PostgreSQL", "description": "Senha do usuario do banco" },
+        { "name": "POSTGRES_DB", "label": "Banco padrao", "default": "vectordb" },
+        { "name": "POSTGRES_USER", "label": "Usuario do banco", "default": "postgres" },
+        { "name": "PGVECTOR_IMAGE_TAG", "label": "Tag pgvector", "default": "pg16" },
+        { "name": "PGVECTOR_INIT_CONFIG", "label": "Docker config de init", "default": "pgvector_init_v1" },
+        { "name": "DATA_NET", "label": "Rede de dados", "default": "data" }
+      ]
+    },
+    {
+      "type": 2,
+      "title": "supabase — backend self-hosted",
+      "name": "supabase",
+      "description": "Supabase self-hosted (Postgres + Studio + Kong/API + Auth + REST + Realtime + Storage + Functions...) adaptado para Docker Swarm. Studio e API expostos via Traefik v3.",
+      "note": "Adaptacao best-effort p/ Swarm. Gere as chaves (JWT_SECRET, ANON_KEY, SERVICE_ROLE_KEY etc.) conforme a doc da Supabase antes do deploy. Veja o README.",
+      "categories": ["database", "ai", "backend"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/supabase.png",
+      "repository": { "url": "https://github.com/marcelofmatos/portainer-stacks", "stackfile": "supabase/docker-compose.yml" },
+      "env": [
+        { "name": "SUPABASE_STUDIO_FQDN", "label": "Dominio do Studio", "description": "Ex.: studio.exemplo.com" },
+        { "name": "SUPABASE_API_FQDN", "label": "Dominio da API", "description": "Ex.: api.exemplo.com" },
+        { "name": "POSTGRES_PASSWORD", "label": "Senha do Postgres", "description": "Usada por todos os servicos" },
+        { "name": "JWT_SECRET", "label": "JWT secret", "description": "Segredo HS256 (min. 32 chars)" },
+        { "name": "ANON_KEY", "label": "Anon key", "description": "JWT da role anon" },
+        { "name": "SERVICE_ROLE_KEY", "label": "Service role key", "description": "JWT da role service_role" },
+        { "name": "DASHBOARD_USERNAME", "label": "Usuario do Studio", "description": "Basic-auth do Studio" },
+        { "name": "DASHBOARD_PASSWORD", "label": "Senha do Studio", "description": "Basic-auth do Studio" },
+        { "name": "SECRET_KEY_BASE", "label": "Realtime key base", "description": "Chave de sessao do realtime (64 chars)" },
+        { "name": "VAULT_ENC_KEY", "label": "Vault enc key", "description": "Chave do Vault (32 chars)" },
+        { "name": "LOGFLARE_API_KEY", "label": "Logflare API key", "description": "Chave do analytics/vector" },
+        { "name": "PROXY_NET", "label": "Rede do proxy", "default": "web" }
+      ]
     }
   ]
 }
