@@ -538,6 +538,40 @@
     },
     {
       "type": 2,
+      "title": "home-assistant — automação residencial",
+      "name": "home-assistant",
+      "description": "Home Assistant (Container): plataforma open source de automação residencial — dashboards, automacoes e integracoes com dispositivos e servicos. Publicado via Traefik v3 com TLS. Estado/config no volume /config (SQLite).",
+      "note": "Versao Container atras de proxy (contexto servidor/cloud). Descoberta automatica de dispositivos locais (mDNS/Bluetooth/Zigbee USB) exige network_mode host ou hardware dedicado (HAOS) e nao se aplica em Swarm overlay. Para IP real do cliente, configure o bloco http (use_x_forwarded_for + trusted_proxies) no configuration.yaml - veja o README. Requer a rede 'web' (balancer).",
+      "categories": [
+        "automation",
+        "iot"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/home-assistant.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "home-assistant/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "HOMEASSISTANT_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: casa.exemplo.com"
+        },
+        {
+          "name": "TZ",
+          "label": "Fuso horario",
+          "default": "America/Sao_Paulo"
+        },
+        {
+          "name": "HOMEASSISTANT_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "stable"
+        }
+      ]
+    },
+    {
+      "type": 2,
       "title": "ollama — runtime de LLMs",
       "name": "ollama",
       "description": "Ollama: executa modelos de linguagem (LLMs) localmente. Exposicao via Traefik opcional.",

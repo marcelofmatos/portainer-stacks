@@ -1,0 +1,61 @@
+# ┌───────────────────────────────────────────────────────────────────────────┐
+# │ Stack "home-assistant" — Home Assistant Container (Docker Swarm)            │
+# └───────────────────────────────────────────────────────────────────────────┘
+# Pré-requisitos de deploy:
+#   1. Crie a rede externa (uma vez por cluster):
+#        docker network create --driver overlay --attachable web
+#   2. Tenha a stack `balancer` (Traefik) rodando e o DNS de HOMEASSISTANT_FQDN apontando p/ o host.
+#   3. Defina a variável OBRIGATÓRIA no deploy (Portainer pede no formulário):
+#        HOMEASSISTANT_FQDN
+#   4. Deploy → acesse https://HOMEASSISTANT_FQDN e faça o onboarding (cria o 1º usuário).
+#
+# REVERSE PROXY: o Home Assistant funciona atrás do Traefik sem ajuste, mas para enxergar o IP
+# REAL do cliente (em vez do IP do proxy) adicione ao /config/configuration.yaml o bloco `http:`
+# com `use_x_forwarded_for` + `trusted_proxies` (sub-redes overlay) — veja a seção "Uso" do README.
+#
+# COMO FUNCIONA:
+#   - `homeassistant` é publicado pelo Traefik na rede `web` (porta interna 8123).
+#   - Estado/config/banco (SQLite) ficam no volume `homeassistant-config` (/config).
+#   - Volume dedicado: para migrar de host, basta copiar esse volume.
+#
+# ESCOPO: este é o Home Assistant *Container* para contexto de servidor/cloud (atrás de proxy).
+# Descoberta automática de dispositivos locais (mDNS/Bluetooth/Zigbee USB) exige `network_mode: host`
+# ou hardware dedicado (Home Assistant OS) e NÃO se aplica aqui (Swarm + rede overlay).
+#
+# VOLUME EM SWARM: volumes são locais ao nó. Em cluster com +1 worker, fixe o serviço no nó
+# definindo WORKER_HOSTNAME e descomentando o constraint `node.hostname` abaixo.
+# Porte: Médio (512 MB → 2 GB RAM)
+# Hardware (1 réplica): mínimo 1 vCPU · 1 GB RAM · 10 GB disco · ideal 2 vCPU · 2 GB RAM · 20 GB disco
+services:
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:${HOMEASSISTANT_IMAGE_TAG:-stable}
+    networks:
+      - web # exposto pelo Traefik
+    environment:
+      - TZ=${TZ:-America/Sao_Paulo}
+    volumes:
+      - homeassistant-config:/config
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # descomente em cluster multi-worker p/ fixar o volume no nó:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.homeassistant.rule=Host(`${HOMEASSISTANT_FQDN}`)
+        - traefik.http.routers.homeassistant.entrypoints=websecure
+        - traefik.http.routers.homeassistant.tls=true
+        - traefik.http.routers.homeassistant.tls.certresolver=letsencryptresolver
+        - traefik.http.services.homeassistant.loadbalancer.server.port=8123
+
+networks:
+  web: # externa: criada pela stack balancer (Traefik)
+    external: true
+    name: ${PROXY_NET:-web}
+
+volumes:
+  homeassistant-config:
+    driver: local
