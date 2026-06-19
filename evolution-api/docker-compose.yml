@@ -11,7 +11,7 @@
 # Hardware (1 réplica): mínimo 1 vCPU · 1 GB RAM · 10 GB disco · ideal 2 vCPU · 2 GB RAM · 20 GB disco
 services:
   evolution-api:
-    image: atendai/evolution-api:${EVOLUTION_IMAGE_TAG:-v2.2.3}
+    image: evoapicloud/evolution-api:${EVOLUTION_IMAGE_TAG:-v2.3.7}
     networks:
       - default # conversa com `db` e `redis` internamente
       - web # exposto pelo Traefik

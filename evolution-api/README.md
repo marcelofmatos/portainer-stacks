@@ -32,7 +32,7 @@ flowchart LR
 | `EVOLUTION_REDIS_URI` | não | `redis://redis:6379/6` | URI do Redis embarcado (com senha: `redis://default:<senha>@redis:6379/6`) |
 | `EVOLUTION_REDIS_IMAGE_TAG` | não | `7-alpine` | tag da imagem Redis |
 | `EVOLUTION_LANGUAGE` | não | `pt-BR` | idioma |
-| `EVOLUTION_IMAGE_TAG` | não | `v2.2.3` | tag da imagem atendai/evolution-api |
+| `EVOLUTION_IMAGE_TAG` | não | `v2.3.7` | tag da imagem evoapicloud/evolution-api (≥ v2.3.4 para envio a grupos LID) |
 | `PROXY_NET` | não | `web` | rede externa do Traefik |
 | `DATA_NET` | não | `data` | rede externa p/ ferramentas de admin alcançarem banco/cache |
 | `WORKER_HOSTNAME` | não | — | fixa os volumes num nó (cluster multi-worker) |
