@@ -1,0 +1,139 @@
+# ┌───────────────────────────────────────────────────────────────────────────┐
+# │ Stack "element" — Matrix (Synapse) + Element Web + PostgreSQL embarcado     │
+# └───────────────────────────────────────────────────────────────────────────┘
+# Pré-requisitos de deploy:
+#   1. Crie as redes externas (uma vez por cluster):
+#        docker network create --driver overlay --attachable web
+#        docker network create --driver overlay --attachable data
+#   2. Tenha a stack `balancer` (Traefik) rodando e o DNS de MATRIX_SERVER_NAME e
+#      ELEMENT_FQDN apontando p/ o host.
+#   3. Defina as variáveis OBRIGATÓRIAS no deploy (Portainer pede no formulário):
+#        MATRIX_SERVER_NAME, ELEMENT_FQDN, MATRIX_DB_PASSWORD
+#   4. Deploy. Crie o 1º usuário (admin) — veja a seção "Uso" do README:
+#        docker exec -it <container_synapse> register_new_matrix_user \
+#          -c /data/homeserver.yaml https://localhost:8008
+#   5. Acesse https://ELEMENT_FQDN e logue apontando para https://MATRIX_SERVER_NAME.
+#
+# COMO FUNCIONA:
+#   - `synapse` (homeserver Matrix) é publicado pelo Traefik em MATRIX_SERVER_NAME (API :8008).
+#       * No 1º start gera /data/homeserver.yaml (modo `generate`) e ajusta o banco p/ Postgres,
+#         o bind p/ 0.0.0.0 e x_forwarded (atrás do proxy). Nos próximos starts, só executa.
+#       * MATRIX_SERVER_NAME é a identidade dos usuários (@usuario:MATRIX_SERVER_NAME) E o host
+#         onde o Synapse é servido — assim não precisa de delegação .well-known (ver README p/ federação).
+#   - `element` (cliente web) é publicado pelo Traefik em ELEMENT_FQDN; serve estático (nginx)
+#       e aponta para o homeserver via /app/config.json gerado no start.
+#   - `db` (PostgreSQL) é o banco PRÓPRIO desta stack (locale C, exigido pelo Synapse).
+#       * fica na `default` (o Synapse o acessa pelo nome `db`)
+#       * fica TAMBÉM na `data` SÓ para ferramentas de admin (pgadmin4) o alcançarem como `<stack>_db` (ex.: element_db)
+#   - Volumes dedicados (`synapse-data`, `db-data`): para migrar de host, basta copiar esses volumes.
+#
+# VOLUME EM SWARM: volumes são locais ao nó. Em cluster com +1 worker, fixe os serviços no nó
+# definindo WORKER_HOSTNAME e descomentando o constraint `node.hostname` abaixo.
+# Porte: Médio (512 MB → 2 GB RAM)
+# Hardware (1 réplica): mínimo 2 vCPU · 2 GB RAM · 20 GB disco · ideal 2 vCPU · 4 GB RAM · 50 GB disco
+services:
+  synapse:
+    image: matrixdotorg/synapse:${SYNAPSE_IMAGE_TAG:-latest}
+    # Substitui o entrypoint (/start.py) por um wrapper: gera a config no 1º start,
+    # aponta o banco p/ Postgres e então executa o homeserver.
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        if [ ! -f /data/homeserver.yaml ]; then
+          /start.py generate
+          python3 -c "import yaml,os;p='/data/homeserver.yaml';c=yaml.safe_load(open(p));c['database']={'name':'psycopg2','args':{'user':os.environ['SYNAPSE_DB_USER'],'password':os.environ['SYNAPSE_DB_PASSWORD'],'database':os.environ['SYNAPSE_DB_NAME'],'host':os.environ['SYNAPSE_DB_HOST'],'port':int(os.environ['SYNAPSE_DB_PORT']),'cp_min':5,'cp_max':10}};[l.update({'bind_addresses':['0.0.0.0'],'x_forwarded':True}) for l in c.get('listeners',[])];c['enable_registration']=os.environ.get('SYNAPSE_ENABLE_REGISTRATION','false').lower()=='true';c['suppress_key_server_warning']=True;open(p,'w').write(yaml.safe_dump(c,default_flow_style=False))"
+        fi
+        exec /start.py run
+    networks:
+      - default # conversa com o banco `db` internamente
+      - web # exposto pelo Traefik
+    environment:
+      - SYNAPSE_SERVER_NAME=${MATRIX_SERVER_NAME} # identidade + host público do homeserver
+      - SYNAPSE_REPORT_STATS=${SYNAPSE_REPORT_STATS:-no}
+      - SYNAPSE_DB_HOST=${SYNAPSE_DB_HOST:-db} # serviço de banco nesta stack
+      - SYNAPSE_DB_PORT=${SYNAPSE_DB_PORT:-5432}
+      - SYNAPSE_DB_NAME=${SYNAPSE_DB_NAME:-synapse}
+      - SYNAPSE_DB_USER=${SYNAPSE_DB_USER:-synapse}
+      - SYNAPSE_DB_PASSWORD=${MATRIX_DB_PASSWORD} # OBRIGATÓRIA (mesma senha do serviço db)
+      - SYNAPSE_ENABLE_REGISTRATION=${SYNAPSE_ENABLE_REGISTRATION:-false} # registro aberto na web (cuidado)
+    volumes:
+      - synapse-data:/data # homeserver.yaml, signing key, mídia
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+      placement:
+        constraints:
+          - node.role == worker
+          # descomente em cluster multi-worker p/ fixar o volume no nó:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.synapse.rule=Host(`${MATRIX_SERVER_NAME}`)
+        - traefik.http.routers.synapse.entrypoints=websecure
+        - traefik.http.routers.synapse.tls=true
+        - traefik.http.routers.synapse.tls.certresolver=letsencryptresolver
+        - traefik.http.services.synapse.loadbalancer.server.port=8008
+
+  element:
+    image: vectorim/element-web:${ELEMENT_IMAGE_TAG:-latest}
+    user: "0:0" # precisa escrever /app/config.json antes de servir
+    # Gera o config.json apontando p/ o homeserver e sobe o nginx estático.
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        printf '%s' '{"default_server_config":{"m.homeserver":{"base_url":"https://${MATRIX_SERVER_NAME}","server_name":"${MATRIX_SERVER_NAME}"}},"brand":"Element","disable_guests":true,"disable_3pid_login":false,"default_theme":"light"}' > /app/config.json
+        exec nginx -g 'daemon off;'
+    networks:
+      - web # exposto pelo Traefik (o cliente fala com o homeserver pelo navegador, não pela rede interna)
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.element.rule=Host(`${ELEMENT_FQDN}`)
+        - traefik.http.routers.element.entrypoints=websecure
+        - traefik.http.routers.element.tls=true
+        - traefik.http.routers.element.tls.certresolver=letsencryptresolver
+        - traefik.http.services.element.loadbalancer.server.port=80
+
+  # Banco de dados PRÓPRIO da stack (não compartilhe com outras stacks).
+  # locale=C é EXIGIDO pelo Synapse (init só vale na 1ª criação do volume).
+  db:
+    image: postgres:${MATRIX_DB_IMAGE_TAG:-16-alpine}
+    networks:
+      - default # acesso do synapse
+      - data # SÓ para ferramentas de admin (pgadmin4) via host `<stack>_db` (ex.: element_db)
+    environment:
+      - POSTGRES_DB=${SYNAPSE_DB_NAME:-synapse}
+      - POSTGRES_USER=${SYNAPSE_DB_USER:-synapse}
+      - POSTGRES_PASSWORD=${MATRIX_DB_PASSWORD} # OBRIGATÓRIA
+      - POSTGRES_INITDB_ARGS=--encoding=UTF8 --locale=C
+    volumes:
+      - db-data:/var/lib/postgresql/data # ← copie este volume para migrar de host
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # fixe junto do synapse no mesmo nó:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+networks:
+  web: # externa: criada pela stack balancer (Traefik)
+    external: true
+    name: ${PROXY_NET:-web}
+  data: # externa: liga o banco às ferramentas de admin (pgadmin4 etc.)
+    external: true
+    name: ${DATA_NET:-data}
+  default: # interna desta stack: synapse <-> db
+    driver: overlay
+
+volumes:
+  synapse-data:
+    driver: local
+  db-data:
+    driver: local

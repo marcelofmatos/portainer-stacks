@@ -656,6 +656,88 @@
     },
     {
       "type": 2,
+      "title": "element — Matrix (chat seguro)",
+      "name": "element",
+      "description": "Matrix self-hosted: homeserver Synapse + cliente web Element + PostgreSQL embarcado. Mensageria segura e federavel (DMs, salas, chamadas), publicada via Traefik v3 com TLS.",
+      "note": "Apos o deploy, crie o 1o usuario no container do synapse: register_new_matrix_user -c /data/homeserver.yaml https://localhost:8008 (veja o README). MATRIX_SERVER_NAME e o dominio do homeserver e vira a identidade (@usuario:dominio). Requer as redes 'web' (balancer) e 'data'.",
+      "categories": [
+        "communication",
+        "Porte: Médio"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/element.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "element/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "MATRIX_SERVER_NAME",
+          "label": "Dominio do homeserver (FQDN)",
+          "description": "Identidade dos usuarios (@usuario:dominio) e host do Synapse. Ex.: matrix.exemplo.com"
+        },
+        {
+          "name": "ELEMENT_FQDN",
+          "label": "Dominio do Element Web (FQDN)",
+          "description": "Onde o cliente web e publicado. Ex.: chat.exemplo.com"
+        },
+        {
+          "name": "MATRIX_DB_PASSWORD",
+          "label": "Senha do PostgreSQL",
+          "description": "Senha do banco embarcado do Synapse (segredo)"
+        },
+        {
+          "name": "SYNAPSE_ENABLE_REGISTRATION",
+          "label": "Registro aberto na web",
+          "description": "true para permitir auto-cadastro publico; false (recomendado) cria usuarios via CLI",
+          "default": "false"
+        },
+        {
+          "name": "SYNAPSE_REPORT_STATS",
+          "label": "Enviar estatisticas anonimas",
+          "description": "yes/no",
+          "default": "no"
+        },
+        {
+          "name": "SYNAPSE_DB_NAME",
+          "label": "Banco",
+          "default": "synapse"
+        },
+        {
+          "name": "SYNAPSE_DB_USER",
+          "label": "Usuario do PostgreSQL",
+          "default": "synapse"
+        },
+        {
+          "name": "SYNAPSE_DB_HOST",
+          "label": "Host do PostgreSQL",
+          "description": "Servico de banco embarcado nesta stack (deixe 'db'). So altere para Postgres externo.",
+          "default": "db"
+        },
+        {
+          "name": "SYNAPSE_IMAGE_TAG",
+          "label": "Tag da imagem Synapse",
+          "default": "latest"
+        },
+        {
+          "name": "ELEMENT_IMAGE_TAG",
+          "label": "Tag da imagem Element",
+          "default": "latest"
+        },
+        {
+          "name": "MATRIX_DB_IMAGE_TAG",
+          "label": "Tag da imagem PostgreSQL",
+          "default": "16-alpine"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
+      ]
+    },
+    {
+      "type": 2,
       "title": "minio — object storage S3",
       "name": "minio",
       "description": "MinIO: armazenamento de objetos compativel com S3, com console web. Dois dominios (API e console) via Traefik v3.",

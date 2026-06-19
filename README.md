@@ -22,7 +22,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 | Porte | RAM (mín → ideal) | Stacks |
 |---|---|---|
 | **Leve** | 64 MB → 512 MB | `error-pages`, `cloudflared`, `socat`, `web-redirect`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis` |
-| **Médio** | 512 MB → 2 GB | `account`, `keycloak`, `zabbix`, `mariadb`, `postgres-pgvector`, `mongodb`, `chromadb`, `qdrant`, `minio`, `workflows`, `evolution-api`, `joomla`, `wordpress`, `wikijs`, `espocrm`, `typebot`, `stirlingpdf`, `flowise`, `litellm`, `open-webui` |
+| **Médio** | 512 MB → 2 GB | `account`, `keycloak`, `zabbix`, `mariadb`, `postgres-pgvector`, `mongodb`, `chromadb`, `qdrant`, `minio`, `workflows`, `evolution-api`, `joomla`, `wordpress`, `wikijs`, `espocrm`, `typebot`, `stirlingpdf`, `flowise`, `litellm`, `open-webui`, `element` |
 | **Pesado** | 2 GB → 4–8 GB | `swarmprom`, `elasticsearch`, `drive`, `rocketchat`, `moodle`, `twenty`, `botpress`, `langfuse`, `librechat`, `anythingllm`, `chatwoot`, `ligerosmart`, `dify`, `supabase` |
 | **GPU / ML** | 8 GB+ (GPU recomendada) | `ollama`, `comfyui`, `ragflow` |
 
@@ -64,6 +64,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 | [`workflows`](workflows/) | n8n (automação) + PostgreSQL | [README](workflows/README.md) |
 | [`evolution-api`](evolution-api/) | API de WhatsApp (usa `postgres-pgvector` + `redis`) | [README](evolution-api/README.md) |
 | [`rocketchat`](rocketchat/) | Chat de equipe + MongoDB | [README](rocketchat/README.md) |
+| [`element`](element/) | Matrix self-hosted (Synapse + Element Web) + PostgreSQL | [README](element/README.md) |
 | [`joomla`](joomla/) | CMS Joomla + MySQL | [README](joomla/README.md) |
 | [`wordpress`](wordpress/) | CMS/blog WordPress (usa `mariadb`) | [README](wordpress/README.md) |
 | [`wikijs`](wikijs/) | Wiki em Markdown (usa `postgres-pgvector`) | [README](wikijs/README.md) |
