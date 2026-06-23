@@ -7,6 +7,15 @@ variáveis de ambiente e troubleshooting.
 Toda a customização é feita por **variáveis de ambiente** (com defaults sensatos); nenhum segredo
 fica no repositório.
 
+## Usar como App Template no Portainer
+1. No Portainer: **Settings → App Templates**.
+2. Em **URL**, informe o `templates.json` cru deste repositório:
+   ```
+   https://raw.githubusercontent.com/marcelofmatos/portainer-stacks/main/templates.json
+   ```
+3. Salve. As stacks aparecem em **App Templates**; ao escolher uma, o Portainer pede as variáveis
+   de ambiente e faz o deploy a partir do `docker-compose.yml` correspondente neste repo.
+
 ## Requisitos de hardware
 
 Cada stack documenta o **hardware mínimo** (sobe e funciona) e o **ideal** (folga para uso real) na
@@ -128,15 +137,6 @@ Porte das stacks (por RAM, do mínimo ao ideal):
   `mongodb`) seguem disponíveis como **opção** para quem preferir um DB central.
 - **Volumes:** locais ao nó. Em cluster multi-worker, fixe os serviços com volume via
   `WORKER_HOSTNAME` (constraint `node.hostname`, comentado nos composes).
-
-## Usar como App Template no Portainer
-1. No Portainer: **Settings → App Templates**.
-2. Em **URL**, informe o `templates.json` cru deste repositório:
-   ```
-   https://raw.githubusercontent.com/marcelofmatos/portainer-stacks/main/templates.json
-   ```
-3. Salve. As stacks aparecem em **App Templates**; ao escolher uma, o Portainer pede as variáveis
-   de ambiente e faz o deploy a partir do `docker-compose.yml` correspondente neste repo.
 
 ## Deploy manual (alternativa)
 ```bash
