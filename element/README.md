@@ -76,7 +76,7 @@ flowchart LR
 
   subgraph web[rede web]
     traefik[Traefik v3<br/>TLS Let's Encrypt]
-    element[element<br/>vectorim/element-web<br/>nginx :80]
+    element[element<br/>vectorim/element-web<br/>nginx :8080]
     synapse[synapse<br/>matrixdotorg/synapse<br/>homeserver :8008]
   end
 
