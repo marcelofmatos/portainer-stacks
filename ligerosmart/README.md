@@ -42,15 +42,18 @@ flowchart LR
 | `ELASTICSEARCH_IMAGE_TAG` | não | `6.8.23` | tag do Elasticsearch |
 | `LIGERO_GRAFANA_IMAGE_TAG` | não | `8` | tag do Grafana |
 | `PROXY_NET` | não | `web` | rede externa do Traefik |
-| `NODE_HOSTNAME_WEBSERVER` | não | — | hostname do nó p/ fixar o serviço `web` (vazio = qualquer worker) |
-| `NODE_HOSTNAME_DATABASE` | não | — | hostname do nó p/ fixar o `database` (MariaDB) |
-| `NODE_HOSTNAME_ELASTICSEARCH` | não | — | hostname do nó p/ fixar o `elasticsearch` |
-| `NODE_HOSTNAME_GRAFANA` | não | — | hostname do nó p/ fixar o `grafana` |
+| `NODE_HOSTNAME_WEBSERVER` | sim | — | hostname do nó onde fixar o serviço `web` |
+| `NODE_HOSTNAME_DATABASE` | sim | — | hostname do nó onde fixar o `database` (MariaDB) |
+| `NODE_HOSTNAME_ELASTICSEARCH` | sim | — | hostname do nó onde fixar o `elasticsearch` |
+| `NODE_HOSTNAME_GRAFANA` | sim | — | hostname do nó onde fixar o `grafana` |
 
-> **Fixar serviços por nó (cluster multi-worker).** Cada serviço tem volume local ao nó. Em
-> cluster com mais de um worker, preencha o `NODE_HOSTNAME_*` de cada serviço com o hostname do
-> nó desejado para fixá-lo ali (assim o volume e o serviço ficam sempre no mesmo nó). **Vazio =
-> roda em qualquer worker.** Descubra os hostnames com `docker node ls`.
+> **Fixar serviços por nó (obrigatório).** Cada serviço tem volume local ao nó, então é fixado no
+> host indicado por `NODE_HOSTNAME_*`. Preencha os quatro com o hostname do nó desejado (`docker
+> node ls`) — pode ser o mesmo nó para todos. **Mantenha o mesmo host entre redeploys**, senão o
+> serviço sobe num nó sem o volume e os dados "somem". Em nó único, use o hostname desse nó.
+>
+> Obs.: o interpolador do Portainer não suporta `${VAR:+...}`/`${VAR:-...}`, por isso o pin é por
+> variável obrigatória simples (`node.hostname == ${NODE_HOSTNAME_*}`), não opcional.
 
 ## Pré-requisitos
 - **Hardware mínimo:** 2 vCPU · 4 GB RAM · 20 GB disco

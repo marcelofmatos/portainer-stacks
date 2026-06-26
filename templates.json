@@ -1525,27 +1525,23 @@
         },
         {
           "name": "NODE_HOSTNAME_WEBSERVER",
-          "label": "Nó do webserver",
-          "description": "Hostname do nó Swarm p/ fixar o serviço web (vazio = qualquer worker)",
-          "default": ""
+          "label": "Nó do webserver (obrigatório)",
+          "description": "Hostname do nó Swarm onde fixar o serviço (veja `docker node ls`)"
         },
         {
           "name": "NODE_HOSTNAME_DATABASE",
-          "label": "Nó do MariaDB",
-          "description": "Hostname do nó Swarm p/ fixar o banco (vazio = qualquer worker)",
-          "default": ""
+          "label": "Nó do MariaDB (obrigatório)",
+          "description": "Hostname do nó Swarm onde fixar o serviço (veja `docker node ls`)"
         },
         {
           "name": "NODE_HOSTNAME_ELASTICSEARCH",
-          "label": "Nó do Elasticsearch",
-          "description": "Hostname do nó Swarm p/ fixar o Elasticsearch (vazio = qualquer worker)",
-          "default": ""
+          "label": "Nó do Elasticsearch (obrigatório)",
+          "description": "Hostname do nó Swarm onde fixar o serviço (veja `docker node ls`)"
         },
         {
           "name": "NODE_HOSTNAME_GRAFANA",
-          "label": "Nó do Grafana",
-          "description": "Hostname do nó Swarm p/ fixar o Grafana (vazio = qualquer worker)",
-          "default": ""
+          "label": "Nó do Grafana (obrigatório)",
+          "description": "Hostname do nó Swarm onde fixar o serviço (veja `docker node ls`)"
         }
       ]
     },

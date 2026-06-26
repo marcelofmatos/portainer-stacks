@@ -2,9 +2,9 @@
 # Baseada no projeto público https://github.com/LigeroSmart/ligerosmart-stack, adaptada a
 # Traefik v3 (rede externa `web`) + TLS Let's Encrypt. Inclui MariaDB, Elasticsearch e Grafana.
 #
-# NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster multi-worker, fixe cada
-# serviço no nó preenchendo NODE_HOSTNAME_WEBSERVER / _DATABASE / _ELASTICSEARCH / _GRAFANA
-# (vazio = roda em qualquer worker; preenchido = fixa naquele host).
+# NOTA (volumes em Swarm): os volumes são locais ao nó. Cada serviço é fixado no nó indicado por
+# NODE_HOSTNAME_WEBSERVER / _DATABASE / _ELASTICSEARCH / _GRAFANA (OBRIGATÓRIAS — use o hostname
+# de `docker node ls`). Mantenha o mesmo host entre redeploys p/ não perder os volumes.
 # Porte: Pesado (2 GB → 4–8 GB RAM)
 # Hardware (1 réplica): mínimo 2 vCPU · 4 GB RAM · 20 GB disco · ideal 4 vCPU · 8 GB RAM · 40 GB disco
 services:
@@ -37,8 +37,8 @@ services:
       placement:
         constraints:
           - node.role == worker
-          # vazio = qualquer worker; preencha NODE_HOSTNAME_WEBSERVER p/ fixar neste host (volume local ao nó)
-          - ${NODE_HOSTNAME_WEBSERVER:+node.hostname==}${NODE_HOSTNAME_WEBSERVER:-node.role==worker}
+          # fixa este serviço num nó específico (hostname de `docker node ls`) — volume é local ao nó
+          - node.hostname == ${NODE_HOSTNAME_WEBSERVER}
       labels:
         - traefik.enable=true
         # App principal (atende /, /otrs, /customer...)
@@ -77,8 +77,8 @@ services:
       placement:
         constraints:
           - node.role == worker
-          # vazio = qualquer worker; preencha NODE_HOSTNAME_DATABASE p/ fixar neste host (volume local ao nó)
-          - ${NODE_HOSTNAME_DATABASE:+node.hostname==}${NODE_HOSTNAME_DATABASE:-node.role==worker}
+          # fixa este serviço num nó específico (hostname de `docker node ls`) — volume é local ao nó
+          - node.hostname == ${NODE_HOSTNAME_DATABASE}
 
   elasticsearch:
     image: ligero/elasticsearch:${ELASTICSEARCH_IMAGE_TAG:-6.8.23}
@@ -96,8 +96,8 @@ services:
       placement:
         constraints:
           - node.role == worker
-          # vazio = qualquer worker; preencha NODE_HOSTNAME_ELASTICSEARCH p/ fixar neste host (volume local ao nó)
-          - ${NODE_HOSTNAME_ELASTICSEARCH:+node.hostname==}${NODE_HOSTNAME_ELASTICSEARCH:-node.role==worker}
+          # fixa este serviço num nó específico (hostname de `docker node ls`) — volume é local ao nó
+          - node.hostname == ${NODE_HOSTNAME_ELASTICSEARCH}
 
   grafana:
     image: ligero/grafana:${LIGERO_GRAFANA_IMAGE_TAG:-8}
@@ -113,8 +113,8 @@ services:
       placement:
         constraints:
           - node.role == worker
-          # vazio = qualquer worker; preencha NODE_HOSTNAME_GRAFANA p/ fixar neste host (volume local ao nó)
-          - ${NODE_HOSTNAME_GRAFANA:+node.hostname==}${NODE_HOSTNAME_GRAFANA:-node.role==worker}
+          # fixa este serviço num nó específico (hostname de `docker node ls`) — volume é local ao nó
+          - node.hostname == ${NODE_HOSTNAME_GRAFANA}
       labels:
         - traefik.enable=true
         - traefik.http.routers.ligerosmart-grafana.rule=Host(`${LIGEROSMART_FQDN}`) && PathPrefix(`/grafana`)
