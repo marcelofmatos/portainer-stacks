@@ -29,8 +29,8 @@ services:
       START_SCHEDULER: "1"
     volumes:
       - core:/opt/otrs
-      - custom:/opt/otrs/Custom # dados persistentes: customizações (.pm)
-      - var:/opt/otrs/var # dados persistentes: article (anexos), spool, sessions, stats, tmp, cron...
+      #- custom:/opt/otrs/Custom # dados persistentes: customizações (.pm)
+      #- var:/opt/otrs/var # dados persistentes: article (anexos), spool, sessions, stats, tmp, cron...
     deploy:
       mode: replicated
       replicas: 1
