@@ -42,7 +42,15 @@ flowchart LR
 | `ELASTICSEARCH_IMAGE_TAG` | não | `6.8.23` | tag do Elasticsearch |
 | `LIGERO_GRAFANA_IMAGE_TAG` | não | `8` | tag do Grafana |
 | `PROXY_NET` | não | `web` | rede externa do Traefik |
-| `WORKER_HOSTNAME` | não | — | fixa os volumes num nó (cluster multi-worker) |
+| `NODE_HOSTNAME_WEBSERVER` | não | — | hostname do nó p/ fixar o serviço `web` (vazio = qualquer worker) |
+| `NODE_HOSTNAME_DATABASE` | não | — | hostname do nó p/ fixar o `database` (MariaDB) |
+| `NODE_HOSTNAME_ELASTICSEARCH` | não | — | hostname do nó p/ fixar o `elasticsearch` |
+| `NODE_HOSTNAME_GRAFANA` | não | — | hostname do nó p/ fixar o `grafana` |
+
+> **Fixar serviços por nó (cluster multi-worker).** Cada serviço tem volume local ao nó. Em
+> cluster com mais de um worker, preencha o `NODE_HOSTNAME_*` de cada serviço com o hostname do
+> nó desejado para fixá-lo ali (assim o volume e o serviço ficam sempre no mesmo nó). **Vazio =
+> roda em qualquer worker.** Descubra os hostnames com `docker node ls`.
 
 ## Pré-requisitos
 - **Hardware mínimo:** 2 vCPU · 4 GB RAM · 20 GB disco
@@ -64,4 +72,4 @@ flowchart LR
 | ES travando por memória | heap inadequado | ajustar `ES_JAVA_OPTS` (ex.: `-Xms1g -Xmx1g`) |
 | 404/sem TLS | fora da rede `web` / DNS não aponta | conferir rede/labels e DNS |
 | `/grafana` em branco | proxy/root url | confirmar `GF_SERVER_ROOT_URL` = `https://LIGEROSMART_FQDN/grafana/` |
-| Dados somem ao reagendar | volumes locais ao nó (multi-worker) | fixar `node.hostname` via `WORKER_HOSTNAME` |
+| Dados somem ao reagendar | volumes locais ao nó (multi-worker) | fixar cada serviço no nó via `NODE_HOSTNAME_*` |

@@ -1522,6 +1522,30 @@
           "name": "PROXY_NET",
           "label": "Rede do proxy",
           "default": "web"
+        },
+        {
+          "name": "NODE_HOSTNAME_WEBSERVER",
+          "label": "Nó do webserver",
+          "description": "Hostname do nó Swarm p/ fixar o serviço web (vazio = qualquer worker)",
+          "default": ""
+        },
+        {
+          "name": "NODE_HOSTNAME_DATABASE",
+          "label": "Nó do MariaDB",
+          "description": "Hostname do nó Swarm p/ fixar o banco (vazio = qualquer worker)",
+          "default": ""
+        },
+        {
+          "name": "NODE_HOSTNAME_ELASTICSEARCH",
+          "label": "Nó do Elasticsearch",
+          "description": "Hostname do nó Swarm p/ fixar o Elasticsearch (vazio = qualquer worker)",
+          "default": ""
+        },
+        {
+          "name": "NODE_HOSTNAME_GRAFANA",
+          "label": "Nó do Grafana",
+          "description": "Hostname do nó Swarm p/ fixar o Grafana (vazio = qualquer worker)",
+          "default": ""
         }
       ]
     },

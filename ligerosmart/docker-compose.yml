@@ -2,8 +2,9 @@
 # Baseada no projeto público https://github.com/LigeroSmart/ligerosmart-stack, adaptada a
 # Traefik v3 (rede externa `web`) + TLS Let's Encrypt. Inclui MariaDB, Elasticsearch e Grafana.
 #
-# NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster multi-worker, fixe os
-# serviços com volume definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+# NOTA (volumes em Swarm): os volumes são locais ao nó. Em cluster multi-worker, fixe cada
+# serviço no nó preenchendo NODE_HOSTNAME_WEBSERVER / _DATABASE / _ELASTICSEARCH / _GRAFANA
+# (vazio = roda em qualquer worker; preenchido = fixa naquele host).
 # Porte: Pesado (2 GB → 4–8 GB RAM)
 # Hardware (1 réplica): mínimo 2 vCPU · 4 GB RAM · 20 GB disco · ideal 4 vCPU · 8 GB RAM · 40 GB disco
 services:
@@ -28,16 +29,16 @@ services:
       START_SCHEDULER: "1"
     volumes:
       - core:/opt/otrs
-      - custom:/opt/otrs/Custom
-      - tmp:/opt/otrs/var/tmp/
-      - article:/opt/otrs/var/article
+      - custom:/opt/otrs/Custom # dados persistentes: customizações (.pm)
+      - var:/opt/otrs/var # dados persistentes: article (anexos), spool, sessions, stats, tmp, cron...
     deploy:
       mode: replicated
       replicas: 1
       placement:
         constraints:
           - node.role == worker
-          # - node.hostname == ${WORKER_HOSTNAME:-}
+          # vazio = qualquer worker; preencha NODE_HOSTNAME_WEBSERVER p/ fixar neste host (volume local ao nó)
+          - ${NODE_HOSTNAME_WEBSERVER:+node.hostname==}${NODE_HOSTNAME_WEBSERVER:-node.role==worker}
       labels:
         - traefik.enable=true
         # App principal (atende /, /otrs, /customer...)
@@ -76,7 +77,8 @@ services:
       placement:
         constraints:
           - node.role == worker
-          # - node.hostname == ${WORKER_HOSTNAME:-}
+          # vazio = qualquer worker; preencha NODE_HOSTNAME_DATABASE p/ fixar neste host (volume local ao nó)
+          - ${NODE_HOSTNAME_DATABASE:+node.hostname==}${NODE_HOSTNAME_DATABASE:-node.role==worker}
 
   elasticsearch:
     image: ligero/elasticsearch:${ELASTICSEARCH_IMAGE_TAG:-6.8.23}
@@ -94,7 +96,8 @@ services:
       placement:
         constraints:
           - node.role == worker
-          # - node.hostname == ${WORKER_HOSTNAME:-}
+          # vazio = qualquer worker; preencha NODE_HOSTNAME_ELASTICSEARCH p/ fixar neste host (volume local ao nó)
+          - ${NODE_HOSTNAME_ELASTICSEARCH:+node.hostname==}${NODE_HOSTNAME_ELASTICSEARCH:-node.role==worker}
 
   grafana:
     image: ligero/grafana:${LIGERO_GRAFANA_IMAGE_TAG:-8}
@@ -110,7 +113,8 @@ services:
       placement:
         constraints:
           - node.role == worker
-          # - node.hostname == ${WORKER_HOSTNAME:-}
+          # vazio = qualquer worker; preencha NODE_HOSTNAME_GRAFANA p/ fixar neste host (volume local ao nó)
+          - ${NODE_HOSTNAME_GRAFANA:+node.hostname==}${NODE_HOSTNAME_GRAFANA:-node.role==worker}
       labels:
         - traefik.enable=true
         - traefik.http.routers.ligerosmart-grafana.rule=Host(`${LIGEROSMART_FQDN}`) && PathPrefix(`/grafana`)
@@ -131,8 +135,7 @@ networks:
 volumes:
   core: { driver: local }
   custom: { driver: local }
-  tmp: { driver: local }
-  article: { driver: local }
+  var: { driver: local }
   mysql-data: { driver: local }
   elasticsearch-data: { driver: local }
   grafana-data: { driver: local }
