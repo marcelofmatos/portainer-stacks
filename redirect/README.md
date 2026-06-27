@@ -4,9 +4,9 @@ Stack que reúne **vários redirects HTTP numa única stack** — cada serviço 
 de origem para um destino (301/302), via [`morbz/docker-web-redirect`](https://hub.docker.com/r/morbz/docker-web-redirect),
 publicado pelo **Traefik v3** com TLS Let's Encrypt.
 
-> **`redirect` vs `web-redirect`:** use `web-redirect` quando quiser **um** redirect parametrizado
-> por env (uma stack por redirect). Use `redirect` (esta) para **gerenciar vários redirects juntos**
-> na mesma stack, adicionando um bloco de serviço por domínio.
+> **Um ou vários:** o formulário do App Template já configura **um** redirect (`redirect-01`). Para
+> ter **vários** redirects na mesma stack, basta adicionar um bloco de serviço por domínio no
+> `docker-compose.yml` (ver a seção *Vários redirects*).
 
 ## Componentes
 

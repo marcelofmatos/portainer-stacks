@@ -2206,44 +2206,9 @@
     },
     {
       "type": 2,
-      "title": "web-redirect — redirecionador HTTP",
-      "name": "web-redirect",
-      "description": "Redireciona todo o trafego de um dominio para uma URL de destino (301/302). Publicado via Traefik v3 com TLS. Util para dominios antigos/alternativos ou apontar um host para outro servico.",
-      "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. REDIRECT_TYPE: redirect (302) ou 'redirect permanent' (301).",
-      "categories": [
-        "networking",
-        "tools",
-        "Porte: Leve"
-      ],
-      "platform": "linux",
-      "logo": "https://api.iconify.design/tabler/external-link.svg?color=%238b5cf6&height=128",
-      "repository": {
-        "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "web-redirect/docker-compose.yml"
-      },
-      "env": [
-        {
-          "name": "REDIRECT_FQDN",
-          "label": "Dominio de origem",
-          "description": "Ex.: antigo.exemplo.com"
-        },
-        {
-          "name": "REDIRECT_TARGET",
-          "label": "URL de destino",
-          "description": "Ex.: https://novo.exemplo.com"
-        },
-        {
-          "name": "REDIRECT_TYPE",
-          "label": "Tipo",
-          "default": "redirect"
-        }
-      ]
-    },
-    {
-      "type": 2,
       "title": "redirect — hub de redirects HTTP",
       "name": "redirect",
-      "description": "Hub de redirecionamentos HTTP: reune varios redirects (dominio -> destino, 301/302) numa unica stack, via morbz/docker-web-redirect, publicado pelo Traefik v3 com TLS. O formulario configura o 1o redirect; mais redirects sao adicionados editando o compose. Para um redirect unico, use a stack web-redirect.",
+      "description": "Redirecionador HTTP: dominio -> destino (301/302) via morbz/docker-web-redirect, publicado pelo Traefik v3 com TLS. O formulario configura 1 redirect; para varios na mesma stack, duplique o bloco de servico no compose.",
       "note": "Requer a rede `web` (stack balancer) e DNS de cada dominio de origem apontando para o host. REDIRECT_TYPE: redirect (302) ou 'redirect permanent' (301). Para varios redirects, duplique o bloco de servico no docker-compose.yml.",
       "categories": [
         "networking",
