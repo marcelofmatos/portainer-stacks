@@ -12,7 +12,7 @@
 # Porte: Leve (64 MB → 512 MB RAM)
 # Hardware (1 réplica): mínimo 0.25 vCPU · 64 MB RAM · 1 GB disco · ideal 0.5 vCPU · 128 MB RAM · 2 GB disco
 services:
-  redirect:
+  redirect-01:
     image: morbz/docker-web-redirect:${REDIRECT_IMAGE_TAG:-latest}
     networks:
       - web
@@ -28,14 +28,14 @@ services:
           - node.role == worker
       labels:
         - traefik.enable=true
-        - traefik.http.routers.redirect.rule=Host(`${REDIRECT_FQDN}`)
-        - traefik.http.routers.redirect.entrypoints=websecure
-        - traefik.http.routers.redirect.tls=true
-        - traefik.http.routers.redirect.tls.certresolver=letsencryptresolver
-        - traefik.http.services.redirect.loadbalancer.server.port=80
+        - traefik.http.routers.redirect-01.rule=Host(`${REDIRECT_FQDN}`)
+        - traefik.http.routers.redirect-01.entrypoints=websecure
+        - traefik.http.routers.redirect-01.tls=true
+        - traefik.http.routers.redirect-01.tls.certresolver=letsencryptresolver
+        - traefik.http.services.redirect-01.loadbalancer.server.port=80
 
   # ── 2º redirect (exemplo): descomente e ajuste para adicionar outro domínio ──
-  # redirect-2:
+  # redirect-02:
   #   image: morbz/docker-web-redirect:${REDIRECT_IMAGE_TAG:-latest}
   #   networks:
   #     - web
@@ -50,11 +50,11 @@ services:
   #         - node.role == worker
   #     labels:
   #       - traefik.enable=true
-  #       - traefik.http.routers.redirect-2.rule=Host(`origem2.exemplo.com`)
-  #       - traefik.http.routers.redirect-2.entrypoints=websecure
-  #       - traefik.http.routers.redirect-2.tls=true
-  #       - traefik.http.routers.redirect-2.tls.certresolver=letsencryptresolver
-  #       - traefik.http.services.redirect-2.loadbalancer.server.port=80
+  #       - traefik.http.routers.redirect-02.rule=Host(`origem2.exemplo.com`)
+  #       - traefik.http.routers.redirect-02.entrypoints=websecure
+  #       - traefik.http.routers.redirect-02.tls=true
+  #       - traefik.http.routers.redirect-02.tls.certresolver=letsencryptresolver
+  #       - traefik.http.services.redirect-02.loadbalancer.server.port=80
 
 networks:
   web:
