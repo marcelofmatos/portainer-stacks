@@ -1,0 +1,62 @@
+# Stack "redirect" — hub de redirecionamentos HTTP (vários domínios numa stack) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Cada serviço redireciona UM domínio de origem para UM destino (via morbz/docker-web-redirect).
+#
+# QUANDO USAR: gerenciar VÁRIOS redirects juntos, numa única stack. Para um redirect único
+# totalmente parametrizado por env, use a stack `web-redirect`.
+#
+# Obrigatórias (1º redirect): REDIRECT_FQDN, REDIRECT_TARGET.
+# ADICIONAR MAIS REDIRECTS: duplique o bloco de serviço (veja o exemplo comentado), troque o
+#   nome do serviço, o nome dos routers/services do Traefik, o Host(`...`) e o REDIRECT_TARGET.
+# DESABILITAR um redirect sem remover o bloco: deixe `replicas: 0`.
+# Porte: Leve (64 MB → 512 MB RAM)
+# Hardware (1 réplica): mínimo 0.25 vCPU · 64 MB RAM · 1 GB disco · ideal 0.5 vCPU · 128 MB RAM · 2 GB disco
+services:
+  redirect:
+    image: morbz/docker-web-redirect:${REDIRECT_IMAGE_TAG:-latest}
+    networks:
+      - web
+    environment:
+      - REDIRECT_TARGET=${REDIRECT_TARGET}
+      # REDIRECT_TYPE: "redirect" (302 temporário) ou "redirect permanent" (301)
+      - REDIRECT_TYPE=${REDIRECT_TYPE:-redirect}
+    deploy:
+      mode: replicated
+      replicas: 1 # 0 = desabilita este redirect sem remover o bloco
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.redirect.rule=Host(`${REDIRECT_FQDN}`)
+        - traefik.http.routers.redirect.entrypoints=websecure
+        - traefik.http.routers.redirect.tls=true
+        - traefik.http.routers.redirect.tls.certresolver=letsencryptresolver
+        - traefik.http.services.redirect.loadbalancer.server.port=80
+
+  # ── 2º redirect (exemplo): descomente e ajuste para adicionar outro domínio ──
+  # redirect-2:
+  #   image: morbz/docker-web-redirect:${REDIRECT_IMAGE_TAG:-latest}
+  #   networks:
+  #     - web
+  #   environment:
+  #     - REDIRECT_TARGET=https://destino2.exemplo.com
+  #     - REDIRECT_TYPE=redirect
+  #   deploy:
+  #     mode: replicated
+  #     replicas: 1
+  #     placement:
+  #       constraints:
+  #         - node.role == worker
+  #     labels:
+  #       - traefik.enable=true
+  #       - traefik.http.routers.redirect-2.rule=Host(`origem2.exemplo.com`)
+  #       - traefik.http.routers.redirect-2.entrypoints=websecure
+  #       - traefik.http.routers.redirect-2.tls=true
+  #       - traefik.http.routers.redirect-2.tls.certresolver=letsencryptresolver
+  #       - traefik.http.services.redirect-2.loadbalancer.server.port=80
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
