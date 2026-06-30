@@ -1,0 +1,70 @@
+# Stack "balancer" (standalone) — Traefik v3 (reverse proxy + TLS) — Docker SEM Swarm
+# Versão para host Docker standalone: `docker compose up` ou Portainer "Compose stack" (type 3).
+# Para Swarm, use o `docker-compose.yml` (App Template type 2).
+#
+# DIFERENÇAS vs a versão Swarm:
+#   - Provider do Traefik = `docker` (lê labels do container) no lugar de `swarm` (lê deploy.labels).
+#   - Sem `hostname: {{.Service.Name}}...` (template do Swarm) e sem `deploy`.
+#   - Portas publicadas no modo padrão do host; `restart: always`.
+#   - Rede `web` é BRIDGE externa: `docker network create web`.
+#
+# Variáveis: DOMAIN, ACME_EMAIL, HTTP_AUTH_BASIC (basicauth do dashboard, user:hash bcrypt).
+# Porte: Leve (64 MB → 512 MB RAM)
+services:
+
+  traefik:
+    image: traefik:${TRAEFIK_IMAGE_TAG:-v3.6}
+    restart: always
+    command:
+      - "--api"
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.exposedByDefault=false"
+      - "--providers.docker.network=${PROXY_NET:-web}"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.http.tls.certresolver=letsencryptresolver"
+      - "--certificatesresolvers.letsencryptresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencryptresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencryptresolver.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencryptresolver.acme.storage=/etc/traefik/letsencrypt/acme.json"
+      - "--serversTransport.insecureSkipVerify=true"
+      - "--log.level=${TRAEFIK_LOG_LEVEL:-WARN}"
+      - "--accesslog=true"
+      - "--accesslog.filepath=/logs/access.log"
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.balancer-traefik.loadbalancer.server.port=8080
+      - traefik.http.routers.balancer-traefik.entrypoints=websecure
+      - traefik.http.routers.balancer-traefik.tls=true
+      - traefik.http.routers.balancer-traefik.tls.certresolver=letsencryptresolver
+      - traefik.http.routers.balancer-traefik.rule=Host(`traefik.balancer.${DOMAIN}`)
+      - traefik.http.routers.balancer-traefik.middlewares=traefik-auth
+      - traefik.http.middlewares.traefik-auth.basicauth.users=${HTTP_AUTH_BASIC}
+      - traefik.http.middlewares.gzip.compress=true
+      - traefik.http.middlewares.redirect-https.redirectscheme.scheme=https
+      - traefik.http.middlewares.redirect-https.redirectscheme.permanent=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - certificates:/etc/traefik/letsencrypt
+      - logs:/logs
+    networks:
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+
+volumes:
+  certificates:
+    driver: local
+  logs:
+    driver: local
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}

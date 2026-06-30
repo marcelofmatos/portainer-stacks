@@ -8,6 +8,11 @@ Plataforma de mensageria **self-hosted** baseada no protocolo [Matrix](https://m
 
 Tudo publicado pelo **Traefik v3** com TLS Let's Encrypt. É o análogo "Matrix" ao `rocketchat`.
 
+> **Swarm vs standalone.** `docker-compose.yml` = Docker **Swarm** (App Template type 2).
+> `docker-compose.standalone.yml` = Docker **standalone** (type 3): labels do Traefik no container
+> (provider `docker`), redes `web`/`data` bridge (`docker network create web && docker network
+> create data`), `restart`/`depends_on` no lugar de `deploy`. Variáveis e uso são idênticos.
+
 ---
 
 ## Pré-requisitos

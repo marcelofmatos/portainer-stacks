@@ -1,8 +1,13 @@
 # balancer — Traefik v3 (reverse proxy + TLS)
 
-Reverse proxy **Traefik v3** para Docker Swarm, com TLS automático via Let's Encrypt
-(httpchallenge) e dashboard protegido por basicauth. Cria o ponto de entrada (`:80`/`:443`) e
-usa a rede externa pública por onde as demais stacks publicam.
+Reverse proxy **Traefik v3** com TLS automático via Let's Encrypt (httpchallenge) e dashboard
+protegido por basicauth. Cria o ponto de entrada (`:80`/`:443`) e usa a rede externa pública por
+onde as demais stacks publicam.
+
+> **Swarm vs standalone.** `docker-compose.yml` = Docker **Swarm** (App Template type 2, provider
+> `swarm`). `docker-compose.standalone.yml` = Docker **standalone** (type 3, provider `docker`,
+> labels no container, rede `web` bridge: `docker network create web`). As stacks expostas devem
+> usar a variante correspondente (Swarm lê `deploy.labels`; standalone lê `labels:` do container).
 
 ## Arquitetura
 

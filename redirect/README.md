@@ -60,7 +60,24 @@ Edite o `docker-compose.yml` e **duplique o bloco do serviço** para cada domín
 - o **`Host(\`...\`)`** (domínio de origem);
 - o **`REDIRECT_TARGET`** (destino).
 
-Para **desabilitar** um redirect sem apagar o bloco, deixe `replicas: 0`.
+Para **desabilitar** um redirect sem apagar o bloco, deixe `replicas: 0` (Swarm).
+
+## Swarm vs standalone (Docker sem Swarm)
+
+Há **dois** arquivos de deploy:
+
+| Arquivo | Modo | App Template | Como o Traefik descobre |
+|---|---|---|---|
+| `docker-compose.yml` | Docker **Swarm** | type 2 (Swarm stack) | provider `swarm` lê `deploy.labels`; rede `web` overlay |
+| `docker-compose.standalone.yml` | Docker **standalone** | type 3 (Compose stack) | provider `docker` lê `labels:` do container; rede `web` bridge |
+
+No **standalone** (`docker compose up` ou Portainer "Compose stack"):
+
+- o Traefik precisa rodar com o **provider Docker** (não-Swarm);
+- crie a rede externa como **bridge**: `docker network create web` (sem `--driver overlay`);
+- desabilitar um redirect: comente o bloco do serviço (não há `replicas` fora do Swarm).
+
+O resto (variáveis, imagem, padrão `redirect-0N`) é igual nos dois.
 
 ## Troubleshooting
 

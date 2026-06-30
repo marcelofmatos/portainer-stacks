@@ -1,0 +1,106 @@
+# ┌───────────────────────────────────────────────────────────────────────────┐
+# │ Stack "element" (standalone) — Matrix (Synapse) + Element Web + PostgreSQL  │
+# │ Versão para host Docker SEM Swarm (docker compose / Portainer Compose stack)│
+# └───────────────────────────────────────────────────────────────────────────┘
+# Para Swarm, use o `docker-compose.yml` (App Template type 2). Esta é a versão type 3.
+#
+# DIFERENÇAS vs a versão Swarm:
+#   - Labels do Traefik no CONTAINER (`labels:`) + `traefik.docker.network` (provider docker).
+#   - Redes `web`/`data` BRIDGE externas; `default` bridge interna (no Swarm são overlay).
+#   - `restart: unless-stopped` + `depends_on` (ordem de start) no lugar de `deploy`.
+#
+# Pré-requisitos:
+#   1. Redes externas (bridge):  docker network create web   &&   docker network create data
+#   2. Traefik (stack balancer, provider docker) rodando; DNS de MATRIX_SERVER_NAME e ELEMENT_FQDN no host.
+#   3. Obrigatórias: MATRIX_SERVER_NAME, ELEMENT_FQDN, MATRIX_DB_PASSWORD.
+#   4. 1º usuário (admin):  docker exec -it <container_synapse> register_new_matrix_user -c /data/homeserver.yaml http://localhost:8008
+# Porte: Médio (512 MB → 2 GB RAM)
+services:
+  synapse:
+    image: matrixdotorg/synapse:${SYNAPSE_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      - db
+    # Wrapper: gera a config no 1º start, aponta o banco p/ Postgres e executa o homeserver.
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        if [ ! -f /data/homeserver.yaml ]; then
+          /start.py generate
+          python3 -c "import yaml,os;p='/data/homeserver.yaml';c=yaml.safe_load(open(p));c['database']={'name':'psycopg2','args':{'user':os.environ['SYNAPSE_DB_USER'],'password':os.environ['SYNAPSE_DB_PASSWORD'],'database':os.environ['SYNAPSE_DB_NAME'],'host':os.environ['SYNAPSE_DB_HOST'],'port':int(os.environ['SYNAPSE_DB_PORT']),'cp_min':5,'cp_max':10}};[l.update({'bind_addresses':['0.0.0.0'],'x_forwarded':True}) for l in c.get('listeners',[])];c['enable_registration']=os.environ.get('SYNAPSE_ENABLE_REGISTRATION','false').lower()=='true';c['suppress_key_server_warning']=True;open(p,'w').write(yaml.safe_dump(c,default_flow_style=False))"
+        fi
+        exec /start.py run
+    networks:
+      - default # conversa com o banco `db` internamente
+      - web # exposto pelo Traefik
+    environment:
+      - SYNAPSE_SERVER_NAME=${MATRIX_SERVER_NAME} # identidade + host público do homeserver
+      - SYNAPSE_REPORT_STATS=${SYNAPSE_REPORT_STATS:-no}
+      - SYNAPSE_DB_HOST=${SYNAPSE_DB_HOST:-db}
+      - SYNAPSE_DB_PORT=${SYNAPSE_DB_PORT:-5432}
+      - SYNAPSE_DB_NAME=${SYNAPSE_DB_NAME:-synapse}
+      - SYNAPSE_DB_USER=${SYNAPSE_DB_USER:-synapse}
+      - SYNAPSE_DB_PASSWORD=${MATRIX_DB_PASSWORD} # OBRIGATÓRIA (mesma senha do serviço db)
+      - SYNAPSE_ENABLE_REGISTRATION=${SYNAPSE_ENABLE_REGISTRATION:-false}
+    volumes:
+      - synapse-data:/data # homeserver.yaml, signing key, mídia
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.synapse.rule=Host(`${MATRIX_SERVER_NAME}`)
+      - traefik.http.routers.synapse.entrypoints=websecure
+      - traefik.http.routers.synapse.tls=true
+      - traefik.http.routers.synapse.tls.certresolver=letsencryptresolver
+      - traefik.http.services.synapse.loadbalancer.server.port=8008
+      - traefik.docker.network=${PROXY_NET:-web} # synapse está em 2 redes: diz ao Traefik qual usar
+
+  element:
+    image: vectorim/element-web:${ELEMENT_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    user: "0:0" # precisa escrever /app/config.json antes de servir
+    # Gera o config.json apontando p/ o homeserver e sobe o nginx estático.
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        printf '%s' '{"default_server_config":{"m.homeserver":{"base_url":"https://${MATRIX_SERVER_NAME}","server_name":"${MATRIX_SERVER_NAME}"}},"brand":"Element","disable_guests":true,"disable_3pid_login":false,"default_theme":"light"}' > /app/config.json
+        exec nginx -g 'daemon off;'
+    networks:
+      - web # exposto pelo Traefik (o cliente fala com o homeserver pelo navegador, não pela rede interna)
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.element.rule=Host(`${ELEMENT_FQDN}`)
+      - traefik.http.routers.element.entrypoints=websecure
+      - traefik.http.routers.element.tls=true
+      - traefik.http.routers.element.tls.certresolver=letsencryptresolver
+      - traefik.http.services.element.loadbalancer.server.port=8080 # element-web (nginx rootless) escuta em 8080
+      - traefik.docker.network=${PROXY_NET:-web}
+
+  # Banco PRÓPRIO da stack (locale=C exigido pelo Synapse; só vale na 1ª criação do volume).
+  db:
+    image: postgres:${MATRIX_DB_IMAGE_TAG:-16-alpine}
+    restart: unless-stopped
+    networks:
+      - default # acesso do synapse
+      - data # SÓ para ferramentas de admin (pgadmin4) via host `<stack>_db` (ex.: element_db)
+    environment:
+      - POSTGRES_DB=${SYNAPSE_DB_NAME:-synapse}
+      - POSTGRES_USER=${SYNAPSE_DB_USER:-synapse}
+      - POSTGRES_PASSWORD=${MATRIX_DB_PASSWORD} # OBRIGATÓRIA
+      - POSTGRES_INITDB_ARGS=--encoding=UTF8 --locale=C
+    volumes:
+      - db-data:/var/lib/postgresql/data # ← copie este volume para migrar de host
+
+networks:
+  web: # externa bridge: criada pela stack balancer (Traefik)
+    external: true
+    name: ${PROXY_NET:-web}
+  data: # externa bridge: liga o banco às ferramentas de admin (pgadmin4 etc.)
+    external: true
+    name: ${DATA_NET:-data}
+  default: # interna desta stack: synapse <-> db
+    driver: bridge
+
+volumes:
+  synapse-data:
+    driver: local
+  db-data:
+    driver: local

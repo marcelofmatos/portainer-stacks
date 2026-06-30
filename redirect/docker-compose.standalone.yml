@@ -1,0 +1,59 @@
+# Stack "redirect" (standalone) — hub de redirecionamentos HTTP — Docker SEM Swarm
+# Versão para host Docker standalone: `docker compose up` ou Portainer "Compose stack"
+# (App Template type 3). Para Swarm, use o `docker-compose.yml` (App Template type 2).
+#
+# DIFERENÇAS vs a versão Swarm:
+#   - Labels do Traefik vão no CONTAINER (`labels:`) — provider `docker` lê aqui (no Swarm é `deploy.labels`).
+#   - Rede `web` é uma BRIDGE externa (no Swarm é overlay). Sem rede `default` overlay.
+#   - `restart: always` no lugar de `deploy.restart_policy`. Sem `deploy` (placement/replicas são do Swarm).
+#
+# Pré-requisitos:
+#   1. Traefik rodando com o provider Docker (não-Swarm) e a rede externa `web` (bridge):
+#        docker network create web
+#   2. DNS de cada domínio de origem apontando para o host.
+#   Obrigatórias (1º redirect): REDIRECT_FQDN, REDIRECT_TARGET.
+#
+# ADICIONAR MAIS REDIRECTS: duplique o serviço (exemplo comentado), trocando nome do serviço,
+#   nomes de router/service do Traefik, Host(`...`) e REDIRECT_TARGET.
+# Porte: Leve (64 MB → 512 MB RAM)
+services:
+  redirect-01:
+    image: morbz/docker-web-redirect:${REDIRECT_IMAGE_TAG:-latest}
+    restart: always
+    networks:
+      - web
+    environment:
+      - REDIRECT_TARGET=${REDIRECT_TARGET}
+      # REDIRECT_TYPE: "redirect" (302 temporário) ou "redirect permanent" (301)
+      - REDIRECT_TYPE=${REDIRECT_TYPE:-redirect}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.redirect-01.rule=Host(`${REDIRECT_FQDN}`)
+      - traefik.http.routers.redirect-01.entrypoints=websecure
+      - traefik.http.routers.redirect-01.tls=true
+      - traefik.http.routers.redirect-01.tls.certresolver=letsencryptresolver
+      - traefik.http.services.redirect-01.loadbalancer.server.port=80
+      - traefik.docker.network=${PROXY_NET:-web}
+
+  # ── 2º redirect (exemplo): descomente e ajuste para adicionar outro domínio ──
+  # redirect-02:
+  #   image: morbz/docker-web-redirect:${REDIRECT_IMAGE_TAG:-latest}
+  #   restart: always
+  #   networks:
+  #     - web
+  #   environment:
+  #     - REDIRECT_TARGET=https://destino2.exemplo.com
+  #     - REDIRECT_TYPE=redirect
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.redirect-02.rule=Host(`origem2.exemplo.com`)
+  #     - traefik.http.routers.redirect-02.entrypoints=websecure
+  #     - traefik.http.routers.redirect-02.tls=true
+  #     - traefik.http.routers.redirect-02.tls.certresolver=letsencryptresolver
+  #     - traefik.http.services.redirect-02.loadbalancer.server.port=80
+  #     - traefik.docker.network=${PROXY_NET:-web}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}

@@ -47,6 +47,51 @@
       ]
     },
     {
+      "type": 3,
+      "title": "balancer (standalone) — Traefik v3",
+      "name": "balancer",
+      "description": "Versao STANDALONE (Docker sem Swarm) do Traefik v3: reverse proxy + TLS Let's Encrypt, provider docker (le labels do container). Cria/usa a rede externa bridge `web`. Para Swarm, use a entrada 'balancer'.",
+      "note": "Host SEM Swarm. Crie a rede externa bridge: docker network create web. Variaveis: DOMAIN, ACME_EMAIL, HTTP_AUTH_BASIC (user:hash bcrypt do dashboard).",
+      "categories": [
+        "proxy",
+        "networking",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/traefik.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "balancer/docker-compose.standalone.yml"
+      },
+      "env": [
+        {
+          "name": "DOMAIN",
+          "label": "Dominio base",
+          "description": "Dashboard fica em traefik.balancer.<DOMAIN>"
+        },
+        {
+          "name": "ACME_EMAIL",
+          "label": "E-mail Let's Encrypt",
+          "description": "Contato para os certificados"
+        },
+        {
+          "name": "HTTP_AUTH_BASIC",
+          "label": "Basicauth do dashboard",
+          "description": "Formato usuario:hash_bcrypt (htpasswd -nbB)"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede publica",
+          "default": "web"
+        },
+        {
+          "name": "TRAEFIK_LOG_LEVEL",
+          "label": "Nivel de log",
+          "default": "WARN"
+        }
+      ]
+    },
+    {
       "type": 2,
       "title": "drive — ownCloud",
       "name": "drive",
@@ -703,6 +748,88 @@
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
         "stackfile": "element/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "MATRIX_SERVER_NAME",
+          "label": "Dominio do homeserver (FQDN)",
+          "description": "Identidade dos usuarios (@usuario:dominio) e host do Synapse. Ex.: matrix.exemplo.com"
+        },
+        {
+          "name": "ELEMENT_FQDN",
+          "label": "Dominio do Element Web (FQDN)",
+          "description": "Onde o cliente web e publicado. Ex.: chat.exemplo.com"
+        },
+        {
+          "name": "MATRIX_DB_PASSWORD",
+          "label": "Senha do PostgreSQL",
+          "description": "Senha do banco embarcado do Synapse (segredo)"
+        },
+        {
+          "name": "SYNAPSE_ENABLE_REGISTRATION",
+          "label": "Registro aberto na web",
+          "description": "true para permitir auto-cadastro publico; false (recomendado) cria usuarios via CLI",
+          "default": "false"
+        },
+        {
+          "name": "SYNAPSE_REPORT_STATS",
+          "label": "Enviar estatisticas anonimas",
+          "description": "yes/no",
+          "default": "no"
+        },
+        {
+          "name": "SYNAPSE_DB_NAME",
+          "label": "Banco",
+          "default": "synapse"
+        },
+        {
+          "name": "SYNAPSE_DB_USER",
+          "label": "Usuario do PostgreSQL",
+          "default": "synapse"
+        },
+        {
+          "name": "SYNAPSE_DB_HOST",
+          "label": "Host do PostgreSQL",
+          "description": "Servico de banco embarcado nesta stack (deixe 'db'). So altere para Postgres externo.",
+          "default": "db"
+        },
+        {
+          "name": "SYNAPSE_IMAGE_TAG",
+          "label": "Tag da imagem Synapse",
+          "default": "latest"
+        },
+        {
+          "name": "ELEMENT_IMAGE_TAG",
+          "label": "Tag da imagem Element",
+          "default": "latest"
+        },
+        {
+          "name": "MATRIX_DB_IMAGE_TAG",
+          "label": "Tag da imagem PostgreSQL",
+          "default": "16-alpine"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
+      ]
+    },
+    {
+      "type": 3,
+      "title": "element (standalone) — Matrix (Synapse) + Element Web",
+      "name": "element",
+      "description": "Versao STANDALONE (Docker sem Swarm) do Matrix: homeserver Synapse + cliente Element Web + PostgreSQL embarcado, atras do Traefik (provider docker) com TLS. Para Swarm, use a entrada 'element'.",
+      "note": "Host SEM Swarm. Crie as redes bridge: docker network create web && docker network create data. Apos o deploy, crie o 1o usuario via register_new_matrix_user no container do synapse (veja README).",
+      "categories": [
+        "communication",
+        "Porte: Médio"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/element.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "element/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2220,6 +2347,41 @@
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
         "stackfile": "redirect/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "REDIRECT_FQDN",
+          "label": "Dominio de origem",
+          "description": "Ex.: antigo.exemplo.com"
+        },
+        {
+          "name": "REDIRECT_TARGET",
+          "label": "URL de destino",
+          "description": "Ex.: https://novo.exemplo.com"
+        },
+        {
+          "name": "REDIRECT_TYPE",
+          "label": "Tipo",
+          "default": "redirect"
+        }
+      ]
+    },
+    {
+      "type": 3,
+      "title": "redirect (standalone) — hub de redirects HTTP",
+      "name": "redirect",
+      "description": "Versao STANDALONE (Docker sem Swarm) do hub de redirects HTTP: dominio -> destino (301/302) via morbz/docker-web-redirect, atras do Traefik (provider docker) com TLS. Labels no container e rede `web` bridge. Para Swarm, use a entrada 'redirect — hub de redirects HTTP'.",
+      "note": "Requer Traefik com provider Docker (nao-Swarm) e a rede externa bridge `web` (docker network create web). DNS de cada dominio de origem apontando para o host. Para varios redirects, duplique o servico no docker-compose.standalone.yml.",
+      "categories": [
+        "networking",
+        "tools",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://api.iconify.design/tabler/route.svg?color=%238b5cf6&height=128",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "redirect/docker-compose.standalone.yml"
       },
       "env": [
         {
