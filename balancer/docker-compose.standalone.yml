@@ -13,7 +13,7 @@
 services:
 
   traefik:
-    image: traefik:${TRAEFIK_IMAGE_TAG:-v3.6}
+    image: traefik:${TRAEFIK_IMAGE_TAG:-v3.7}
     restart: always
     command:
       - "--api"
