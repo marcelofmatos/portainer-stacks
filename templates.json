@@ -48,7 +48,7 @@
     },
     {
       "type": 3,
-      "title": "balancer (standalone) — Traefik v3",
+      "title": "balancer — Traefik v3",
       "name": "balancer",
       "description": "Versao STANDALONE (Docker sem Swarm) do Traefik v3: reverse proxy + TLS Let's Encrypt, provider docker (le labels do container). Cria/usa a rede externa bridge `web`. Para Swarm, use a entrada 'balancer'.",
       "note": "Host SEM Swarm. Crie a rede externa bridge: docker network create web. Variaveis: DOMAIN, ACME_EMAIL, HTTP_AUTH_BASIC (user:hash bcrypt do dashboard).",
@@ -817,7 +817,7 @@
     },
     {
       "type": 3,
-      "title": "element (standalone) — Matrix (Synapse) + Element Web",
+      "title": "element — Matrix (Synapse) + Element Web",
       "name": "element",
       "description": "Versao STANDALONE (Docker sem Swarm) do Matrix: homeserver Synapse + cliente Element Web + PostgreSQL embarcado, atras do Traefik (provider docker) com TLS. Para Swarm, use a entrada 'element'.",
       "note": "Host SEM Swarm. Crie as redes bridge: docker network create web && docker network create data. Apos o deploy, crie o 1o usuario via register_new_matrix_user no container do synapse (veja README).",
@@ -2368,7 +2368,7 @@
     },
     {
       "type": 3,
-      "title": "redirect (standalone) — hub de redirects HTTP",
+      "title": "redirect — hub de redirects HTTP",
       "name": "redirect",
       "description": "Versao STANDALONE (Docker sem Swarm) do hub de redirects HTTP: dominio -> destino (301/302) via morbz/docker-web-redirect, atras do Traefik (provider docker) com TLS. Labels no container e rede `web` bridge. Para Swarm, use a entrada 'redirect — hub de redirects HTTP'.",
       "note": "Requer Traefik com provider Docker (nao-Swarm) e a rede externa bridge `web` (docker network create web). DNS de cada dominio de origem apontando para o host. Para varios redirects, duplique o servico no docker-compose.standalone.yml.",
