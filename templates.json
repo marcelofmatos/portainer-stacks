@@ -1359,6 +1359,12 @@
           "description": "Onde o cliente web e publicado. Ex.: chat.exemplo.com"
         },
         {
+          "name": "ELEMENT_BRAND",
+          "label": "Nome da marca (chat)",
+          "description": "Nome exibido no titulo e na tela de boas-vindas do cliente. Ex.: Acme Chat",
+          "default": "Chat"
+        },
+        {
           "name": "MATRIX_DB_PASSWORD",
           "label": "Senha do PostgreSQL",
           "description": "Senha do banco embarcado do Synapse (segredo)"
@@ -1398,7 +1404,8 @@
         },
         {
           "name": "ELEMENT_IMAGE_TAG",
-          "label": "Tag da imagem Element",
+          "label": "Tag da imagem Element (white-label)",
+          "description": "Imagem custom ghcr.io/marcelofmatos/element (branding criado)",
           "default": "latest"
         },
         {
@@ -1441,6 +1448,12 @@
           "description": "Onde o cliente web e publicado. Ex.: chat.exemplo.com"
         },
         {
+          "name": "ELEMENT_BRAND",
+          "label": "Nome da marca (chat)",
+          "description": "Nome exibido no titulo e na tela de boas-vindas do cliente. Ex.: Acme Chat",
+          "default": "Chat"
+        },
+        {
           "name": "MATRIX_DB_PASSWORD",
           "label": "Senha do PostgreSQL",
           "description": "Senha do banco embarcado do Synapse (segredo)"
@@ -1480,7 +1493,8 @@
         },
         {
           "name": "ELEMENT_IMAGE_TAG",
-          "label": "Tag da imagem Element",
+          "label": "Tag da imagem Element (white-label)",
+          "description": "Imagem custom ghcr.io/marcelofmatos/element (branding criado)",
           "default": "latest"
         },
         {

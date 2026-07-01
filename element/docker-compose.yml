@@ -20,8 +20,10 @@
 #         o bind p/ 0.0.0.0 e x_forwarded (atrás do proxy). Nos próximos starts, só executa.
 #       * MATRIX_SERVER_NAME é a identidade dos usuários (@usuario:MATRIX_SERVER_NAME) E o host
 #         onde o Synapse é servido — assim não precisa de delegação .well-known (ver README p/ federação).
-#   - `element` (cliente web) é publicado pelo Traefik em ELEMENT_FQDN; serve estático (nginx)
-#       e aponta para o homeserver via /app/config.json gerado no start.
+#   - `web` (cliente web) usa a imagem custom white-label `ghcr.io/marcelofmatos/element`
+#       (branding criado — paleta marcelomatos.dev); publicado pelo Traefik em ELEMENT_FQDN.
+#       Gera /app/config.json apontando p/ o homeserver a partir das envs ELEMENT_* no start.
+#       Código da imagem: https://github.com/marcelofmatos/element
 #   - `db` (PostgreSQL) é o banco PRÓPRIO desta stack (locale C, exigido pelo Synapse).
 #       * fica na `default` (o Synapse o acessa pelo nome `db`)
 #       * fica TAMBÉM na `data` SÓ para ferramentas de admin (pgadmin4) o alcançarem como `<stack>_db` (ex.: element_db)
@@ -76,15 +78,14 @@ services:
         - traefik.http.routers.synapse.tls.certresolver=letsencryptresolver
         - traefik.http.services.synapse.loadbalancer.server.port=8008
 
-  element:
-    image: vectorim/element-web:${ELEMENT_IMAGE_TAG:-latest}
-    user: "0:0" # precisa escrever /app/config.json antes de servir
-    # Gera o config.json apontando p/ o homeserver e sobe o nginx estático.
-    entrypoint: ["/bin/sh", "-ec"]
-    command:
-      - |
-        printf '%s' '{"default_server_config":{"m.homeserver":{"base_url":"https://${MATRIX_SERVER_NAME}","server_name":"${MATRIX_SERVER_NAME}"}},"brand":"Element","disable_guests":true,"disable_3pid_login":false,"default_theme":"light"}' > /app/config.json
-        exec nginx -g 'daemon off;'
+  web:
+    # Imagem custom white-label (branding criado; config.json gerado do template via env).
+    # A própria imagem sobe o nginx na 8080 e gera o config no start (ver repo do código).
+    image: ghcr.io/marcelofmatos/element:${ELEMENT_IMAGE_TAG:-latest}
+    environment:
+      - ELEMENT_BASE_URL=https://${MATRIX_SERVER_NAME} # base_url do homeserver
+      - ELEMENT_SERVER_NAME=${MATRIX_SERVER_NAME} # server_name (identidade @user:server_name)
+      - ELEMENT_BRAND=${ELEMENT_BRAND:-Chat} # nome da marca exibido no cliente
     networks:
       - web # exposto pelo Traefik (o cliente fala com o homeserver pelo navegador, não pela rede interna)
     deploy:

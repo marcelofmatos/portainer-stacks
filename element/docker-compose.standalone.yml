@@ -53,16 +53,15 @@ services:
       - traefik.http.services.synapse.loadbalancer.server.port=8008
       - traefik.docker.network=${PROXY_NET:-web} # synapse está em 2 redes: diz ao Traefik qual usar
 
-  element:
-    image: vectorim/element-web:${ELEMENT_IMAGE_TAG:-latest}
+  web:
+    # Imagem custom white-label (branding criado; config.json gerado do template via env).
+    # A própria imagem sobe o nginx na 8080 e gera o config no start (ver repo do código).
+    image: ghcr.io/marcelofmatos/element:${ELEMENT_IMAGE_TAG:-latest}
     restart: unless-stopped
-    user: "0:0" # precisa escrever /app/config.json antes de servir
-    # Gera o config.json apontando p/ o homeserver e sobe o nginx estático.
-    entrypoint: ["/bin/sh", "-ec"]
-    command:
-      - |
-        printf '%s' '{"default_server_config":{"m.homeserver":{"base_url":"https://${MATRIX_SERVER_NAME}","server_name":"${MATRIX_SERVER_NAME}"}},"brand":"Element","disable_guests":true,"disable_3pid_login":false,"default_theme":"light"}' > /app/config.json
-        exec nginx -g 'daemon off;'
+    environment:
+      - ELEMENT_BASE_URL=https://${MATRIX_SERVER_NAME} # base_url do homeserver
+      - ELEMENT_SERVER_NAME=${MATRIX_SERVER_NAME} # server_name (identidade @user:server_name)
+      - ELEMENT_BRAND=${ELEMENT_BRAND:-Chat} # nome da marca exibido no cliente
     networks:
       - web # exposto pelo Traefik (o cliente fala com o homeserver pelo navegador, não pela rede interna)
     labels:

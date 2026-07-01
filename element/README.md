@@ -3,7 +3,9 @@
 Plataforma de mensageria **self-hosted** baseada no protocolo [Matrix](https://matrix.org):
 
 - **Synapse** — o *homeserver* (servidor Matrix): contas, salas, DMs, chamadas, mídia.
-- **Element Web** — o cliente web (a "cara" do Element.io), servido como estático.
+- **Element Web** — o cliente web, na imagem **white-label** `ghcr.io/marcelofmatos/element`
+  (branding criado — paleta do [marcelomatos.dev](https://marcelomatos.dev); homeserver e nome
+  da marca via env), servido como estático.
 - **PostgreSQL** — banco **próprio** da stack (locale `C`, exigido pelo Synapse).
 
 Tudo publicado pelo **Traefik v3** com TLS Let's Encrypt. É o análogo "Matrix" ao `rocketchat`.
@@ -34,13 +36,14 @@ Tudo publicado pelo **Traefik v3** com TLS Let's Encrypt. É o análogo "Matrix"
 | `MATRIX_SERVER_NAME` | ✅ | — | Domínio do homeserver. Vira a identidade dos usuários (`@usuario:MATRIX_SERVER_NAME`) **e** o host onde o Synapse é servido. Ex.: `matrix.exemplo.com` |
 | `ELEMENT_FQDN` | ✅ | — | Domínio do cliente web. Ex.: `chat.exemplo.com` |
 | `MATRIX_DB_PASSWORD` | ✅ | — | Senha do PostgreSQL embarcado (segredo) |
+| `ELEMENT_BRAND` | — | `Chat` | Nome da marca exibido no cliente (título e tela de boas-vindas). Ex.: `Acme Chat` |
 | `SYNAPSE_ENABLE_REGISTRATION` | — | `false` | `true` libera auto-cadastro público na web. Em `false`, cria-se usuários via CLI (recomendado) |
 | `SYNAPSE_REPORT_STATS` | — | `no` | Envia estatísticas anônimas ao matrix.org (`yes`/`no`) |
 | `SYNAPSE_DB_NAME` | — | `synapse` | Nome do banco |
 | `SYNAPSE_DB_USER` | — | `synapse` | Usuário do banco |
 | `SYNAPSE_DB_HOST` | — | `db` | Serviço de banco desta stack. Só altere para um Postgres externo |
 | `SYNAPSE_IMAGE_TAG` | — | `latest` | Tag de `matrixdotorg/synapse` |
-| `ELEMENT_IMAGE_TAG` | — | `latest` | Tag de `vectorim/element-web` |
+| `ELEMENT_IMAGE_TAG` | — | `latest` | Tag de `ghcr.io/marcelofmatos/element` (imagem white-label custom) |
 | `MATRIX_DB_IMAGE_TAG` | — | `16-alpine` | Tag de `postgres` |
 | `PROXY_NET` / `DATA_NET` | — | `web` / `data` | Nome das redes externas |
 
@@ -81,7 +84,7 @@ flowchart LR
 
   subgraph web[rede web]
     traefik[Traefik v3<br/>TLS Let's Encrypt]
-    element[element<br/>vectorim/element-web<br/>nginx :8080]
+    element[web<br/>ghcr.io/marcelofmatos/element<br/>white-label · nginx :8080]
     synapse[synapse<br/>matrixdotorg/synapse<br/>homeserver :8008]
   end
 
@@ -95,14 +98,15 @@ flowchart LR
 
   user -->|https ELEMENT_FQDN| traefik --> element
   user -->|https MATRIX_SERVER_NAME| traefik --> synapse
-  element -. baixa config.json<br/>aponta base_url p/ MATRIX_SERVER_NAME .-> user
+  element -. serve config.json (gerado do template via env)<br/>base_url p/ MATRIX_SERVER_NAME .-> user
   synapse -->|psycopg2 :5432| db
   pgadmin -. admin via host element_db .-> db
 ```
 
 O cliente **Element** é estático: ele roda no navegador e fala com o homeserver **direto pela
 internet** (`https://MATRIX_SERVER_NAME`), não pela rede interna do Docker. Por isso o serviço
-`element` só precisa da rede `web`.
+`web` só precisa da rede `web`. A imagem é a white-label `ghcr.io/marcelofmatos/element`
+(branding criado; homeserver e nome da marca vêm das envs `ELEMENT_*`).
 
 ## Fluxo (login + envio de mensagem)
 
@@ -138,8 +142,11 @@ descontinuado). Por isso o `command` desta stack:
 
 Nos próximos starts o passo 1–2 é pulado (a config já existe no volume `synapse-data`).
 
-O **Element** grava `/app/config.json` apontando `m.homeserver.base_url` para
-`https://MATRIX_SERVER_NAME` e então sobe o nginx.
+O **Element** (imagem white-label `ghcr.io/marcelofmatos/element`) gera, no start,
+`/app/config.json` e `/app/branding/welcome.html` a partir de templates via `envsubst`
+(usando `ELEMENT_BASE_URL`, `ELEMENT_SERVER_NAME` e `ELEMENT_BRAND`) — o `base_url` aponta
+para `https://MATRIX_SERVER_NAME` — e então sobe o nginx. O branding (tema, logos, fundo)
+já vem criado na imagem.
 
 ---
 
