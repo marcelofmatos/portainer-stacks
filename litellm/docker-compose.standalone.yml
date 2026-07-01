@@ -1,0 +1,43 @@
+# Stack "litellm" (standalone) — LiteLLM Proxy (gateway OpenAI-compatible) — Docker SEM Swarm
+# Para Swarm, use o `docker-compose.yml` (App Template type 2). Esta é a versão type 3.
+#
+# DIFERENÇAS vs a versão Swarm:
+#   - O Docker config (Swarm) vira BIND MOUNT de host: o config.yaml (model_list) é montado de um
+#     arquivo local. Default: ./config/config.yaml (do repo). Aponte LITELLM_CONFIG_FILE p/ o seu.
+#   - Labels do Traefik no container (provider docker) + traefik.docker.network; redes bridge; restart.
+#
+# Pré-req: Traefik (provider docker) + rede externa bridge `web`.
+# Obrigatórias: LITELLM_FQDN, LITELLM_MASTER_KEY, LITELLM_SALT_KEY.
+# Porte: Médio (512 MB → 2 GB RAM)
+services:
+  proxy:
+    image: ghcr.io/berriai/litellm:${LITELLM_IMAGE_TAG:-main-stable}
+    restart: unless-stopped
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    environment:
+      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY}
+      - LITELLM_SALT_KEY=${LITELLM_SALT_KEY}
+      - DATABASE_URL=${DATABASE_URL:-}
+      # Chaves dos provedores referenciadas pelo config.yaml via os.environ/<VAR>:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    volumes:
+      # model_list via arquivo local do host:
+      - ${LITELLM_CONFIG_FILE:-./config/config.yaml}:/app/config.yaml:ro
+    networks:
+      - default
+      - web
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.litellm.rule=Host(`${LITELLM_FQDN}`)
+      - traefik.http.routers.litellm.entrypoints=websecure
+      - traefik.http.routers.litellm.tls=true
+      - traefik.http.routers.litellm.tls.certresolver=letsencryptresolver
+      - traefik.http.services.litellm.loadbalancer.server.port=4000
+      - traefik.docker.network=${PROXY_NET:-web}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge

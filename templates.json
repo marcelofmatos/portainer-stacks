@@ -298,6 +298,72 @@
       ]
     },
     {
+      "type": 3,
+      "title": "account — OpenLDAP + LAM + self-service-password",
+      "name": "account",
+      "description": "Diretorio OpenLDAP com LDAP Account Manager (administracao) e self-service-password (troca de senha). Expoe a rede `ldap` para outras stacks autenticarem.",
+      "note": "PRE-REQUISITO: crie antes os Docker configs do self-service-password (`docker config create account_ssp_config_v1 ...` e `account_ssp_css_custom_v1 ...`). Veja o README da stack.",
+      "categories": [
+        "authentication",
+        "ldap",
+        "Porte: Médio"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/ldap-account-manager.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "account/docker-compose.standalone.yml"
+      },
+      "env": [
+        {
+          "name": "LAM_FQDN",
+          "label": "Dominio do LAM",
+          "description": "Ex.: account.exemplo.com"
+        },
+        {
+          "name": "SSP_FQDN",
+          "label": "Dominio do self-service-password",
+          "description": "Ex.: senha.exemplo.com"
+        },
+        {
+          "name": "LDAP_DOMAIN",
+          "label": "Dominio LDAP",
+          "description": "Vira dc=... (ex.: exemplo.com)",
+          "default": "example.com"
+        },
+        {
+          "name": "LDAP_ORGANISATION",
+          "label": "Organizacao",
+          "default": "Example Org"
+        },
+        {
+          "name": "LDAP_ADMIN_PASSWORD",
+          "label": "Senha admin LDAP",
+          "description": "Senha do cn=admin,dc=..."
+        },
+        {
+          "name": "SSP_CONFIG_NAME",
+          "label": "Docker config (config.inc.local.php)",
+          "default": "account_ssp_config_v1"
+        },
+        {
+          "name": "SSP_CSS_NAME",
+          "label": "Docker config (custom.css)",
+          "default": "account_ssp_css_custom_v1"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        },
+        {
+          "name": "LDAP_NET",
+          "label": "Rede compartilhada LDAP",
+          "default": "ldap"
+        }
+      ]
+    },
+    {
       "type": 2,
       "title": "lldap — Light LDAP",
       "name": "lldap",
@@ -1148,6 +1214,56 @@
       ]
     },
     {
+      "type": 3,
+      "title": "authelia — autenticacao/2FA",
+      "name": "authelia",
+      "description": "Authelia: portal de autenticacao e 2FA (forward-auth) para proteger servicos atras do Traefik. Inclui Redis.",
+      "note": "PRE-REQUISITO: crie o Docker config `authelia_config_v1` a partir de config/configuration.yml. Aplique nas stacks o middleware authelia@swarm. Veja o README.",
+      "categories": [
+        "authentication",
+        "security",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/authelia.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "authelia/docker-compose.standalone.yml"
+      },
+      "env": [
+        {
+          "name": "AUTHELIA_FQDN",
+          "label": "Dominio do portal",
+          "description": "Ex.: auth.exemplo.com"
+        },
+        {
+          "name": "AUTHELIA_JWT_SECRET",
+          "label": "JWT secret",
+          "description": "Segredo para assinar JWTs"
+        },
+        {
+          "name": "AUTHELIA_SESSION_SECRET",
+          "label": "Session secret",
+          "description": "Segredo das sessoes"
+        },
+        {
+          "name": "AUTHELIA_STORAGE_ENCRYPTION_KEY",
+          "label": "Storage key",
+          "description": "Chave de storage (min. 20 chars)"
+        },
+        {
+          "name": "AUTHELIA_CONFIG_NAME",
+          "label": "Docker config",
+          "default": "authelia_config_v1"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
+      ]
+    },
+    {
       "type": 2,
       "title": "rocketchat — chat de equipe",
       "name": "rocketchat",
@@ -1482,6 +1598,55 @@
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
         "stackfile": "litellm/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "LITELLM_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: llm.exemplo.com"
+        },
+        {
+          "name": "LITELLM_MASTER_KEY",
+          "label": "Master key",
+          "description": "Chave mestra (sk-...)"
+        },
+        {
+          "name": "LITELLM_SALT_KEY",
+          "label": "Salt key",
+          "description": "Salt de criptografia (nao alterar depois)"
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "label": "OpenAI API key (opcional)",
+          "description": "Usada pelo config.yaml"
+        },
+        {
+          "name": "LITELLM_CONFIG_NAME",
+          "label": "Docker config",
+          "default": "litellm_config_v1"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
+      ]
+    },
+    {
+      "type": 3,
+      "title": "litellm — gateway de LLMs",
+      "name": "litellm",
+      "description": "LiteLLM Proxy: gateway OpenAI-compativel para varios provedores de LLM, publicado via Traefik v3 com TLS.",
+      "note": "PRE-REQUISITO: crie o Docker config `litellm_config_v1` a partir de config/config.yaml (lista de modelos). Veja o README.",
+      "categories": [
+        "ai",
+        "Porte: Médio"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/selfhst/icons/png/litellm.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "litellm/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -4376,6 +4541,46 @@
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
         "stackfile": "haproxy/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "HAPROXY_FQDN",
+          "label": "Dominio das stats (FQDN)",
+          "description": "Ex.: haproxy.exemplo.com"
+        },
+        {
+          "name": "HAPROXY_AUTH_BASIC",
+          "label": "Basicauth do Traefik",
+          "description": "Formato usuario:hash_bcrypt (htpasswd -nbB)"
+        },
+        {
+          "name": "HAPROXY_CONFIG_NAME",
+          "label": "Nome do Docker config",
+          "default": "haproxy_config_v1"
+        },
+        {
+          "name": "HAPROXY_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "lts-alpine"
+        }
+      ]
+    },
+    {
+      "type": 3,
+      "title": "haproxy — load balancer TCP/HTTP",
+      "name": "haproxy",
+      "description": "HAProxy para balanceamento/proxy TCP ou HTTP de servicos internos. A pagina de stats (porta 8404) e publicada via Traefik v3 com TLS e protegida por basicauth. Configuracao via Docker config externo.",
+      "note": "Requer a rede `web` (stack balancer) e a rede `data`. Crie o Docker config: docker config create haproxy_config_v1 haproxy/config/haproxy.cfg. HAPROXY_AUTH_BASIC no formato usuario:hash (htpasswd -nbB).",
+      "categories": [
+        "proxy",
+        "networking",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/haproxy.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "haproxy/docker-compose.standalone.yml"
       },
       "env": [
         {

@@ -26,8 +26,11 @@ A maioria das stacks tem **duas variantes**, e o Portainer mostra a certa confor
   `docker` (labels no container), redes **bridge**, `restart` no lugar de `deploy`. Crie as redes
   externas como bridge (ex.: `docker network create web`).
 
-Num host standalone só aparecem as entradas type 3, e vice-versa. Poucas stacks que dependem de
-recursos exclusivos do Swarm (Docker **configs**, `mode: global`) ainda são só Swarm.
+Num host standalone só aparecem as entradas type 3, e vice-versa. Nas stacks que usavam **Docker
+configs** (Swarm), a variante standalone monta o arquivo de config como **bind mount de host**
+(ex.: `AUTHELIA_CONFIG_FILE`, `HAPROXY_CONFIG_FILE`, `LITELLM_CONFIG_FILE`, `SSP_CONFIG_FILE`).
+Apenas o **`swarmprom`** (monitoramento de Swarm, `mode: global` multi-nó) fica só em Swarm — não
+faz sentido em host único.
 
 ## Requisitos de hardware
 

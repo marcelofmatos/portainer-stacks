@@ -1,0 +1,45 @@
+# Stack "haproxy" (standalone) — HAProxy (load balancer TCP/HTTP) — Docker SEM Swarm
+# Para Swarm, use o `docker-compose.yml` (App Template type 2). Esta é a versão type 3.
+#
+# DIFERENÇAS vs a versão Swarm:
+#   - O Docker config (Swarm) vira BIND MOUNT de host: o haproxy.cfg é montado de um arquivo local.
+#     Default: ./config/haproxy.cfg (do repo). Aponte HAPROXY_CONFIG_FILE para um arquivo NO HOST.
+#   - Labels do Traefik no container (provider docker) + traefik.docker.network; redes bridge; restart.
+#
+# Pré-req: Traefik (provider docker) + redes externas bridge `web` e `data`.
+# Obrigatórias: HAPROXY_FQDN, HAPROXY_AUTH_BASIC.
+# Porte: Leve (64 MB → 512 MB RAM)
+services:
+  haproxy:
+    image: haproxy:${HAPROXY_IMAGE_TAG:-lts-alpine}
+    restart: unless-stopped
+    networks:
+      - default
+      - web
+      - data
+    volumes:
+      # haproxy.cfg via arquivo local do host:
+      - ${HAPROXY_CONFIG_FILE:-./config/haproxy.cfg}:/usr/local/etc/haproxy/haproxy.cfg:ro
+    # Frontends TCP definidos no haproxy.cfg precisam ser publicados aqui. Ex.:
+    # ports:
+    #   - "3306:3306"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.haproxy.rule=Host(`${HAPROXY_FQDN}`)
+      - traefik.http.routers.haproxy.entrypoints=websecure
+      - traefik.http.routers.haproxy.tls=true
+      - traefik.http.routers.haproxy.tls.certresolver=letsencryptresolver
+      - traefik.http.routers.haproxy.middlewares=haproxy-auth
+      - traefik.http.middlewares.haproxy-auth.basicauth.users=${HAPROXY_AUTH_BASIC}
+      - traefik.http.services.haproxy.loadbalancer.server.port=8404
+      - traefik.docker.network=${PROXY_NET:-web}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: bridge

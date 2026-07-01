@@ -1,0 +1,59 @@
+# Stack "authelia" (standalone) — Authelia (forward-auth/2FA) + Redis — Docker SEM Swarm
+# Para Swarm, use o `docker-compose.yml` (App Template type 2). Esta é a versão type 3.
+#
+# DIFERENÇAS vs a versão Swarm:
+#   - O Docker config (Swarm) vira BIND MOUNT de host: o configuration.yml é montado de um arquivo
+#     local. Default: ./config/configuration.yml (do repo). Aponte AUTHELIA_CONFIG_FILE para um
+#     arquivo NO HOST para editar com suas configurações.
+#   - Labels do Traefik no container (provider docker) + traefik.docker.network; redes bridge; restart.
+#   - O middleware forward-auth fica como `authelia@docker` (no Swarm era `authelia@swarm`).
+#
+# Pré-req: Traefik (provider docker) + rede externa bridge `web` (docker network create web).
+# Obrigatórias: AUTHELIA_FQDN, AUTHELIA_JWT_SECRET, AUTHELIA_SESSION_SECRET, AUTHELIA_STORAGE_ENCRYPTION_KEY.
+# Porte: Leve (64 MB → 512 MB RAM)
+services:
+  authelia:
+    image: authelia/authelia:${AUTHELIA_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    volumes:
+      # configuração via arquivo local do host (edite este arquivo / aponte para o seu):
+      - ${AUTHELIA_CONFIG_FILE:-./config/configuration.yml}:/config/configuration.yml:ro
+    environment:
+      - AUTHELIA_JWT_SECRET=${AUTHELIA_JWT_SECRET}
+      - AUTHELIA_SESSION_SECRET=${AUTHELIA_SESSION_SECRET}
+      - AUTHELIA_STORAGE_ENCRYPTION_KEY=${AUTHELIA_STORAGE_ENCRYPTION_KEY}
+    networks:
+      - default
+      - web
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.authelia.rule=Host(`${AUTHELIA_FQDN}`)
+      - traefik.http.routers.authelia.entrypoints=websecure
+      - traefik.http.routers.authelia.tls=true
+      - traefik.http.routers.authelia.tls.certresolver=letsencryptresolver
+      - traefik.http.services.authelia.loadbalancer.server.port=9091
+      # Middleware forward-auth reutilizável por outras stacks: `authelia@docker`
+      - traefik.http.middlewares.authelia.forwardauth.address=http://authelia:9091/api/verify?rd=https://${AUTHELIA_FQDN}
+      - traefik.http.middlewares.authelia.forwardauth.trustForwardHeader=true
+      - traefik.http.middlewares.authelia.forwardauth.authResponseHeaders=Remote-User,Remote-Groups,Remote-Name,Remote-Email
+      - traefik.docker.network=${PROXY_NET:-web}
+
+  redis:
+    image: redis:${REDIS_IMAGE_TAG:-alpine}
+    restart: unless-stopped
+    command: ["redis-server", "--save", "60", "1"]
+    networks:
+      - default
+    volumes:
+      - redis:/data
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge
+
+volumes:
+  redis:
+    driver: local

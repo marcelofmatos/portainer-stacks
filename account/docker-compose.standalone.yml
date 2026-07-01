@@ -1,0 +1,102 @@
+# Stack "account" (standalone) — OpenLDAP + LAM + self-service-password — Docker SEM Swarm
+# Para Swarm, use o `docker-compose.yml` (App Template type 2). Esta é a versão type 3.
+#
+# DIFERENÇAS vs a versão Swarm:
+#   - Os Docker configs (Swarm) do self-service-password viram BIND MOUNT de host: o
+#     config.inc.local.php é montado de um arquivo local. Default: ./config/ssp-config.inc.local.php
+#     (do repo). Aponte SSP_CONFIG_FILE para um arquivo NO HOST para editar as suas configurações.
+#     (a custom.css é opcional — veja o bind comentado no serviço `user`.)
+#   - Labels do Traefik no container (provider docker) + traefik.docker.network; redes bridge; restart.
+#
+# Pré-req: Traefik (provider docker) + redes externas bridge `web` e `ldap`
+#   (docker network create web && docker network create ldap).
+# Obrigatórias: LAM_FQDN, SSP_FQDN, LDAP_DOMAIN, LDAP_ORGANISATION, LDAP_ADMIN_PASSWORD.
+# Porte: Médio (512 MB → 2 GB RAM)
+services:
+
+  manager:
+    image: ghcr.io/ldapaccountmanager/lam:${LAM_IMAGE_TAG:-9.5}
+    restart: unless-stopped
+    environment:
+      LAM_SKIP_PRECONFIGURE: 'true'
+    volumes:
+      - lam-etc:/etc/ldap-account-manager/
+      - lam-lib:/var/lib/ldap-account-manager/
+    networks:
+      - default
+      - web
+    healthcheck:
+      disable: true
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.account-manager.rule=Host(`${LAM_FQDN}`)
+      - traefik.http.routers.account-manager.entrypoints=websecure
+      - traefik.http.routers.account-manager.tls=true
+      - traefik.http.routers.account-manager.tls.certresolver=letsencryptresolver
+      - traefik.http.services.account-manager.loadbalancer.server.port=80
+      - traefik.docker.network=${PROXY_NET:-web}
+
+  ldap:
+    image: osixia/openldap:${OPENLDAP_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      LDAP_ORGANISATION: ${LDAP_ORGANISATION:-Example Org}
+      LDAP_DOMAIN: ${LDAP_DOMAIN:-example.com}
+      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+    volumes:
+      - ldap-database:/var/lib/ldap
+      - ldap-config:/etc/ldap/slapd.d
+    networks:
+      - default
+      - ldap
+
+  user:
+    image: ltbproject/self-service-password:${SSP_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    volumes:
+      # configuração via arquivo local do host:
+      - ${SSP_CONFIG_FILE:-./config/ssp-config.inc.local.php}:/var/www/conf/config.inc.local.php:ro
+      # css customizada (opcional) — descomente e aponte para o seu arquivo:
+      # - ${SSP_CSS_FILE:-./config/ssp-custom.css}:/var/www/htdocs/css/custom.css:ro
+      - user-cache:/var/www/cache
+      - user-conf:/var/www/conf
+      - user-templates_c:/var/www/templates_c
+    environment:
+      HTTP_ACCEPT_LANGUAGE: ${SSP_LANGUAGE:-pt_BR}
+    networks:
+      - default
+      - web
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.account-user.rule=Host(`${SSP_FQDN}`)
+      - traefik.http.routers.account-user.entrypoints=websecure
+      - traefik.http.routers.account-user.tls=true
+      - traefik.http.routers.account-user.tls.certresolver=letsencryptresolver
+      - traefik.http.services.account-user.loadbalancer.server.port=80
+      - traefik.docker.network=${PROXY_NET:-web}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  ldap:
+    external: true
+    name: ${LDAP_NET:-ldap}
+  default:
+    driver: bridge
+
+volumes:
+  lam-etc:
+    driver: local
+  lam-lib:
+    driver: local
+  ldap-database:
+    driver: local
+  ldap-config:
+    driver: local
+  user-cache:
+    driver: local
+  user-conf:
+    driver: local
+  user-templates_c:
+    driver: local
