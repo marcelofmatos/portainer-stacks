@@ -50,8 +50,8 @@
       "type": 3,
       "title": "balancer — Traefik v3",
       "name": "balancer",
-      "description": "Versao STANDALONE (Docker sem Swarm) do Traefik v3: reverse proxy + TLS Let's Encrypt, provider docker (le labels do container). Cria/usa a rede externa bridge `web`. Para Swarm, use a entrada 'balancer'.",
-      "note": "Host SEM Swarm. Crie a rede externa bridge: docker network create web. Variaveis: DOMAIN, ACME_EMAIL, HTTP_AUTH_BASIC (user:hash bcrypt do dashboard).",
+      "description": "Reverse proxy Traefik v3: TLS Let's Encrypt automatico, provider Docker (le os labels do container) e dashboard protegido por basicauth. Cria/usa a rede externa `web`.",
+      "note": "Crie a rede externa: docker network create web. Variaveis: DOMAIN, ACME_EMAIL, HTTP_AUTH_BASIC (user:hash bcrypt do dashboard).",
       "categories": [
         "proxy",
         "networking",
@@ -302,7 +302,7 @@
       "title": "account — OpenLDAP + LAM + self-service-password",
       "name": "account",
       "description": "Diretorio OpenLDAP com LDAP Account Manager (administracao) e self-service-password (troca de senha). Expoe a rede `ldap` para outras stacks autenticarem.",
-      "note": "PRE-REQUISITO: crie antes os Docker configs do self-service-password (`docker config create account_ssp_config_v1 ...` e `account_ssp_css_custom_v1 ...`). Veja o README da stack.",
+      "note": "PRE-REQUISITO: o self-service-password le a config de um arquivo local (bind mount) - aponte SSP_CONFIG_FILE para o seu config.inc.local.php (default config/ssp-config.inc.local.php). Crie a rede `ldap`. Veja o README.",
       "categories": [
         "authentication",
         "ldap",
@@ -429,7 +429,7 @@
       "title": "lldap — Light LDAP",
       "name": "lldap",
       "description": "Servidor LDAP leve (usuarios + grupos) com UI web. Alternativa simples ao OpenLDAP/AD; expoe a rede `ldap` para outras stacks autenticarem (host lldap_server:3890).",
-      "note": "Gere segredos fortes para LLDAP_JWT_SECRET e LLDAP_KEY_SEED (openssl rand -hex 32). A rede overlay `ldap` precisa existir.",
+      "note": "Gere segredos fortes para LLDAP_JWT_SECRET e LLDAP_KEY_SEED (openssl rand -hex 32). A rede `ldap` precisa existir.",
       "categories": [
         "authentication",
         "ldap",
@@ -535,7 +535,7 @@
       "title": "phpmyadmin — admin MySQL/MariaDB",
       "name": "phpmyadmin",
       "description": "phpMyAdmin publicado via Traefik v3 com TLS. Entra na rede `data` e alcanca a stack mariadb pelo host `mariadb`. PMA_ARBITRARY permite informar outro host na tela de login.",
-      "note": "Requer a rede `web` (stack balancer) e a rede `data` (docker network create --driver overlay --attachable data).",
+      "note": "Requer a rede `web` (stack balancer) e a rede `data` (docker network create data).",
       "categories": [
         "database",
         "tools",
@@ -616,7 +616,7 @@
       "title": "error-pages — paginas de erro do Traefik",
       "name": "error-pages",
       "description": "Paginas de erro customizadas para o Traefik (tarampampam/error-pages). Funciona como middleware `errors` que captura respostas 4xx/5xx das outras stacks.",
-      "note": "Apos o deploy, aplique nas outras stacks o middleware: traefik.http.routers.<r>.middlewares=error-pages@swarm",
+      "note": "Apos o deploy, aplique nas outras stacks o middleware: traefik.http.routers.<r>.middlewares=error-pages@docker",
       "categories": [
         "proxy",
         "tools",
@@ -1066,7 +1066,7 @@
       "title": "home-assistant — automação residencial",
       "name": "home-assistant",
       "description": "Home Assistant (Container): plataforma open source de automação residencial — dashboards, automacoes e integracoes com dispositivos e servicos. Publicado via Traefik v3 com TLS. Estado/config no volume /config (SQLite).",
-      "note": "Versao Container atras de proxy (contexto servidor/cloud). Descoberta automatica de dispositivos locais (mDNS/Bluetooth/Zigbee USB) exige network_mode host ou hardware dedicado (HAOS) e nao se aplica em Swarm overlay. Para IP real do cliente, configure o bloco http (use_x_forwarded_for + trusted_proxies) no configuration.yaml - veja o README. Requer a rede 'web' (balancer).",
+      "note": "Versao Container atras de proxy (contexto servidor/cloud). Descoberta automatica de dispositivos locais (mDNS/Bluetooth/Zigbee USB) exige network_mode host ou hardware dedicado (HAOS) e nao se aplica neste modo. Para IP real do cliente, configure o bloco http (use_x_forwarded_for + trusted_proxies) no configuration.yaml - veja o README. Requer a rede 'web' (balancer).",
       "categories": [
         "automation",
         "iot"
@@ -1218,7 +1218,7 @@
       "title": "authelia — autenticacao/2FA",
       "name": "authelia",
       "description": "Authelia: portal de autenticacao e 2FA (forward-auth) para proteger servicos atras do Traefik. Inclui Redis.",
-      "note": "PRE-REQUISITO: crie o Docker config `authelia_config_v1` a partir de config/configuration.yml. Aplique nas stacks o middleware authelia@swarm. Veja o README.",
+      "note": "PRE-REQUISITO: a config e montada de um arquivo local (bind mount) - aponte AUTHELIA_CONFIG_FILE para o seu configuration.yml (default config/configuration.yml). Aplique nas stacks o middleware authelia@docker. Veja o README.",
       "categories": [
         "authentication",
         "security",
@@ -1424,8 +1424,8 @@
       "type": 3,
       "title": "element — Matrix (Synapse) + Element Web",
       "name": "element",
-      "description": "Versao STANDALONE (Docker sem Swarm) do Matrix: homeserver Synapse + cliente Element Web + PostgreSQL embarcado, atras do Traefik (provider docker) com TLS. Para Swarm, use a entrada 'element'.",
-      "note": "Host SEM Swarm. Crie as redes bridge: docker network create web && docker network create data. Apos o deploy, crie o 1o usuario via register_new_matrix_user no container do synapse (veja README).",
+      "description": "Matrix self-hosted: homeserver Synapse + cliente Element Web + PostgreSQL embarcado, publicado via Traefik v3 com TLS.",
+      "note": "Crie as redes externas: docker network create web && docker network create data. Apos o deploy, crie o 1o usuario via register_new_matrix_user no container do synapse (veja README).",
       "categories": [
         "communication",
         "Porte: Médio"
@@ -1651,7 +1651,7 @@
       "title": "litellm — gateway de LLMs",
       "name": "litellm",
       "description": "LiteLLM Proxy: gateway OpenAI-compativel para varios provedores de LLM, publicado via Traefik v3 com TLS.",
-      "note": "PRE-REQUISITO: crie o Docker config `litellm_config_v1` a partir de config/config.yaml (lista de modelos). Veja o README.",
+      "note": "PRE-REQUISITO: o model_list e montado de um arquivo local (bind mount) - aponte LITELLM_CONFIG_FILE para o seu config.yaml (default config/config.yaml). Veja o README.",
       "categories": [
         "ai",
         "Porte: Médio"
@@ -2127,8 +2127,8 @@
       "type": 3,
       "title": "mariadb — banco MariaDB",
       "name": "mariadb",
-      "description": "Banco de dados MariaDB compartilhado (sem proxy). Entra na rede overlay `data` para outras stacks conectarem por `mariadb:3306`.",
-      "note": "PRE-REQUISITO: crie a rede compartilhada: `docker network create --driver overlay --attachable data`. Para acesso externo, descomente o bloco ports no compose.",
+      "description": "Banco de dados MariaDB compartilhado (sem proxy). Entra na rede `data` para outras stacks conectarem por `mariadb:3306`.",
+      "note": "PRE-REQUISITO: crie a rede compartilhada: `docker network create data`. Para acesso externo, descomente o bloco ports no compose.",
       "categories": [
         "database",
         "Porte: Médio"
@@ -2216,8 +2216,8 @@
       "type": 3,
       "title": "postgres-pgvector — PostgreSQL + pgvector",
       "name": "postgres-pgvector",
-      "description": "PostgreSQL com a extensao pgvector nativa (imagem oficial pgvector/pgvector), para IA/RAG (embeddings). Entra na rede overlay `data` para outras stacks conectarem por `postgres:5432`.",
-      "note": "PRE-REQUISITO: crie a rede `data` (docker network create --driver overlay --attachable data). A extensao e por banco: rode CREATE EXTENSION IF NOT EXISTS vector; em cada banco que usar vetores (ver README).",
+      "description": "PostgreSQL com a extensao pgvector nativa (imagem oficial pgvector/pgvector), para IA/RAG (embeddings). Entra na rede `data` para outras stacks conectarem por `postgres:5432`.",
+      "note": "PRE-REQUISITO: crie a rede `data` (docker network create data). A extensao e por banco: rode CREATE EXTENSION IF NOT EXISTS vector; em cada banco que usar vetores (ver README).",
       "categories": [
         "database",
         "ai",
@@ -2306,8 +2306,8 @@
       "type": 3,
       "title": "redis — cache compartilhado",
       "name": "redis",
-      "description": "Redis como cache/memoria compartilhado (sem proxy). Entra na rede overlay `data` para outras stacks conectarem por `redis:6379`.",
-      "note": "PRE-REQUISITO: crie a rede `data` (docker network create --driver overlay --attachable data). Defina REDIS_PASSWORD para proteger o cache.",
+      "description": "Redis como cache/memoria compartilhado (sem proxy). Entra na rede `data` para outras stacks conectarem por `redis:6379`.",
+      "note": "PRE-REQUISITO: crie a rede `data` (docker network create data). Defina REDIS_PASSWORD para proteger o cache.",
       "categories": [
         "database",
         "cache",
@@ -2782,8 +2782,8 @@
       "type": 3,
       "title": "supabase — backend self-hosted",
       "name": "supabase",
-      "description": "Supabase self-hosted (Postgres + Studio + Kong/API + Auth + REST + Realtime + Storage + Functions...) adaptado para Docker Swarm. Studio e API expostos via Traefik v3.",
-      "note": "Adaptacao best-effort p/ Swarm. Gere as chaves (JWT_SECRET, ANON_KEY, SERVICE_ROLE_KEY etc.) conforme a doc da Supabase antes do deploy. Veja o README.",
+      "description": "Supabase self-hosted (Postgres + Studio + Kong/API + Auth + REST + Realtime + Storage + Functions...). Studio e API expostos via Traefik v3.",
+      "note": "Adaptacao best-effort. Gere as chaves (JWT_SECRET, ANON_KEY, SERVICE_ROLE_KEY etc.) conforme a doc da Supabase antes do deploy. Veja o README.",
       "categories": [
         "database",
         "ai",
@@ -3075,46 +3075,6 @@
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
         "stackfile": "docker-service-update/docker-compose.yml"
-      },
-      "env": [
-        {
-          "name": "UPDATE_FQDN",
-          "label": "Dominio (FQDN)",
-          "description": "Ex.: deploy.exemplo.com"
-        },
-        {
-          "name": "UPDATE_AUTH_BASIC",
-          "label": "Basicauth do webhook",
-          "description": "Formato usuario:hash_bcrypt (htpasswd -nbB)"
-        },
-        {
-          "name": "APP_IMAGE_TAG",
-          "label": "Tag da imagem",
-          "default": "latest"
-        },
-        {
-          "name": "PROXY_NET",
-          "label": "Rede do proxy",
-          "default": "web"
-        }
-      ]
-    },
-    {
-      "type": 3,
-      "title": "docker-service-update — webhook de deploy Swarm",
-      "name": "docker-service-update",
-      "description": "Webhook HTTP que recebe o nome de uma imagem e forca o re-deploy (service update --force) dos servicos Swarm que a usam. Para chamar de pipelines de CI/CD apos publicar a imagem. Publicado via Traefik v3 com TLS e protegido por basicauth.",
-      "note": "Roda no MANAGER (acessa /var/run/docker.sock). Requer a rede `web` (stack balancer). O endpoint forca re-deploy de qualquer servico: UPDATE_AUTH_BASIC obrigatorio, formato usuario:hash (htpasswd -nbB).",
-      "categories": [
-        "ci-cd",
-        "tools",
-        "Porte: Leve"
-      ],
-      "platform": "linux",
-      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/docker.png",
-      "repository": {
-        "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "docker-service-update/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -3754,8 +3714,8 @@
       "type": 3,
       "title": "mongodb — banco NoSQL compartilhado",
       "name": "mongodb",
-      "description": "MongoDB como banco NoSQL interno/compartilhado do cluster. NAO usa Traefik nem a rede web: fica na rede overlay `data` e outras stacks conectam pelo host mongodb:27017. Admin via web pela stack mongo-express.",
-      "note": "Banco interno. Requer a rede `data`: docker network create --driver overlay --attachable data. Nao exponha 27017 na internet.",
+      "description": "MongoDB como banco NoSQL interno/compartilhado do cluster. NAO usa Traefik nem a rede web: fica na rede `data` e outras stacks conectam pelo host mongodb:27017. Admin via web pela stack mongo-express.",
+      "note": "Banco interno. Requer a rede `data`: docker network create data. Nao exponha 27017 na internet.",
       "categories": [
         "database",
         "Porte: Médio"
@@ -4113,7 +4073,7 @@
       "type": 3,
       "title": "elasticsearch — busca/indice",
       "name": "elasticsearch",
-      "description": "Elasticsearch single-node como backend interno de busca/indice. NAO usa Traefik nem a rede web: fica na rede overlay data e outras stacks conectam pelo host elasticsearch:9200.",
+      "description": "Elasticsearch single-node como backend interno de busca/indice. NAO usa Traefik nem a rede web: fica na rede data e outras stacks conectam pelo host elasticsearch:9200.",
       "note": "Backend interno. Requer a rede `data` e `vm.max_map_count=262144` no host (ver README). Nao exponha 9200 na internet.",
       "categories": [
         "database",
@@ -4416,8 +4376,8 @@
       "type": 3,
       "title": "redirect — hub de redirects HTTP",
       "name": "redirect",
-      "description": "Versao STANDALONE (Docker sem Swarm) do hub de redirects HTTP: dominio -> destino (301/302) via morbz/docker-web-redirect, atras do Traefik (provider docker) com TLS. Labels no container e rede `web` bridge. Para Swarm, use a entrada 'redirect — hub de redirects HTTP'.",
-      "note": "Requer Traefik com provider Docker (nao-Swarm) e a rede externa bridge `web` (docker network create web). DNS de cada dominio de origem apontando para o host. Para varios redirects, duplique o servico no docker-compose.standalone.yml.",
+      "description": "Hub de redirects HTTP: dominio -> destino (301/302) via morbz/docker-web-redirect, publicado via Traefik v3 com TLS. O formulario configura 1 redirect; para varios, duplique o servico no compose.",
+      "note": "Requer a rede `web` e DNS de cada dominio de origem apontando para o host. Para varios redirects, duplique o servico no docker-compose.standalone.yml.",
       "categories": [
         "networking",
         "tools",
@@ -4583,8 +4543,8 @@
       "type": 3,
       "title": "haproxy — load balancer TCP/HTTP",
       "name": "haproxy",
-      "description": "HAProxy para balanceamento/proxy TCP ou HTTP de servicos internos. A pagina de stats (porta 8404) e publicada via Traefik v3 com TLS e protegida por basicauth. Configuracao via Docker config externo.",
-      "note": "Requer a rede `web` (stack balancer) e a rede `data`. Crie o Docker config: docker config create haproxy_config_v1 haproxy/config/haproxy.cfg. HAPROXY_AUTH_BASIC no formato usuario:hash (htpasswd -nbB).",
+      "description": "HAProxy para balanceamento/proxy TCP ou HTTP de servicos internos. A pagina de stats (porta 8404) e publicada via Traefik v3 com TLS e protegida por basicauth. Configuracao via arquivo local (bind mount).",
+      "note": "Requer a rede `web` (stack balancer) e a rede `data`. A config e montada de um arquivo local - aponte HAPROXY_CONFIG_FILE para o seu haproxy.cfg (default config/haproxy.cfg). HAPROXY_AUTH_BASIC no formato usuario:hash (htpasswd -nbB).",
       "categories": [
         "proxy",
         "networking",

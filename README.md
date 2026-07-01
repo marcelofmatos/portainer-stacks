@@ -29,8 +29,8 @@ A maioria das stacks tem **duas variantes**, e o Portainer mostra a certa confor
 Num host standalone só aparecem as entradas type 3, e vice-versa. Nas stacks que usavam **Docker
 configs** (Swarm), a variante standalone monta o arquivo de config como **bind mount de host**
 (ex.: `AUTHELIA_CONFIG_FILE`, `HAPROXY_CONFIG_FILE`, `LITELLM_CONFIG_FILE`, `SSP_CONFIG_FILE`).
-Apenas o **`swarmprom`** (monitoramento de Swarm, `mode: global` multi-nó) fica só em Swarm — não
-faz sentido em host único.
+Só ficam em Swarm o **`swarmprom`** (`mode: global` multi-nó) e o **`docker-service-update`**
+(`docker service update --force` é exclusivo do Swarm) — não fazem sentido em host único.
 
 ## Requisitos de hardware
 
