@@ -1,0 +1,56 @@
+# Stack "wordpress" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  wordpress:
+    restart: unless-stopped
+    image: wordpress:${WORDPRESS_IMAGE_TAG:-php8.3-apache}
+    networks:
+    - default
+    - web
+    environment:
+    - WORDPRESS_DB_HOST=${WORDPRESS_DB_HOST:-db}
+    - WORDPRESS_DB_NAME=${WORDPRESS_DB_NAME:-wordpress}
+    - WORDPRESS_DB_USER=${WORDPRESS_DB_USER:-wordpress}
+    - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_PASSWORD}
+    - WORDPRESS_TABLE_PREFIX=${WORDPRESS_TABLE_PREFIX:-wp_}
+    - WORDPRESS_CONFIG_EXTRA=${WORDPRESS_CONFIG_EXTRA:-}
+    volumes:
+    - wordpress-data:/var/www/html
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.wordpress.rule=Host(`${WORDPRESS_FQDN}`)
+    - traefik.http.routers.wordpress.entrypoints=websecure
+    - traefik.http.routers.wordpress.tls=true
+    - traefik.http.routers.wordpress.tls.certresolver=letsencryptresolver
+    - traefik.http.services.wordpress.loadbalancer.server.port=80
+    - traefik.docker.network=${PROXY_NET:-web}
+  db:
+    restart: unless-stopped
+    image: mariadb:${WORDPRESS_DB_IMAGE_TAG:-11}
+    networks:
+    - default
+    - data
+    environment:
+    - MARIADB_DATABASE=${WORDPRESS_DB_NAME:-wordpress}
+    - MARIADB_USER=${WORDPRESS_DB_USER:-wordpress}
+    - MARIADB_PASSWORD=${WORDPRESS_DB_PASSWORD}
+    - MARIADB_ROOT_PASSWORD=${WORDPRESS_DB_ROOT_PASSWORD}
+    volumes:
+    - db-data:/var/lib/mysql
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: bridge
+volumes:
+  wordpress-data:
+    driver: local
+  db-data:
+    driver: local

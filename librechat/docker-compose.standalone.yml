@@ -1,0 +1,72 @@
+# Stack "librechat" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  api:
+    restart: unless-stopped
+    image: ghcr.io/danny-avila/librechat:${LIBRECHAT_IMAGE_TAG:-latest}
+    networks:
+    - default
+    - web
+    environment:
+    - HOST=0.0.0.0
+    - PORT=3080
+    - MONGO_URI=mongodb://${LIBRECHAT_MONGO_USER:-root}:${LIBRECHAT_MONGO_PASSWORD}@${LIBRECHAT_MONGO_HOST:-db}:27017/${LIBRECHAT_MONGO_DB:-LibreChat}?authSource=admin
+    - DOMAIN_CLIENT=https://${LIBRECHAT_FQDN}
+    - DOMAIN_SERVER=https://${LIBRECHAT_FQDN}
+    - CREDS_KEY=${LIBRECHAT_CREDS_KEY}
+    - CREDS_IV=${LIBRECHAT_CREDS_IV}
+    - JWT_SECRET=${LIBRECHAT_JWT_SECRET}
+    - JWT_REFRESH_SECRET=${LIBRECHAT_JWT_REFRESH_SECRET}
+    - ALLOW_REGISTRATION=${LIBRECHAT_ALLOW_REGISTRATION:-false}
+    - ALLOW_SOCIAL_REGISTRATION=${LIBRECHAT_ALLOW_SOCIAL_REGISTRATION:-false}
+    - SEARCH=true
+    - MEILI_HOST=http://meilisearch:7700
+    - MEILI_MASTER_KEY=${LIBRECHAT_MEILI_MASTER_KEY}
+    - OPENAI_API_KEY=${LIBRECHAT_OPENAI_API_KEY:-}
+    - OPENAI_REVERSE_PROXY=${LIBRECHAT_OPENAI_REVERSE_PROXY:-}
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.librechat.rule=Host(`${LIBRECHAT_FQDN}`)
+    - traefik.http.routers.librechat.entrypoints=websecure
+    - traefik.http.routers.librechat.tls=true
+    - traefik.http.routers.librechat.tls.certresolver=letsencryptresolver
+    - traefik.http.services.librechat.loadbalancer.server.port=3080
+    - traefik.docker.network=${PROXY_NET:-web}
+  meilisearch:
+    restart: unless-stopped
+    image: getmeili/meilisearch:${LIBRECHAT_MEILI_IMAGE_TAG:-v1.12}
+    networks:
+    - default
+    environment:
+    - MEILI_MASTER_KEY=${LIBRECHAT_MEILI_MASTER_KEY}
+    - MEILI_NO_ANALYTICS=true
+    volumes:
+    - meilisearch-data:/meili_data
+  db:
+    restart: unless-stopped
+    image: mongo:${LIBRECHAT_MONGO_IMAGE_TAG:-7}
+    networks:
+    - default
+    - data
+    environment:
+    - MONGO_INITDB_ROOT_USERNAME=${LIBRECHAT_MONGO_USER:-root}
+    - MONGO_INITDB_ROOT_PASSWORD=${LIBRECHAT_MONGO_PASSWORD}
+    volumes:
+    - db-data:/data/db
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: bridge
+volumes:
+  meilisearch-data:
+    driver: local
+  db-data:
+    driver: local

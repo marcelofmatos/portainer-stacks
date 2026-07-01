@@ -1,0 +1,153 @@
+# Stack "dify" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+x-shared-env:
+  LOG_LEVEL: INFO
+  SECRET_KEY: ${DIFY_SECRET_KEY}
+  CONSOLE_WEB_URL: https://${DIFY_FQDN}
+  CONSOLE_API_URL: https://${DIFY_FQDN}
+  SERVICE_API_URL: https://${DIFY_FQDN}
+  APP_WEB_URL: https://${DIFY_FQDN}
+  FILES_URL: https://${DIFY_FQDN}
+  DB_USERNAME: ${DIFY_DB_USER:-postgres}
+  DB_PASSWORD: ${DIFY_DB_PASSWORD}
+  DB_HOST: ${DIFY_DB_HOST:-postgres}
+  DB_PORT: ${DIFY_DB_PORT:-5432}
+  DB_DATABASE: ${DIFY_DB_NAME:-dify}
+  REDIS_HOST: ${DIFY_REDIS_HOST:-redis}
+  REDIS_PORT: ${DIFY_REDIS_PORT:-6379}
+  REDIS_PASSWORD: ${DIFY_REDIS_PASSWORD:-}
+  REDIS_DB: '0'
+  CELERY_BROKER_URL: redis://${DIFY_REDIS_USER:-}:${DIFY_REDIS_PASSWORD:-}@${DIFY_REDIS_HOST:-redis}:${DIFY_REDIS_PORT:-6379}/1
+  STORAGE_TYPE: opendal
+  OPENDAL_SCHEME: fs
+  OPENDAL_FS_ROOT: storage
+  VECTOR_STORE: qdrant
+  QDRANT_URL: ${DIFY_QDRANT_URL:-http://qdrant:6333}
+  QDRANT_API_KEY: ${DIFY_QDRANT_API_KEY:-}
+  CODE_EXECUTION_ENDPOINT: http://sandbox:8194
+  CODE_EXECUTION_API_KEY: ${DIFY_SANDBOX_API_KEY}
+services:
+  api:
+    restart: unless-stopped
+    image: langgenius/dify-api:${DIFY_IMAGE_TAG:-latest}
+    networks:
+    - default
+    - web
+    - data
+    environment:
+      LOG_LEVEL: INFO
+      SECRET_KEY: ${DIFY_SECRET_KEY}
+      CONSOLE_WEB_URL: https://${DIFY_FQDN}
+      CONSOLE_API_URL: https://${DIFY_FQDN}
+      SERVICE_API_URL: https://${DIFY_FQDN}
+      APP_WEB_URL: https://${DIFY_FQDN}
+      FILES_URL: https://${DIFY_FQDN}
+      DB_USERNAME: ${DIFY_DB_USER:-postgres}
+      DB_PASSWORD: ${DIFY_DB_PASSWORD}
+      DB_HOST: ${DIFY_DB_HOST:-postgres}
+      DB_PORT: ${DIFY_DB_PORT:-5432}
+      DB_DATABASE: ${DIFY_DB_NAME:-dify}
+      REDIS_HOST: ${DIFY_REDIS_HOST:-redis}
+      REDIS_PORT: ${DIFY_REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${DIFY_REDIS_PASSWORD:-}
+      REDIS_DB: '0'
+      CELERY_BROKER_URL: redis://${DIFY_REDIS_USER:-}:${DIFY_REDIS_PASSWORD:-}@${DIFY_REDIS_HOST:-redis}:${DIFY_REDIS_PORT:-6379}/1
+      STORAGE_TYPE: opendal
+      OPENDAL_SCHEME: fs
+      OPENDAL_FS_ROOT: storage
+      VECTOR_STORE: qdrant
+      QDRANT_URL: ${DIFY_QDRANT_URL:-http://qdrant:6333}
+      QDRANT_API_KEY: ${DIFY_QDRANT_API_KEY:-}
+      CODE_EXECUTION_ENDPOINT: http://sandbox:8194
+      CODE_EXECUTION_API_KEY: ${DIFY_SANDBOX_API_KEY}
+      MODE: api
+      MIGRATION_ENABLED: 'true'
+    volumes:
+    - dify-storage:/app/api/storage
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.dify-api.rule=Host(`${DIFY_FQDN}`) && (PathPrefix(`/console/api`) || PathPrefix(`/api`) || PathPrefix(`/v1`) || PathPrefix(`/files`))
+    - traefik.http.routers.dify-api.priority=10
+    - traefik.http.routers.dify-api.entrypoints=websecure
+    - traefik.http.routers.dify-api.tls=true
+    - traefik.http.routers.dify-api.tls.certresolver=letsencryptresolver
+    - traefik.http.services.dify-api.loadbalancer.server.port=5001
+    - traefik.docker.network=${PROXY_NET:-web}
+  worker:
+    restart: unless-stopped
+    image: langgenius/dify-api:${DIFY_IMAGE_TAG:-latest}
+    networks:
+    - default
+    - data
+    environment:
+      LOG_LEVEL: INFO
+      SECRET_KEY: ${DIFY_SECRET_KEY}
+      CONSOLE_WEB_URL: https://${DIFY_FQDN}
+      CONSOLE_API_URL: https://${DIFY_FQDN}
+      SERVICE_API_URL: https://${DIFY_FQDN}
+      APP_WEB_URL: https://${DIFY_FQDN}
+      FILES_URL: https://${DIFY_FQDN}
+      DB_USERNAME: ${DIFY_DB_USER:-postgres}
+      DB_PASSWORD: ${DIFY_DB_PASSWORD}
+      DB_HOST: ${DIFY_DB_HOST:-postgres}
+      DB_PORT: ${DIFY_DB_PORT:-5432}
+      DB_DATABASE: ${DIFY_DB_NAME:-dify}
+      REDIS_HOST: ${DIFY_REDIS_HOST:-redis}
+      REDIS_PORT: ${DIFY_REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${DIFY_REDIS_PASSWORD:-}
+      REDIS_DB: '0'
+      CELERY_BROKER_URL: redis://${DIFY_REDIS_USER:-}:${DIFY_REDIS_PASSWORD:-}@${DIFY_REDIS_HOST:-redis}:${DIFY_REDIS_PORT:-6379}/1
+      STORAGE_TYPE: opendal
+      OPENDAL_SCHEME: fs
+      OPENDAL_FS_ROOT: storage
+      VECTOR_STORE: qdrant
+      QDRANT_URL: ${DIFY_QDRANT_URL:-http://qdrant:6333}
+      QDRANT_API_KEY: ${DIFY_QDRANT_API_KEY:-}
+      CODE_EXECUTION_ENDPOINT: http://sandbox:8194
+      CODE_EXECUTION_API_KEY: ${DIFY_SANDBOX_API_KEY}
+      MODE: worker
+    volumes:
+    - dify-storage:/app/api/storage
+  web:
+    restart: unless-stopped
+    image: langgenius/dify-web:${DIFY_IMAGE_TAG:-latest}
+    networks:
+    - default
+    - web
+    environment:
+      CONSOLE_API_URL: https://${DIFY_FQDN}
+      APP_API_URL: https://${DIFY_FQDN}
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.dify-web.rule=Host(`${DIFY_FQDN}`)
+    - traefik.http.routers.dify-web.priority=1
+    - traefik.http.routers.dify-web.entrypoints=websecure
+    - traefik.http.routers.dify-web.tls=true
+    - traefik.http.routers.dify-web.tls.certresolver=letsencryptresolver
+    - traefik.http.services.dify-web.loadbalancer.server.port=3000
+    - traefik.docker.network=${PROXY_NET:-web}
+  sandbox:
+    restart: unless-stopped
+    image: langgenius/dify-sandbox:${DIFY_SANDBOX_IMAGE_TAG:-latest}
+    networks:
+    - default
+    environment:
+      API_KEY: ${DIFY_SANDBOX_API_KEY}
+      GIN_MODE: release
+      WORKER_TIMEOUT: '15'
+      ENABLE_NETWORK: 'true'
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: bridge
+volumes:
+  dify-storage:
+    driver: local

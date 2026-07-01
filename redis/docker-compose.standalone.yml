@@ -1,0 +1,30 @@
+# Stack "redis" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  redis:
+    restart: unless-stopped
+    image: redis:${REDIS_IMAGE_TAG:-7-alpine}
+    command:
+    - redis-server
+    - --maxmemory
+    - ${REDIS_MAXMEMORY:-256mb}
+    - --maxmemory-policy
+    - ${REDIS_MAXMEMORY_POLICY:-allkeys-lru}
+    - --appendonly
+    - ${REDIS_APPENDONLY:-yes}
+    - --requirepass
+    - ${REDIS_PASSWORD:-}
+    volumes:
+    - redis-data:/data
+    networks:
+    - data
+networks:
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+volumes:
+  redis-data:
+    driver: local

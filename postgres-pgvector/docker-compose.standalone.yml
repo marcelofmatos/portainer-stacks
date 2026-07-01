@@ -1,0 +1,24 @@
+# Stack "postgres-pgvector" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  postgres:
+    restart: unless-stopped
+    image: pgvector/pgvector:${PGVECTOR_IMAGE_TAG:-pg16}
+    networks:
+    - data
+    environment:
+    - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    - POSTGRES_DB=${POSTGRES_DB:-vectordb}
+    - POSTGRES_USER=${POSTGRES_USER:-postgres}
+    volumes:
+    - pg-data:/var/lib/postgresql/data
+networks:
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+volumes:
+  pg-data:
+    driver: local

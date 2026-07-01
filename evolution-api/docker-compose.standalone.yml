@@ -1,0 +1,77 @@
+# Stack "evolution-api" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  evolution-api:
+    restart: unless-stopped
+    image: evoapicloud/evolution-api:${EVOLUTION_IMAGE_TAG:-v2.3.7}
+    networks:
+    - default
+    - web
+    environment:
+    - SERVER_URL=https://${EVOLUTION_FQDN}
+    - AUTHENTICATION_API_KEY=${EVOLUTION_API_KEY}
+    - LANGUAGE=${EVOLUTION_LANGUAGE:-pt-BR}
+    - DATABASE_ENABLED=true
+    - DATABASE_PROVIDER=postgresql
+    - DATABASE_CONNECTION_URI=postgresql://${EVOLUTION_DB_USER:-postgres}:${EVOLUTION_DB_PASSWORD}@${EVOLUTION_DB_HOST:-db}:${EVOLUTION_DB_PORT:-5432}/${EVOLUTION_DB_NAME:-evolution}
+    - DATABASE_CONNECTION_CLIENT_NAME=evolution
+    - DATABASE_SAVE_DATA_INSTANCE=true
+    - DATABASE_SAVE_DATA_NEW_MESSAGE=true
+    - DATABASE_SAVE_MESSAGE_UPDATE=true
+    - DATABASE_SAVE_DATA_CONTACTS=true
+    - DATABASE_SAVE_DATA_CHATS=true
+    - CACHE_REDIS_ENABLED=true
+    - CACHE_REDIS_URI=${EVOLUTION_REDIS_URI:-redis://redis:6379/6}
+    - CACHE_REDIS_PREFIX_KEY=evolution
+    - CACHE_REDIS_SAVE_INSTANCES=false
+    - CACHE_LOCAL_ENABLED=false
+    volumes:
+    - evolution-instances:/evolution/instances
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.evolution-api.rule=Host(`${EVOLUTION_FQDN}`)
+    - traefik.http.routers.evolution-api.entrypoints=websecure
+    - traefik.http.routers.evolution-api.tls=true
+    - traefik.http.routers.evolution-api.tls.certresolver=letsencryptresolver
+    - traefik.http.services.evolution-api.loadbalancer.server.port=8080
+    - traefik.docker.network=${PROXY_NET:-web}
+  db:
+    restart: unless-stopped
+    image: postgres:${EVOLUTION_DB_IMAGE_TAG:-16-alpine}
+    networks:
+    - default
+    - data
+    environment:
+    - POSTGRES_DB=${EVOLUTION_DB_NAME:-evolution}
+    - POSTGRES_USER=${EVOLUTION_DB_USER:-postgres}
+    - POSTGRES_PASSWORD=${EVOLUTION_DB_PASSWORD}
+    volumes:
+    - db-data:/var/lib/postgresql/data
+  redis:
+    restart: unless-stopped
+    image: redis:${EVOLUTION_REDIS_IMAGE_TAG:-7-alpine}
+    command: redis-server --save 60 1
+    networks:
+    - default
+    - data
+    volumes:
+    - redis-data:/data
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: bridge
+volumes:
+  evolution-instances:
+    driver: local
+  db-data:
+    driver: local
+  redis-data:
+    driver: local

@@ -1,0 +1,30 @@
+# Stack "home-assistant" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  homeassistant:
+    restart: unless-stopped
+    image: ghcr.io/home-assistant/home-assistant:${HOMEASSISTANT_IMAGE_TAG:-stable}
+    networks:
+    - web
+    environment:
+    - TZ=${TZ:-America/Sao_Paulo}
+    volumes:
+    - homeassistant-config:/config
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.homeassistant.rule=Host(`${HOMEASSISTANT_FQDN}`)
+    - traefik.http.routers.homeassistant.entrypoints=websecure
+    - traefik.http.routers.homeassistant.tls=true
+    - traefik.http.routers.homeassistant.tls.certresolver=letsencryptresolver
+    - traefik.http.services.homeassistant.loadbalancer.server.port=8123
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+volumes:
+  homeassistant-config:
+    driver: local

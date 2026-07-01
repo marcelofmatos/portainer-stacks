@@ -1,0 +1,35 @@
+# Stack "elasticsearch" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  elasticsearch:
+    restart: unless-stopped
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_IMAGE_TAG:-8.15.3}
+    hostname: elasticsearch
+    networks:
+    - data
+    environment:
+    - discovery.type=single-node
+    - cluster.name=${ELASTIC_CLUSTER_NAME:-portainer-stacks}
+    - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    - xpack.security.enabled=${ELASTIC_SECURITY:-true}
+    - bootstrap.memory_lock=true
+    - ES_JAVA_OPTS=${ELASTIC_JAVA_OPTS:--Xms512m -Xmx512m}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+    - elasticsearch-data:/usr/share/elasticsearch/data
+networks:
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+volumes:
+  elasticsearch-data:
+    driver: local

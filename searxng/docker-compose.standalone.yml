@@ -1,0 +1,39 @@
+# Stack "searxng" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  searxng:
+    restart: unless-stopped
+    image: searxng/searxng:${SEARXNG_IMAGE_TAG:-latest}
+    networks:
+    - default
+    - web
+    - data
+    environment:
+    - SEARXNG_BASE_URL=https://${SEARXNG_FQDN}/
+    - SEARXNG_SECRET=${SEARXNG_SECRET}
+    - SEARXNG_REDIS_URL=${SEARXNG_REDIS_URL:-}
+    volumes:
+    - searxng-config:/etc/searxng
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.searxng.rule=Host(`${SEARXNG_FQDN}`)
+    - traefik.http.routers.searxng.entrypoints=websecure
+    - traefik.http.routers.searxng.tls=true
+    - traefik.http.routers.searxng.tls.certresolver=letsencryptresolver
+    - traefik.http.services.searxng.loadbalancer.server.port=8080
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: bridge
+volumes:
+  searxng-config:
+    driver: local

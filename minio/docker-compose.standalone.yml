@@ -1,0 +1,43 @@
+# Stack "minio" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  minio:
+    restart: unless-stopped
+    image: minio/minio:${MINIO_IMAGE_TAG:-latest}
+    command: server /data --console-address ":9001"
+    environment:
+    - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+    - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    - MINIO_BROWSER_REDIRECT_URL=https://${MINIO_CONSOLE_FQDN}
+    volumes:
+    - minio-data:/data
+    networks:
+    - default
+    - web
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.minio-s3.rule=Host(`${MINIO_S3_FQDN}`)
+    - traefik.http.routers.minio-s3.entrypoints=websecure
+    - traefik.http.routers.minio-s3.tls=true
+    - traefik.http.routers.minio-s3.tls.certresolver=letsencryptresolver
+    - traefik.http.routers.minio-s3.service=minio-s3
+    - traefik.http.services.minio-s3.loadbalancer.server.port=9000
+    - traefik.http.routers.minio-console.rule=Host(`${MINIO_CONSOLE_FQDN}`)
+    - traefik.http.routers.minio-console.entrypoints=websecure
+    - traefik.http.routers.minio-console.tls=true
+    - traefik.http.routers.minio-console.tls.certresolver=letsencryptresolver
+    - traefik.http.routers.minio-console.service=minio-console
+    - traefik.http.services.minio-console.loadbalancer.server.port=9001
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge
+volumes:
+  minio-data:
+    driver: local

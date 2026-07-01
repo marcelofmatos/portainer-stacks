@@ -1,0 +1,33 @@
+# Stack "protonmail-bridge" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  smtp:
+    restart: unless-stopped
+    image: pattertj/protonmail-bridge:${PROTONMAIL_IMAGE_TAG:-latest}
+    networks:
+    - default
+    - web
+    environment:
+    - WEBUI_AUTH_TOKEN=${PROTONMAIL_WEBUI_AUTH_TOKEN}
+    volumes:
+    - protonmail-bridge-data:/root
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.protonmail-bridge.rule=Host(`${PROTONMAIL_FQDN}`)
+    - traefik.http.routers.protonmail-bridge.entrypoints=websecure
+    - traefik.http.routers.protonmail-bridge.tls=true
+    - traefik.http.routers.protonmail-bridge.tls.certresolver=letsencryptresolver
+    - traefik.http.services.protonmail-bridge.loadbalancer.server.port=3000
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge
+volumes:
+  protonmail-bridge-data:
+    driver: local

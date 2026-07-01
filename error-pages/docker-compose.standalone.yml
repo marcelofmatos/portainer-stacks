@@ -1,0 +1,29 @@
+# Stack "error-pages" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  error-pages:
+    restart: unless-stopped
+    image: ghcr.io/tarampampam/error-pages:${ERRORPAGES_IMAGE_TAG:-3}
+    environment:
+    - TEMPLATE_NAME=${ERRORPAGES_TEMPLATE:-ghost}
+    networks:
+    - web
+    labels:
+    - traefik.enable=true
+    - traefik.http.services.error-pages.loadbalancer.server.port=8080
+    - traefik.http.middlewares.error-pages.errors.status=400-599
+    - traefik.http.middlewares.error-pages.errors.service=error-pages
+    - traefik.http.middlewares.error-pages.errors.query=/{status}.html
+    - traefik.http.routers.error-pages.rule=Host(`${ERRORPAGES_FQDN:-error-pages.invalid}`)
+    - traefik.http.routers.error-pages.entrypoints=websecure
+    - traefik.http.routers.error-pages.tls=true
+    - traefik.http.routers.error-pages.tls.certresolver=letsencryptresolver
+    - traefik.http.routers.error-pages.service=error-pages
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}

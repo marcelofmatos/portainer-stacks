@@ -1,0 +1,51 @@
+# Stack "langfuse" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  langfuse:
+    restart: unless-stopped
+    image: langfuse/langfuse:${LANGFUSE_IMAGE_TAG:-2}
+    networks:
+    - default
+    - web
+    environment:
+    - DATABASE_URL=postgresql://${LANGFUSE_DB_USER:-postgres}:${LANGFUSE_DB_PASSWORD}@${LANGFUSE_DB_HOST:-db}:${LANGFUSE_DB_PORT:-5432}/${LANGFUSE_DB_NAME:-langfuse}
+    - NEXTAUTH_URL=https://${LANGFUSE_FQDN}
+    - NEXTAUTH_SECRET=${LANGFUSE_NEXTAUTH_SECRET}
+    - SALT=${LANGFUSE_SALT}
+    - TELEMETRY_ENABLED=${LANGFUSE_TELEMETRY_ENABLED:-true}
+    - AUTH_DISABLE_SIGNUP=${LANGFUSE_DISABLE_SIGNUP:-true}
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.langfuse.rule=Host(`${LANGFUSE_FQDN}`)
+    - traefik.http.routers.langfuse.entrypoints=websecure
+    - traefik.http.routers.langfuse.tls=true
+    - traefik.http.routers.langfuse.tls.certresolver=letsencryptresolver
+    - traefik.http.services.langfuse.loadbalancer.server.port=3000
+    - traefik.docker.network=${PROXY_NET:-web}
+  db:
+    restart: unless-stopped
+    image: postgres:${LANGFUSE_DB_IMAGE_TAG:-16-alpine}
+    networks:
+    - default
+    - data
+    environment:
+    - POSTGRES_DB=${LANGFUSE_DB_NAME:-langfuse}
+    - POSTGRES_USER=${LANGFUSE_DB_USER:-postgres}
+    - POSTGRES_PASSWORD=${LANGFUSE_DB_PASSWORD}
+    volumes:
+    - db-data:/var/lib/postgresql/data
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: bridge
+volumes:
+  db-data:
+    driver: local

@@ -1,0 +1,35 @@
+# Stack "chromadb" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  chroma:
+    restart: unless-stopped
+    image: chromadb/chroma:${CHROMA_IMAGE_TAG:-latest}
+    environment:
+    - CHROMA_SERVER_AUTHN_CREDENTIALS=${CHROMA_AUTH_TOKEN:-}
+    - CHROMA_SERVER_AUTHN_PROVIDER=${CHROMA_AUTH_PROVIDER:-}
+    - ANONYMIZED_TELEMETRY=${CHROMA_ANONYMIZED_TELEMETRY:-FALSE}
+    volumes:
+    - chroma-data:/data
+    networks:
+    - default
+    - web
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.chromadb.rule=Host(`${CHROMA_FQDN}`)
+    - traefik.http.routers.chromadb.entrypoints=websecure
+    - traefik.http.routers.chromadb.tls=true
+    - traefik.http.routers.chromadb.tls.certresolver=letsencryptresolver
+    - traefik.http.services.chromadb.loadbalancer.server.port=8000
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge
+volumes:
+  chroma-data:
+    driver: local

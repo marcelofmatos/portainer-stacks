@@ -1,0 +1,32 @@
+# Stack "phpmyadmin" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  pma:
+    restart: unless-stopped
+    image: phpmyadmin/phpmyadmin:${PMA_IMAGE_TAG:-latest}
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOSTS: ${PMA_HOSTS:-mariadb}
+      PMA_ABSOLUTE_URI: https://${PMA_FQDN}/
+      UPLOAD_LIMIT: ${PMA_UPLOAD_LIMIT:-256M}
+    networks:
+    - web
+    - data
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.pma.rule=Host(`${PMA_FQDN}`)
+    - traefik.http.routers.pma.entrypoints=websecure
+    - traefik.http.routers.pma.tls=true
+    - traefik.http.routers.pma.tls.certresolver=letsencryptresolver
+    - traefik.http.services.pma.loadbalancer.server.port=80
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}

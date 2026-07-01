@@ -1,0 +1,33 @@
+# Stack "ssh-server" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  ssh:
+    restart: unless-stopped
+    image: lscr.io/linuxserver/openssh-server:${SSH_IMAGE_TAG:-latest}
+    hostname: ${SSH_HOSTNAME:-ssh-server}
+    networks:
+    - default
+    ports:
+    - target: 2222
+      published: ${SSH_PORT:-2222}
+      mode: host
+    environment:
+    - PUID=${SSH_PUID:-1000}
+    - PGID=${SSH_PGID:-1000}
+    - TZ=${TZ:-America/Sao_Paulo}
+    - USER_NAME=${SSH_USER:-sftp}
+    - PUBLIC_KEY=${SSH_PUBLIC_KEY:-}
+    - SUDO_ACCESS=${SSH_SUDO_ACCESS:-false}
+    - PASSWORD_ACCESS=${SSH_PASSWORD_ACCESS:-false}
+    - USER_PASSWORD=${SSH_USER_PASSWORD:-}
+    volumes:
+    - ssh-config:/config
+networks:
+  default:
+    driver: bridge
+volumes:
+  ssh-config:
+    driver: local

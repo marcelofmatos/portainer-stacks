@@ -1,0 +1,26 @@
+# Stack "openspeedtest" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  openspeedtest:
+    restart: unless-stopped
+    image: openspeedtest/latest:${OPENSPEEDTEST_IMAGE_TAG:-latest}
+    networks:
+    - default
+    - web
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.openspeedtest.rule=Host(`${OPENSPEEDTEST_FQDN}`)
+    - traefik.http.routers.openspeedtest.entrypoints=websecure
+    - traefik.http.routers.openspeedtest.tls=true
+    - traefik.http.routers.openspeedtest.tls.certresolver=letsencryptresolver
+    - traefik.http.services.openspeedtest.loadbalancer.server.port=3000
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge

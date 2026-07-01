@@ -1,0 +1,42 @@
+# Stack "lldap" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  server:
+    restart: unless-stopped
+    image: lldap/lldap:${LLDAP_IMAGE_TAG:-stable}
+    environment:
+    - TZ=${TZ:-UTC}
+    - LLDAP_JWT_SECRET=${LLDAP_JWT_SECRET}
+    - LLDAP_KEY_SEED=${LLDAP_KEY_SEED}
+    - LLDAP_LDAP_BASE_DN=${LLDAP_BASE_DN:-dc=example,dc=com}
+    - LLDAP_LDAP_USER_DN=${LLDAP_ADMIN_USERNAME:-admin}
+    - LLDAP_LDAP_USER_PASS=${LLDAP_ADMIN_PASSWORD}
+    volumes:
+    - lldap-data:/data
+    networks:
+    - default
+    - web
+    - ldap
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.lldap.rule=Host(`${LLDAP_FQDN}`)
+    - traefik.http.routers.lldap.entrypoints=websecure
+    - traefik.http.routers.lldap.tls=true
+    - traefik.http.routers.lldap.tls.certresolver=letsencryptresolver
+    - traefik.http.services.lldap.loadbalancer.server.port=17170
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  ldap:
+    external: true
+    name: ${LDAP_NET:-ldap}
+  default:
+    driver: bridge
+volumes:
+  lldap-data:
+    driver: local

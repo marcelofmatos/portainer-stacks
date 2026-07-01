@@ -16,6 +16,19 @@ fica no repositório.
 3. Salve. As stacks aparecem em **App Templates**; ao escolher uma, o Portainer pede as variáveis
    de ambiente e faz o deploy a partir do `docker-compose.yml` correspondente neste repo.
 
+### Swarm ou standalone (Docker sem Swarm)
+
+A maioria das stacks tem **duas variantes**, e o Portainer mostra a certa conforme o ambiente:
+
+- **Swarm** → `docker-compose.yml` (App Template **type 2**): Traefik via provider `swarm`
+  (`deploy.labels`), redes overlay.
+- **Standalone** → `docker-compose.standalone.yml` (App Template **type 3**): Traefik via provider
+  `docker` (labels no container), redes **bridge**, `restart` no lugar de `deploy`. Crie as redes
+  externas como bridge (ex.: `docker network create web`).
+
+Num host standalone só aparecem as entradas type 3, e vice-versa. Poucas stacks que dependem de
+recursos exclusivos do Swarm (Docker **configs**, `mode: global`) ainda são só Swarm.
+
 ## Requisitos de hardware
 
 Cada stack documenta o **hardware mínimo** (sobe e funciona) e o **ideal** (folga para uso real) na
@@ -30,7 +43,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 
 | Porte | RAM (mín → ideal) | Stacks |
 |---|---|---|
-| **Leve** | 64 MB → 512 MB | `error-pages`, `cloudflared`, `socat`, `redirect`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis` |
+| **Leve** | 64 MB → 512 MB | `error-pages`, `cloudflared`, `socat`, `redirect`, `onedrive`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis` |
 | **Médio** | 512 MB → 2 GB | `account`, `keycloak`, `zabbix`, `mariadb`, `postgres-pgvector`, `mongodb`, `chromadb`, `qdrant`, `minio`, `workflows`, `evolution-api`, `joomla`, `wordpress`, `wikijs`, `espocrm`, `typebot`, `stirlingpdf`, `flowise`, `litellm`, `open-webui`, `element`, `home-assistant` |
 | **Pesado** | 2 GB → 4–8 GB | `swarmprom`, `elasticsearch`, `drive`, `rocketchat`, `moodle`, `twenty`, `botpress`, `langfuse`, `librechat`, `anythingllm`, `chatwoot`, `ligerosmart`, `dify`, `supabase` |
 | **GPU / ML** | 8 GB+ (GPU recomendada) | `ollama`, `comfyui`, `ragflow` |
@@ -65,6 +78,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 |---|---|---|
 | [`drive`](drive/) | ownCloud (arquivos) + MySQL + Redis | [README](drive/README.md) |
 | [`minio`](minio/) | Object storage S3 + console | [README](minio/README.md) |
+| [`onedrive`](onedrive/) | Sincronização com Microsoft OneDrive (sem web) | [README](onedrive/README.md) |
 | [`phpmyadmin`](phpmyadmin/) | phpMyAdmin (admin MySQL/MariaDB) | [README](phpmyadmin/README.md) |
 | [`pgadmin4`](pgadmin4/) | Admin de PostgreSQL | [README](pgadmin4/README.md) |
 | [`stirlingpdf`](stirlingpdf/) | Ferramentas de PDF | [README](stirlingpdf/README.md) |

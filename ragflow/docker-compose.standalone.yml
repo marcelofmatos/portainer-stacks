@@ -1,0 +1,52 @@
+# Stack "ragflow" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  ragflow:
+    restart: unless-stopped
+    image: infiniflow/ragflow:${RAGFLOW_IMAGE_TAG:-latest}
+    networks:
+    - default
+    - web
+    - data
+    environment:
+    - DOC_ENGINE=elasticsearch
+    - MYSQL_HOST=${RAGFLOW_MYSQL_HOST:-mariadb}
+    - MYSQL_PORT=${RAGFLOW_MYSQL_PORT:-3306}
+    - MYSQL_DBNAME=${RAGFLOW_MYSQL_DB:-rag_flow}
+    - MYSQL_PASSWORD=${RAGFLOW_MYSQL_PASSWORD}
+    - MINIO_HOST=${RAGFLOW_MINIO_HOST:-minio:9000}
+    - MINIO_USER=${RAGFLOW_MINIO_USER:-ragflow}
+    - MINIO_PASSWORD=${RAGFLOW_MINIO_PASSWORD}
+    - ES_HOST=${RAGFLOW_ES_HOST:-elasticsearch}
+    - ES_PORT=${RAGFLOW_ES_PORT:-9200}
+    - ELASTIC_PASSWORD=${RAGFLOW_ES_PASSWORD}
+    - REDIS_HOST=${RAGFLOW_REDIS_HOST:-redis}
+    - REDIS_PORT=${RAGFLOW_REDIS_PORT:-6379}
+    - REDIS_PASSWORD=${RAGFLOW_REDIS_PASSWORD:-}
+    - SVR_HTTP_PORT=9380
+    - TIMEZONE=${RAGFLOW_TIMEZONE:-America/Sao_Paulo}
+    volumes:
+    - ragflow-data:/root/.ragflow
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.ragflow.rule=Host(`${RAGFLOW_FQDN}`)
+    - traefik.http.routers.ragflow.entrypoints=websecure
+    - traefik.http.routers.ragflow.tls=true
+    - traefik.http.routers.ragflow.tls.certresolver=letsencryptresolver
+    - traefik.http.services.ragflow.loadbalancer.server.port=80
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: bridge
+volumes:
+  ragflow-data:
+    driver: local

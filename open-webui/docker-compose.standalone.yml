@@ -1,0 +1,38 @@
+# Stack "open-webui" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  open-webui:
+    restart: unless-stopped
+    image: ghcr.io/open-webui/open-webui:${OPENWEBUI_IMAGE_TAG:-main}
+    networks:
+    - default
+    - web
+    environment:
+    - WEBUI_SECRET_KEY=${OPENWEBUI_SECRET_KEY}
+    - WEBUI_URL=https://${OPENWEBUI_FQDN}
+    - OLLAMA_BASE_URL=${OPENWEBUI_OLLAMA_URL:-}
+    - OPENAI_API_BASE_URL=${OPENWEBUI_OPENAI_BASE_URL:-}
+    - OPENAI_API_KEY=${OPENWEBUI_OPENAI_API_KEY:-}
+    - ENABLE_SIGNUP=${OPENWEBUI_ENABLE_SIGNUP:-false}
+    volumes:
+    - open-webui-data:/app/backend/data
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.open-webui.rule=Host(`${OPENWEBUI_FQDN}`)
+    - traefik.http.routers.open-webui.entrypoints=websecure
+    - traefik.http.routers.open-webui.tls=true
+    - traefik.http.routers.open-webui.tls.certresolver=letsencryptresolver
+    - traefik.http.services.open-webui.loadbalancer.server.port=8080
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge
+volumes:
+  open-webui-data:
+    driver: local

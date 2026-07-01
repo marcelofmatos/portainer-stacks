@@ -1,0 +1,25 @@
+# Stack "mongodb" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  mongodb:
+    restart: unless-stopped
+    image: mongo:${MONGO_IMAGE_TAG:-7}
+    hostname: mongodb
+    networks:
+    - data
+    environment:
+    - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME:-root}
+    - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
+    - MONGO_INITDB_DATABASE=${MONGO_DATABASE:-appdb}
+    volumes:
+    - mongodb-data:/data/db
+networks:
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+volumes:
+  mongodb-data:
+    driver: local

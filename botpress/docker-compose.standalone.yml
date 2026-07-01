@@ -1,0 +1,53 @@
+# Stack "botpress" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  botpress:
+    restart: unless-stopped
+    image: botpress/server:${BOTPRESS_IMAGE_TAG:-latest}
+    networks:
+    - default
+    - web
+    environment:
+    - EXTERNAL_URL=https://${BOTPRESS_FQDN}
+    - DATABASE_URL=postgres://${BOTPRESS_DB_USER:-postgres}:${BOTPRESS_DB_PASSWORD}@${BOTPRESS_DB_HOST:-db}:${BOTPRESS_DB_PORT:-5432}/${BOTPRESS_DB_NAME:-botpress}
+    - BP_PRODUCTION=true
+    - PORT=3000
+    volumes:
+    - botpress-data:/botpress/data
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.botpress.rule=Host(`${BOTPRESS_FQDN}`)
+    - traefik.http.routers.botpress.entrypoints=websecure
+    - traefik.http.routers.botpress.tls=true
+    - traefik.http.routers.botpress.tls.certresolver=letsencryptresolver
+    - traefik.http.services.botpress.loadbalancer.server.port=3000
+    - traefik.docker.network=${PROXY_NET:-web}
+  db:
+    restart: unless-stopped
+    image: postgres:${BOTPRESS_DB_IMAGE_TAG:-16-alpine}
+    networks:
+    - default
+    - data
+    environment:
+    - POSTGRES_DB=${BOTPRESS_DB_NAME:-botpress}
+    - POSTGRES_USER=${BOTPRESS_DB_USER:-postgres}
+    - POSTGRES_PASSWORD=${BOTPRESS_DB_PASSWORD}
+    volumes:
+    - db-data:/var/lib/postgresql/data
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: bridge
+volumes:
+  botpress-data:
+    driver: local
+  db-data:
+    driver: local

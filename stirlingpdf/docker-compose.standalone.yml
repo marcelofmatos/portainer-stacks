@@ -1,0 +1,37 @@
+# Stack "stirlingpdf" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  stirling:
+    restart: unless-stopped
+    image: frooodle/s-pdf:${STIRLING_IMAGE_TAG:-latest}
+    environment:
+    - DOCKER_ENABLE_SECURITY=${STIRLING_ENABLE_SECURITY:-false}
+    - LANGS=${STIRLING_LANGS:-pt_BR,en_US}
+    networks:
+    - default
+    - web
+    volumes:
+    - configs:/configs
+    - fonts:/usr/share/fonts/opentype/custom
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.stirling.rule=Host(`${STIRLING_FQDN}`)
+    - traefik.http.routers.stirling.entrypoints=websecure
+    - traefik.http.routers.stirling.tls=true
+    - traefik.http.routers.stirling.tls.certresolver=letsencryptresolver
+    - traefik.http.services.stirling.loadbalancer.server.port=8080
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge
+volumes:
+  configs:
+    driver: local
+  fonts:
+    driver: local

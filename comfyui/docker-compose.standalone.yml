@@ -1,0 +1,33 @@
+# Stack "comfyui" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  comfyui:
+    restart: unless-stopped
+    image: ${COMFYUI_IMAGE:-yanwk/comfyui-boot:latest}
+    networks:
+    - default
+    - web
+    volumes:
+    - comfyui-data:${COMFYUI_DATA_PATH:-/root}
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.comfyui.rule=Host(`${COMFYUI_FQDN}`)
+    - traefik.http.routers.comfyui.entrypoints=websecure
+    - traefik.http.routers.comfyui.tls=true
+    - traefik.http.routers.comfyui.tls.certresolver=letsencryptresolver
+    - traefik.http.routers.comfyui.middlewares=comfyui-auth
+    - traefik.http.middlewares.comfyui-auth.basicauth.users=${COMFYUI_AUTH_BASIC}
+    - traefik.http.services.comfyui.loadbalancer.server.port=8188
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge
+volumes:
+  comfyui-data:
+    driver: local

@@ -1,0 +1,27 @@
+# Stack "mariadb" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  mariadb:
+    restart: unless-stopped
+    image: mariadb:${MARIADB_IMAGE_TAG:-11}
+    hostname: mariadb
+    networks:
+    - data
+    environment:
+    - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+    - MARIADB_DATABASE=${MARIADB_DATABASE:-appdb}
+    - MARIADB_USER=${MARIADB_USER:-app}
+    - MARIADB_PASSWORD=${MARIADB_PASSWORD}
+    - MARIADB_AUTO_UPGRADE=1
+    volumes:
+    - mariadb-data:/var/lib/mysql
+networks:
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+volumes:
+  mariadb-data:
+    driver: local

@@ -1,0 +1,26 @@
+# Stack "mailtester" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  mailcatcher:
+    restart: unless-stopped
+    image: jeanberu/mailcatcher:${MAILCATCHER_IMAGE_TAG:-latest}
+    command: mailcatcher --foreground --ip=0.0.0.0 --smtp-port=1025 --http-port=1080
+    environment:
+    - TZ=${TZ:-UTC}
+    networks:
+    - web
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.mailtester.rule=Host(`${MAILTESTER_FQDN}`)
+    - traefik.http.routers.mailtester.entrypoints=websecure
+    - traefik.http.routers.mailtester.tls=true
+    - traefik.http.routers.mailtester.tls.certresolver=letsencryptresolver
+    - traefik.http.services.mailtester.loadbalancer.server.port=1080
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}

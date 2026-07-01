@@ -1,0 +1,61 @@
+# Stack "moodle" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  moodle:
+    restart: unless-stopped
+    image: bitnami/moodle:${MOODLE_IMAGE_TAG:-latest}
+    networks:
+    - default
+    - web
+    environment:
+    - MOODLE_DATABASE_HOST=db
+    - MOODLE_DATABASE_PORT_NUMBER=3306
+    - MOODLE_DATABASE_NAME=${MOODLE_DB_NAME:-moodle}
+    - MOODLE_DATABASE_USER=${MOODLE_DB_USER:-moodle}
+    - MOODLE_DATABASE_PASSWORD=${MOODLE_DB_PASSWORD}
+    - MOODLE_USERNAME=${MOODLE_ADMIN_USER:-admin}
+    - MOODLE_PASSWORD=${MOODLE_ADMIN_PASSWORD}
+    - MOODLE_EMAIL=${MOODLE_ADMIN_EMAIL:-admin@example.com}
+    - MOODLE_HOST=${MOODLE_FQDN}
+    - MOODLE_REVERSEPROXY=yes
+    - MOODLE_SSLPROXY=yes
+    volumes:
+    - moodle:/bitnami/moodle
+    - moodledata:/bitnami/moodledata
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.moodle.rule=Host(`${MOODLE_FQDN}`)
+    - traefik.http.routers.moodle.entrypoints=websecure
+    - traefik.http.routers.moodle.tls=true
+    - traefik.http.routers.moodle.tls.certresolver=letsencryptresolver
+    - traefik.http.services.moodle.loadbalancer.server.port=8080
+    - traefik.docker.network=${PROXY_NET:-web}
+  db:
+    restart: unless-stopped
+    image: bitnami/mariadb:${MARIADB_IMAGE_TAG:-latest}
+    environment:
+    - MARIADB_USER=${MOODLE_DB_USER:-moodle}
+    - MARIADB_DATABASE=${MOODLE_DB_NAME:-moodle}
+    - MARIADB_PASSWORD=${MOODLE_DB_PASSWORD}
+    - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+    - ALLOW_EMPTY_PASSWORD=no
+    volumes:
+    - mariadb:/bitnami/mariadb
+    networks:
+    - default
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge
+volumes:
+  moodle:
+    driver: local
+  moodledata:
+    driver: local
+  mariadb:
+    driver: local

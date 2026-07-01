@@ -1,0 +1,46 @@
+# Stack "onedrive" — cliente de sincronização Microsoft OneDrive (abraunegg) — Docker Swarm
+# Sincroniza uma pasta (volume) com o OneDrive. NÃO é serviço web: é um daemon de sync em
+# background (sem Traefik, sem porta publicada). Publicado como container de sincronização.
+#
+# AUTENTICAÇÃO (1ª vez, interativa — OAuth): o container precisa ser autorizado uma vez antes de
+# rodar em modo monitor. Veja a seção "Uso" do README (docker run -it no volume de conf).
+#
+# COMO FUNCIONA:
+#   - `onedrive-conf` guarda o token de acesso e o estado (items.sqlite3).
+#   - `onedrive-data` é a pasta local sincronizada com o OneDrive.
+#   - Roda como usuário não-root (ONEDRIVE_UID/GID) — exigência da imagem.
+#
+# VOLUME EM SWARM: volumes são locais ao nó. Em cluster multi-worker, fixe o serviço no nó
+# definindo WORKER_HOSTNAME e descomentando o constraint `node.hostname`.
+# Porte: Leve (64 MB → 512 MB RAM)
+# Hardware (1 réplica): mínimo 0.5 vCPU · 128 MB RAM · disco = tamanho do OneDrive sincronizado
+services:
+  onedrive:
+    image: driveone/onedrive:${ONEDRIVE_IMAGE_TAG:-latest}
+    environment:
+      - ONEDRIVE_UID=${ONEDRIVE_UID:-1000} # dono dos arquivos (não-root, obrigatório)
+      - ONEDRIVE_GID=${ONEDRIVE_GID:-1000}
+      - ONEDRIVE_VERBOSE=${ONEDRIVE_VERBOSE:-1}
+      # Flags opcionais (0/1): descomente conforme o uso
+      # - ONEDRIVE_DOWNLOADONLY=1   # só baixa (espelho read-only do OneDrive)
+      # - ONEDRIVE_UPLOADONLY=1     # só envia
+      # - ONEDRIVE_RESYNC=1         # força resync (use pontualmente e remova depois)
+    volumes:
+      - onedrive-conf:/onedrive/conf # token de acesso + estado (items.sqlite3) — NÃO apague
+      - onedrive-data:/onedrive/data # pasta sincronizada com o OneDrive
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+      placement:
+        constraints:
+          - node.role == worker
+          # descomente em cluster multi-worker p/ fixar os volumes no nó:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+volumes:
+  onedrive-conf:
+    driver: local
+  onedrive-data:
+    driver: local # ← ou troque por um bind mount p/ apontar a uma pasta do host

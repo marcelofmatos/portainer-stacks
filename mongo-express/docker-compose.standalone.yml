@@ -1,0 +1,36 @@
+# Stack "mongo-express" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  mongo-express:
+    restart: unless-stopped
+    image: mongo-express:${MONGO_EXPRESS_IMAGE_TAG:-1.0.2}
+    networks:
+    - default
+    - web
+    - data
+    environment:
+    - ME_CONFIG_MONGODB_URL=mongodb://${MONGOEXPRESS_MONGO_USER:-root}:${MONGOEXPRESS_MONGO_PASSWORD}@${MONGOEXPRESS_MONGO_HOST:-mongodb}:${MONGOEXPRESS_MONGO_PORT:-27017}/?authSource=admin
+    - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+    - ME_CONFIG_BASICAUTH_USERNAME=${MONGOEXPRESS_USERNAME:-admin}
+    - ME_CONFIG_BASICAUTH_PASSWORD=${MONGOEXPRESS_PASSWORD}
+    - ME_CONFIG_SITE_BASEURL=/
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.mongo-express.rule=Host(`${MONGOEXPRESS_FQDN}`)
+    - traefik.http.routers.mongo-express.entrypoints=websecure
+    - traefik.http.routers.mongo-express.tls=true
+    - traefik.http.routers.mongo-express.tls.certresolver=letsencryptresolver
+    - traefik.http.services.mongo-express.loadbalancer.server.port=8081
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: bridge

@@ -1,0 +1,31 @@
+# Stack "onedrive" (standalone) — cliente de sync Microsoft OneDrive — Docker SEM Swarm
+# Versão para host Docker standalone: `docker compose up` ou Portainer "Compose stack" (type 3).
+# Para Swarm, use o `docker-compose.yml` (App Template type 2).
+#
+# DIFERENÇAS vs a versão Swarm: `restart: unless-stopped` no lugar de `deploy` (placement/replicas
+# são do Swarm). O resto (imagem, volumes, env, autenticação) é idêntico.
+#
+# AUTENTICAÇÃO (1ª vez, interativa — OAuth): autorize o container uma vez antes de rodar em modo
+# monitor. Veja "Uso" no README.
+# Porte: Leve (64 MB → 512 MB RAM)
+services:
+  onedrive:
+    image: driveone/onedrive:${ONEDRIVE_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      - ONEDRIVE_UID=${ONEDRIVE_UID:-1000} # dono dos arquivos (não-root, obrigatório)
+      - ONEDRIVE_GID=${ONEDRIVE_GID:-1000}
+      - ONEDRIVE_VERBOSE=${ONEDRIVE_VERBOSE:-1}
+      # Flags opcionais (0/1): descomente conforme o uso
+      # - ONEDRIVE_DOWNLOADONLY=1   # só baixa (espelho read-only do OneDrive)
+      # - ONEDRIVE_UPLOADONLY=1     # só envia
+      # - ONEDRIVE_RESYNC=1         # força resync (use pontualmente e remova depois)
+    volumes:
+      - onedrive-conf:/onedrive/conf # token de acesso + estado (items.sqlite3) — NÃO apague
+      - onedrive-data:/onedrive/data # pasta sincronizada com o OneDrive
+
+volumes:
+  onedrive-conf:
+    driver: local
+  onedrive-data:
+    driver: local # ← ou troque por um bind mount p/ apontar a uma pasta do host

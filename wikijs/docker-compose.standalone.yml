@@ -1,0 +1,51 @@
+# Stack "wikijs" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  wikijs:
+    restart: unless-stopped
+    image: requarks/wiki:${WIKIJS_IMAGE_TAG:-2}
+    networks:
+    - default
+    - web
+    environment:
+    - DB_TYPE=postgres
+    - DB_HOST=${WIKIJS_DB_HOST:-db}
+    - DB_PORT=${WIKIJS_DB_PORT:-5432}
+    - DB_USER=${WIKIJS_DB_USER:-wikijs}
+    - DB_PASS=${WIKIJS_DB_PASSWORD}
+    - DB_NAME=${WIKIJS_DB_NAME:-wikijs}
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.wikijs.rule=Host(`${WIKIJS_FQDN}`)
+    - traefik.http.routers.wikijs.entrypoints=websecure
+    - traefik.http.routers.wikijs.tls=true
+    - traefik.http.routers.wikijs.tls.certresolver=letsencryptresolver
+    - traefik.http.services.wikijs.loadbalancer.server.port=3000
+    - traefik.docker.network=${PROXY_NET:-web}
+  db:
+    restart: unless-stopped
+    image: postgres:${WIKIJS_DB_IMAGE_TAG:-16-alpine}
+    networks:
+    - default
+    - data
+    environment:
+    - POSTGRES_DB=${WIKIJS_DB_NAME:-wikijs}
+    - POSTGRES_USER=${WIKIJS_DB_USER:-wikijs}
+    - POSTGRES_PASSWORD=${WIKIJS_DB_PASSWORD}
+    volumes:
+    - db-data:/var/lib/postgresql/data
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: bridge
+volumes:
+  db-data:
+    driver: local

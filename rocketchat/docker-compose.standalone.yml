@@ -1,0 +1,43 @@
+# Stack "rocketchat" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  rocketchat:
+    restart: unless-stopped
+    image: rocketchat/rocket.chat:${ROCKETCHAT_IMAGE_TAG:-latest}
+    environment:
+    - ROOT_URL=https://${ROCKETCHAT_FQDN}
+    - PORT=3000
+    - MONGO_URL=mongodb://db:27017/${ROCKETCHAT_DB_NAME:-rocketchat}?replicaSet=rs0
+    - MONGO_OPLOG_URL=mongodb://db:27017/local?replicaSet=rs0
+    - DEPLOY_METHOD=docker
+    networks:
+    - default
+    - web
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.rocketchat.rule=Host(`${ROCKETCHAT_FQDN}`)
+    - traefik.http.routers.rocketchat.entrypoints=websecure
+    - traefik.http.routers.rocketchat.tls=true
+    - traefik.http.routers.rocketchat.tls.certresolver=letsencryptresolver
+    - traefik.http.services.rocketchat.loadbalancer.server.port=3000
+    - traefik.docker.network=${PROXY_NET:-web}
+  db:
+    restart: unless-stopped
+    image: mongo:${MONGO_IMAGE_TAG:-6.0}
+    command: mongod --replSet rs0 --oplogSize 128
+    volumes:
+    - mongo:/data/db
+    networks:
+    - default
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge
+volumes:
+  mongo:
+    driver: local

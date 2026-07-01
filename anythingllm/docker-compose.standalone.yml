@@ -1,0 +1,39 @@
+# Stack "anythingllm" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  anythingllm:
+    restart: unless-stopped
+    image: mintplexlabs/anythingllm:${ANYTHINGLLM_IMAGE_TAG:-latest}
+    networks:
+    - default
+    - web
+    - data
+    environment:
+    - STORAGE_DIR=/app/server/storage
+    - JWT_SECRET=${ANYTHINGLLM_JWT_SECRET:?ANYTHINGLLM_JWT_SECRET e obrigatorio}
+    - DISABLE_TELEMETRY=${ANYTHINGLLM_DISABLE_TELEMETRY:-true}
+    volumes:
+    - anythingllm-data:/app/server/storage
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.anythingllm.rule=Host(`${ANYTHINGLLM_FQDN}`)
+    - traefik.http.routers.anythingllm.entrypoints=websecure
+    - traefik.http.routers.anythingllm.tls=true
+    - traefik.http.routers.anythingllm.tls.certresolver=letsencryptresolver
+    - traefik.http.services.anythingllm.loadbalancer.server.port=3001
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: bridge
+volumes:
+  anythingllm-data:
+    driver: local

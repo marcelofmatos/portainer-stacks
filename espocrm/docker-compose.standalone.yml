@@ -1,0 +1,74 @@
+# Stack "espocrm" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
+# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
+# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
+# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
+# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+services:
+  espocrm:
+    restart: unless-stopped
+    image: espocrm/espocrm:${ESPOCRM_IMAGE_TAG:-8.4}
+    networks:
+    - default
+    - web
+    environment:
+    - ESPOCRM_DATABASE_PLATFORM=Mysql
+    - ESPOCRM_DATABASE_HOST=${ESPOCRM_DB_HOST:-db}
+    - ESPOCRM_DATABASE_PORT=${ESPOCRM_DB_PORT:-3306}
+    - ESPOCRM_DATABASE_NAME=${ESPOCRM_DB_NAME:-espocrm}
+    - ESPOCRM_DATABASE_USER=${ESPOCRM_DB_USER:-espocrm}
+    - ESPOCRM_DATABASE_PASSWORD=${ESPOCRM_DB_PASSWORD}
+    - ESPOCRM_ADMIN_USERNAME=${ESPOCRM_ADMIN_USERNAME:-admin}
+    - ESPOCRM_ADMIN_PASSWORD=${ESPOCRM_ADMIN_PASSWORD}
+    - ESPOCRM_SITE_URL=https://${ESPOCRM_FQDN}
+    volumes:
+    - espocrm-data:/var/www/html
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.espocrm.rule=Host(`${ESPOCRM_FQDN}`)
+    - traefik.http.routers.espocrm.entrypoints=websecure
+    - traefik.http.routers.espocrm.tls=true
+    - traefik.http.routers.espocrm.tls.certresolver=letsencryptresolver
+    - traefik.http.services.espocrm.loadbalancer.server.port=80
+    - traefik.docker.network=${PROXY_NET:-web}
+  espocrm-daemon:
+    restart: unless-stopped
+    image: espocrm/espocrm:${ESPOCRM_IMAGE_TAG:-8.4}
+    command: docker-daemon.sh
+    networks:
+    - default
+    environment:
+    - ESPOCRM_DATABASE_PLATFORM=Mysql
+    - ESPOCRM_DATABASE_HOST=${ESPOCRM_DB_HOST:-db}
+    - ESPOCRM_DATABASE_PORT=${ESPOCRM_DB_PORT:-3306}
+    - ESPOCRM_DATABASE_NAME=${ESPOCRM_DB_NAME:-espocrm}
+    - ESPOCRM_DATABASE_USER=${ESPOCRM_DB_USER:-espocrm}
+    - ESPOCRM_DATABASE_PASSWORD=${ESPOCRM_DB_PASSWORD}
+    volumes:
+    - espocrm-data:/var/www/html
+  db:
+    restart: unless-stopped
+    image: mariadb:${ESPOCRM_DB_IMAGE_TAG:-11}
+    networks:
+    - default
+    - data
+    environment:
+    - MARIADB_DATABASE=${ESPOCRM_DB_NAME:-espocrm}
+    - MARIADB_USER=${ESPOCRM_DB_USER:-espocrm}
+    - MARIADB_PASSWORD=${ESPOCRM_DB_PASSWORD}
+    - MARIADB_ROOT_PASSWORD=${ESPOCRM_DB_ROOT_PASSWORD}
+    volumes:
+    - db-data:/var/lib/mysql
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: bridge
+volumes:
+  espocrm-data:
+    driver: local
+  db-data:
+    driver: local
