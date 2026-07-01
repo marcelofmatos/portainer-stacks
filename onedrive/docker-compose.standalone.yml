@@ -1,10 +1,5 @@
-# Stack "onedrive" (standalone) — cliente de sync Microsoft OneDrive — Docker SEM Swarm
-# Versão para host Docker standalone: `docker compose up` ou Portainer "Compose stack" (type 3).
-# Para Swarm, use o `docker-compose.yml` (App Template type 2).
-#
-# DIFERENÇAS vs a versão Swarm: `restart: unless-stopped` no lugar de `deploy` (placement/replicas
-# são do Swarm). O resto (imagem, volumes, env, autenticação) é idêntico.
-#
+# Stack "onedrive" — cliente de sincronização Microsoft OneDrive (variante Docker Compose)
+# Daemon de sync em background (sem web). Volumes conf (token/estado) e data (pasta sincronizada).
 # AUTENTICAÇÃO (1ª vez, interativa — OAuth): autorize o container uma vez antes de rodar em modo
 # monitor. Veja "Uso" no README.
 # Porte: Leve (64 MB → 512 MB RAM)

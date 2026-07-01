@@ -1,13 +1,6 @@
-# Stack "balancer" (standalone) — Traefik v3 (reverse proxy + TLS) — Docker SEM Swarm
-# Versão para host Docker standalone: `docker compose up` ou Portainer "Compose stack" (type 3).
-# Para Swarm, use o `docker-compose.yml` (App Template type 2).
-#
-# DIFERENÇAS vs a versão Swarm:
-#   - Provider do Traefik = `docker` (lê labels do container) no lugar de `swarm` (lê deploy.labels).
-#   - Sem `hostname: {{.Service.Name}}...` (template do Swarm) e sem `deploy`.
-#   - Portas publicadas no modo padrão do host; `restart: always`.
-#   - Rede `web` é BRIDGE externa: `docker network create web`.
-#
+# Stack "balancer" — Traefik v3 (reverse proxy + TLS Let's Encrypt) (variante Docker Compose)
+# Provider docker (lê os labels do container); publica :80/:443; dashboard protegido por basicauth.
+# Pré-req: rede externa `web` (docker network create web).
 # Variáveis: DOMAIN, ACME_EMAIL, HTTP_AUTH_BASIC (basicauth do dashboard, user:hash bcrypt).
 # Porte: Leve (64 MB → 512 MB RAM)
 services:

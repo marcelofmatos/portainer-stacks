@@ -1,12 +1,7 @@
-# Stack "haproxy" (standalone) — HAProxy (load balancer TCP/HTTP) — Docker SEM Swarm
-# Para Swarm, use o `docker-compose.yml` (App Template type 2). Esta é a versão type 3.
-#
-# DIFERENÇAS vs a versão Swarm:
-#   - O Docker config (Swarm) vira BIND MOUNT de host: o haproxy.cfg é montado de um arquivo local.
-#     Default: ./config/haproxy.cfg (do repo). Aponte HAPROXY_CONFIG_FILE para um arquivo NO HOST.
-#   - Labels do Traefik no container (provider docker) + traefik.docker.network; redes bridge; restart.
-#
-# Pré-req: Traefik (provider docker) + redes externas bridge `web` e `data`.
+# Stack "haproxy" — HAProxy (load balancer TCP/HTTP) (variante Docker Compose)
+# A config é montada de um arquivo local (bind mount): aponte HAPROXY_CONFIG_FILE para o seu
+# haproxy.cfg (default ./config/haproxy.cfg). A página de stats (8404) é publicada via Traefik.
+# Pré-req: redes externas `web` e `data`.
 # Obrigatórias: HAPROXY_FQDN, HAPROXY_AUTH_BASIC.
 # Porte: Leve (64 MB → 512 MB RAM)
 services:

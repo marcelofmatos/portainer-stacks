@@ -1,13 +1,7 @@
 # ┌───────────────────────────────────────────────────────────────────────────┐
-# │ Stack "element" (standalone) — Matrix (Synapse) + Element Web + PostgreSQL  │
-# │ Versão para host Docker SEM Swarm (docker compose / Portainer Compose stack)│
+# │ Stack "element" — Matrix (Synapse) + Element Web + PostgreSQL                │
 # └───────────────────────────────────────────────────────────────────────────┘
-# Para Swarm, use o `docker-compose.yml` (App Template type 2). Esta é a versão type 3.
-#
-# DIFERENÇAS vs a versão Swarm:
-#   - Labels do Traefik no CONTAINER (`labels:`) + `traefik.docker.network` (provider docker).
-#   - Redes `web`/`data` BRIDGE externas; `default` bridge interna (no Swarm são overlay).
-#   - `restart: unless-stopped` + `depends_on` (ordem de start) no lugar de `deploy`.
+# Variante Docker Compose (host standalone). Traefik pelo provider docker (labels no container).
 #
 # Pré-requisitos:
 #   1. Redes externas (bridge):  docker network create web   &&   docker network create data

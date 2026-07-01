@@ -1,15 +1,8 @@
-# Stack "redirect" (standalone) — hub de redirecionamentos HTTP — Docker SEM Swarm
-# Versão para host Docker standalone: `docker compose up` ou Portainer "Compose stack"
-# (App Template type 3). Para Swarm, use o `docker-compose.yml` (App Template type 2).
-#
-# DIFERENÇAS vs a versão Swarm:
-#   - Labels do Traefik vão no CONTAINER (`labels:`) — provider `docker` lê aqui (no Swarm é `deploy.labels`).
-#   - Rede `web` é uma BRIDGE externa (no Swarm é overlay). Sem rede `default` overlay.
-#   - `restart: always` no lugar de `deploy.restart_policy`. Sem `deploy` (placement/replicas são do Swarm).
+# Stack "redirect" — hub de redirecionamentos HTTP (variante Docker Compose)
+# Traefik pelo provider docker (labels no container); rede externa `web`.
 #
 # Pré-requisitos:
-#   1. Traefik rodando com o provider Docker (não-Swarm) e a rede externa `web` (bridge):
-#        docker network create web
+#   1. Traefik rodando e a rede externa `web` (docker network create web).
 #   2. DNS de cada domínio de origem apontando para o host.
 #   Obrigatórias (1º redirect): REDIRECT_FQDN, REDIRECT_TARGET.
 #

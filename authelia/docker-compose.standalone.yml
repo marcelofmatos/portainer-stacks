@@ -1,14 +1,8 @@
-# Stack "authelia" (standalone) — Authelia (forward-auth/2FA) + Redis — Docker SEM Swarm
-# Para Swarm, use o `docker-compose.yml` (App Template type 2). Esta é a versão type 3.
-#
-# DIFERENÇAS vs a versão Swarm:
-#   - O Docker config (Swarm) vira BIND MOUNT de host: o configuration.yml é montado de um arquivo
-#     local. Default: ./config/configuration.yml (do repo). Aponte AUTHELIA_CONFIG_FILE para um
-#     arquivo NO HOST para editar com suas configurações.
-#   - Labels do Traefik no container (provider docker) + traefik.docker.network; redes bridge; restart.
-#   - O middleware forward-auth fica como `authelia@docker` (no Swarm era `authelia@swarm`).
-#
-# Pré-req: Traefik (provider docker) + rede externa bridge `web` (docker network create web).
+# Stack "authelia" — Authelia (forward-auth/2FA) + Redis (variante Docker Compose)
+# A config é montada de um arquivo local (bind mount): aponte AUTHELIA_CONFIG_FILE para o seu
+# configuration.yml (default ./config/configuration.yml). O middleware forward-auth reutilizável por
+# outras stacks fica como `authelia@docker`.
+# Pré-req: rede externa `web` (docker network create web).
 # Obrigatórias: AUTHELIA_FQDN, AUTHELIA_JWT_SECRET, AUTHELIA_SESSION_SECRET, AUTHELIA_STORAGE_ENCRYPTION_KEY.
 # Porte: Leve (64 MB → 512 MB RAM)
 services:

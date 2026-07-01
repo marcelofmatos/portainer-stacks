@@ -1,15 +1,8 @@
-# Stack "account" (standalone) — OpenLDAP + LAM + self-service-password — Docker SEM Swarm
-# Para Swarm, use o `docker-compose.yml` (App Template type 2). Esta é a versão type 3.
-#
-# DIFERENÇAS vs a versão Swarm:
-#   - Os Docker configs (Swarm) do self-service-password viram BIND MOUNT de host: o
-#     config.inc.local.php é montado de um arquivo local. Default: ./config/ssp-config.inc.local.php
-#     (do repo). Aponte SSP_CONFIG_FILE para um arquivo NO HOST para editar as suas configurações.
-#     (a custom.css é opcional — veja o bind comentado no serviço `user`.)
-#   - Labels do Traefik no container (provider docker) + traefik.docker.network; redes bridge; restart.
-#
-# Pré-req: Traefik (provider docker) + redes externas bridge `web` e `ldap`
-#   (docker network create web && docker network create ldap).
+# Stack "account" — OpenLDAP + LDAP Account Manager + self-service-password (variante Docker Compose)
+# O self-service-password lê a config de um arquivo local (bind mount): aponte SSP_CONFIG_FILE para o
+# seu config.inc.local.php (default ./config/ssp-config.inc.local.php). A custom.css é opcional (bind
+# comentado no serviço `user`).
+# Pré-req: redes externas `web` e `ldap` (docker network create web && docker network create ldap).
 # Obrigatórias: LAM_FQDN, SSP_FQDN, LDAP_DOMAIN, LDAP_ORGANISATION, LDAP_ADMIN_PASSWORD.
 # Porte: Médio (512 MB → 2 GB RAM)
 services:

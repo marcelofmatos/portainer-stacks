@@ -1,8 +1,5 @@
-# Stack "dify" (standalone) — Docker SEM Swarm (docker compose / Portainer Compose stack, type 3)
-# Variante gerada a partir do docker-compose.yml (Swarm). Diferenças: labels do Traefik no
-# CONTAINER (provider docker) + traefik.docker.network; redes overlay -> bridge; `restart` no lugar
-# de `deploy` (placement/replicas são do Swarm). Variáveis, portas e detalhes: ver docker-compose.yml e README.
-# Pré-requisito: redes externas como BRIDGE (ex.: `docker network create web`; e `data`/`ldap` se a stack usar).
+# Stack "dify" — variante Docker Compose (host standalone). Variáveis, portas e uso no README.
+# Pré-requisito: crie as redes externas usadas pela stack (ex.: docker network create web; e data/ldap se aplicável).
 x-shared-env:
   LOG_LEVEL: INFO
   SECRET_KEY: ${DIFY_SECRET_KEY}
