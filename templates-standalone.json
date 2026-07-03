@@ -2819,6 +2819,37 @@
           "default": "1"
         }
       ]
+    },
+    {
+      "type": 3,
+      "title": "claude-code-organizer — Claude Code Organizer",
+      "name": "claude-code-organizer",
+      "description": "Dashboard para gerenciar a configuração do Claude Code (memories, skills, MCP servers, rules, hooks, settings) entre escopos global e por projeto. A config vive num volume persistente.",
+      "note": "Volume novo nasce vazio — popule cco-data com seu .claude e .claude.json. O CCO não tem autenticação própria: proteja com forward-auth (ex.: Authelia). Crie antes a rede externa do proxy (docker network create web).",
+      "categories": ["tools", "ai", "Porte: Leve"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/claude-ai.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "claude-code-organizer/docker-compose.standalone.yml"
+      },
+      "env": [
+        {
+          "name": "CCO_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: cco.exemplo.com"
+        },
+        {
+          "name": "CCO_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "latest"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
+      ]
     }
   ]
 }

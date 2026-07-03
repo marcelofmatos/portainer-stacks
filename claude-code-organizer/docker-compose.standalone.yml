@@ -1,0 +1,37 @@
+# Stack "claude-code-organizer" — variante Docker Compose (host standalone). Variáveis e uso no README.
+# Pré-requisito: crie a rede externa do proxy (docker network create web).
+#
+# Autocontido: a config vive no volume cco-data montado em /data (/data/.claude + /data/.claude.json).
+# Um volume novo nasce VAZIO — popule-o (ver README). Obrigatória: CCO_FQDN.
+# ⚠ Segurança: o CCO NÃO tem autenticação própria; se exposto, proteja com forward-auth (ex.: Authelia).
+services:
+  app:
+    restart: unless-stopped
+    image: ghcr.io/marcelofmatos/claude-code-organizer:${CCO_IMAGE_TAG:-latest}
+    networks:
+    - default
+    - web
+    environment:
+    - HOME=/data
+    - CCO_PORT=3847
+    volumes:
+    - cco-data:/data
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.cco.rule=Host(`${CCO_FQDN}`)
+    - traefik.http.routers.cco.entrypoints=websecure
+    - traefik.http.routers.cco.tls=true
+    - traefik.http.routers.cco.tls.certresolver=letsencryptresolver
+    - traefik.http.services.cco.loadbalancer.server.port=3847
+    - traefik.docker.network=${PROXY_NET:-web}
+    # ⚠ Proteja com forward-auth (o CCO não tem login). Ex. (ajuste ao seu middleware):
+    # - traefik.http.routers.cco.middlewares=${CCO_AUTH_MIDDLEWARE:-}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge
+volumes:
+  cco-data:
+    driver: local
