@@ -95,8 +95,8 @@
       "type": 2,
       "title": "caddy — reverse proxy + HTTPS automatico",
       "name": "caddy",
-      "description": "Caddy 2: reverse proxy com HTTPS automatico (Let's Encrypt/ZeroSSL), configurado por Caddyfile. Ponto de entrada :80/:443. Alternativa ao balancer (Traefik).",
-      "note": "Alternativa ao Traefik: nao rode os dois no mesmo host (disputam 80/443). Crie antes o Docker config do Caddyfile: docker config create caddy_caddyfile_v1 caddy/config/Caddyfile. Requer a rede `web`.",
+      "description": "Caddy com caddy-docker-proxy: reverse proxy com HTTPS automatico configurado por LABELS dos servicos (auto-descoberta, estilo Traefik). Ponto de entrada :80/:443. Alternativa ao balancer (Traefik).",
+      "note": "Le o docker.sock (roda no MANAGER em Swarm). Cada servico declara suas rotas em deploy.labels (caddy: dominio + caddy.reverse_proxy). Requer a rede `web` (CADDY_INGRESS_NETWORKS). Nao rode junto do Traefik (disputam 80/443). Veja o README.",
       "categories": [
         "networking",
         "proxy",
@@ -110,24 +110,21 @@
       },
       "env": [
         {
-          "name": "CADDY_ACME_EMAIL",
-          "label": "E-mail do ACME",
-          "description": "Recomendado (avisos de expiracao do Let's Encrypt)"
-        },
-        {
-          "name": "CADDY_CONFIG_NAME",
-          "label": "Nome do Docker config (Caddyfile)",
-          "default": "caddy_caddyfile_v1"
+          "name": "PROXY_NET",
+          "label": "Rede (ingress)",
+          "description": "Rede por onde o Caddy alcanca os alvos (CADDY_INGRESS_NETWORKS)",
+          "default": "web"
         },
         {
           "name": "CADDY_IMAGE_TAG",
           "label": "Tag da imagem",
-          "default": "2-alpine"
+          "default": "2.9-alpine"
         },
         {
-          "name": "PROXY_NET",
-          "label": "Rede",
-          "default": "web"
+          "name": "CADDY_ACME_CA",
+          "label": "Endpoint ACME",
+          "description": "Troque pelo staging do Let's Encrypt durante testes",
+          "default": "https://acme-v02.api.letsencrypt.org/directory"
         }
       ]
     },
@@ -135,8 +132,8 @@
       "type": 3,
       "title": "caddy — reverse proxy + HTTPS automatico",
       "name": "caddy",
-      "description": "Caddy 2: reverse proxy com HTTPS automatico (Let's Encrypt/ZeroSSL), configurado por Caddyfile. Ponto de entrada :80/:443. Alternativa ao balancer (Traefik).",
-      "note": "Alternativa ao Traefik: nao rode os dois no mesmo host (disputam 80/443). O Caddyfile e montado de um arquivo local (aponte CADDY_CONFIG_FILE, default config/Caddyfile). Requer a rede `web`.",
+      "description": "Caddy com caddy-docker-proxy: reverse proxy com HTTPS automatico configurado por LABELS dos containers (auto-descoberta, estilo Traefik). Ponto de entrada :80/:443. Alternativa ao balancer (Traefik).",
+      "note": "Le o docker.sock. Cada container declara suas rotas em labels (caddy: dominio + caddy.reverse_proxy). Requer a rede `web` (CADDY_INGRESS_NETWORKS). Nao rode junto do Traefik (disputam 80/443). Veja o README.",
       "categories": [
         "networking",
         "proxy",
@@ -150,19 +147,21 @@
       },
       "env": [
         {
-          "name": "CADDY_ACME_EMAIL",
-          "label": "E-mail do ACME",
-          "description": "Recomendado (avisos de expiracao do Let's Encrypt)"
+          "name": "PROXY_NET",
+          "label": "Rede (ingress)",
+          "description": "Rede por onde o Caddy alcanca os alvos (CADDY_INGRESS_NETWORKS)",
+          "default": "web"
         },
         {
           "name": "CADDY_IMAGE_TAG",
           "label": "Tag da imagem",
-          "default": "2-alpine"
+          "default": "2.9-alpine"
         },
         {
-          "name": "PROXY_NET",
-          "label": "Rede",
-          "default": "web"
+          "name": "CADDY_ACME_CA",
+          "label": "Endpoint ACME",
+          "description": "Troque pelo staging do Let's Encrypt durante testes",
+          "default": "https://acme-v02.api.letsencrypt.org/directory"
         }
       ]
     },

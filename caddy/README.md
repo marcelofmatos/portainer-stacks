@@ -1,21 +1,27 @@
-# caddy — Caddy 2 (reverse proxy + HTTPS automático)
+# caddy — caddy-docker-proxy (reverse proxy + HTTPS automático por labels)
 
-[Caddy](https://caddyserver.com/) como **reverse proxy** com **HTTPS automático** (obtém e renova
-certificados Let's Encrypt/ZeroSSL sozinho). Configuração por **Caddyfile**. É o ponto de entrada
+[Caddy](https://caddyserver.com/) com o plugin
+[`lucaslorentz/caddy-docker-proxy`](https://github.com/lucaslorentz/caddy-docker-proxy): o Caddy
+monta a configuração **automaticamente a partir de labels** dos containers/serviços (auto-descoberta,
+no estilo do Traefik), com **HTTPS automático** (Let's Encrypt/ZeroSSL). É o ponto de entrada
 (`:80`/`:443`) do host.
 
-> **Caddy × `balancer` (Traefik):** os dois fazem reverse proxy + TLS automático — são
-> **alternativas**. Use um **ou** o outro no mesmo host (ambos disputam as portas 80/443). O Caddy
-> se configura por um arquivo (Caddyfile); o Traefik, por labels dos containers. Para o estilo
-> "labels" com Caddy, veja `caddy-docker-proxy` na seção *Alternativas*.
+> **Caddy × `balancer` (Traefik):** os dois fazem reverse proxy + TLS automático por labels — são
+> **alternativas**. Use um **ou** o outro no mesmo host (ambos disputam 80/443). O label do Caddy é
+> `caddy…`; o do Traefik é `traefik…`.
 
-## Arquitetura
+## Como funciona
+
+O container `caddy` lê o **`/var/run/docker.sock`**, observa os containers/serviços, converte os
+labels `caddy…` em configuração de Caddy e **recarrega sozinho** a cada mudança. Ele resolve o
+endereço do alvo pela rede definida em `CADDY_INGRESS_NETWORKS` (a rede `web`).
 
 ```mermaid
 flowchart LR
-    internet((Internet)) -->|80/443| caddy[Caddy 2]
+    internet((Internet)) -->|80/443| caddy[caddy-docker-proxy]
+    caddy -.->|lê labels| sock[/docker.sock/]
     caddy -.->|ACME TLS| acme[Let's Encrypt / ZeroSSL]
-    caddy -->|reverse_proxy nome:porta · rede web| apps[Containers / sites]
+    caddy -->|reverse_proxy · rede web| app[container com labels caddy.*]
     caddy --> certs[(caddy-data<br/>certificados)]
 ```
 
@@ -23,66 +29,145 @@ flowchart LR
 
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|
-| `CADDY_ACME_EMAIL` | não | — | e-mail do ACME (recomendado para avisos de expiração) |
-| `CADDY_CONFIG_NAME` | Swarm | `caddy_caddyfile_v1` | nome do Docker config com o Caddyfile (só Swarm) |
-| `CADDY_CONFIG_FILE` | — | `./config/Caddyfile` | caminho do Caddyfile no host (só standalone) |
-| `CADDY_IMAGE_TAG` | não | `2-alpine` | tag da imagem `caddy` |
-| `PROXY_NET` | não | `web` | rede externa por onde o Caddy alcança os containers |
+| `PROXY_NET` | não | `web` | rede externa por onde o Caddy alcança os alvos (`CADDY_INGRESS_NETWORKS`) |
+| `CADDY_IMAGE_TAG` | não | `2.9-alpine` | tag de `lucaslorentz/caddy-docker-proxy` |
+| `CADDY_ACME_CA` | não | LE produção | endpoint do ACME (troque pelo **staging** do Let's Encrypt durante testes) |
+
+> **E-mail do ACME** é opcional (avisos de expiração). Para definir, descomente o label
+> `caddy.email=seu-email@exemplo.com` **no serviço `caddy`** (não em cada app).
 
 ## Pré-requisitos
 
-1. Rede externa `web` (para o Caddy alcançar os containers a proxiar pelo nome):
-   - Swarm: `docker network create --driver overlay --attachable web`
+1. Rede externa `web` (por onde o Caddy fala com os alvos):
    - Standalone: `docker network create web`
-2. DNS dos domínios que o Caddy vai servir apontando para o host (necessário para o ACME emitir TLS).
-3. O Caddyfile com seus sites (ver abaixo).
+   - Swarm: `docker network create --driver overlay --attachable web`
+2. DNS de cada domínio que o Caddy vai servir apontando para o host (o ACME precisa disso para emitir TLS).
+3. Os containers a expor precisam estar **na rede `web`** e ter os labels `caddy…` (abaixo).
 
-## Uso
+---
 
-### Configuração (Caddyfile)
-Edite o [`config/Caddyfile`](config/Caddyfile). Exemplo mínimo:
+## Integração com containers (labels)
 
-```caddyfile
-{
-	email {$CADDY_ACME_EMAIL}
-}
+Cada app declara suas próprias rotas. **Onde colocar os labels depende do modo:**
 
-app.exemplo.com {
-	reverse_proxy app:8080
-}
-```
-O Caddy resolve `app` pelo nome do container/serviço na rede `web` e emite o TLS de
-`app.exemplo.com` automaticamente. Env vars entram no Caddyfile via `{$NOME_DA_VAR}`.
+- **Standalone** (`docker compose` / Portainer Compose stack): labels no **container** — chave `labels:`.
+- **Swarm** (`docker stack` / App Template type 2): labels no **serviço** — chave `deploy.labels:`.
 
-### Swarm (`docker-compose.yml`, App Template type 2)
-O Caddyfile é um **Docker config** externo. Crie-o antes do deploy:
+### Exemplo básico — reverse proxy de uma app
 
-```bash
-docker config create caddy_caddyfile_v1 caddy/config/Caddyfile
-```
-Para alterar depois: crie `caddy_caddyfile_v2`, aponte `CADDY_CONFIG_NAME=caddy_caddyfile_v2` e
-atualize a stack (Docker config é imutável).
-
-### Standalone (`docker-compose.standalone.yml`, App Template type 3)
-O Caddyfile é um **bind mount** de host: aponte `CADDY_CONFIG_FILE` para o seu arquivo (default
-`./config/Caddyfile`). Para recarregar após editar:
-
-```bash
-docker exec <container_caddy> caddy reload --config /etc/caddy/Caddyfile
+**Standalone:**
+```yaml
+services:
+  minha-app:
+    image: minha/app
+    networks: [web]                 # mesma rede do caddy (CADDY_INGRESS_NETWORKS)
+    labels:
+      caddy: app.exemplo.com        # o domínio (site)
+      caddy.reverse_proxy: "{{upstreams 8080}}"   # -> IP do container na porta 8080
+networks:
+  web: { external: true, name: web }
 ```
 
-## Alternativas
+**Swarm** (mesma app, labels em `deploy.labels`):
+```yaml
+services:
+  minha-app:
+    image: minha/app
+    networks: [web]
+    deploy:
+      labels:
+        caddy: app.exemplo.com
+        caddy.reverse_proxy: "{{upstreams 8080}}"
+networks:
+  web: { external: true, name: web }
+```
 
-- **`caddy-docker-proxy`** (`lucaslorentz/caddy-docker-proxy`): configura o Caddy por **labels**
-  dos containers (estilo Traefik), sem Caddyfile central. Bom se você prefere descoberta automática.
-- **`balancer`** (Traefik): o reverse proxy padrão deste repo (labels + middlewares).
+Pronto: `https://app.exemplo.com` já sobe com TLS emitido automaticamente.
+
+### O template `{{upstreams}}`
+Resolve o endereço do próprio container/serviço na rede de ingress:
+- `{{upstreams}}` → porta **80**
+- `{{upstreams 8080}}` → porta **8080**
+- `{{upstreams https 8443}}` → esquema **https** + porta 8443
+
+### Padrões comuns
+
+**Vários domínios / redirect de www:**
+```yaml
+labels:
+  caddy_0: exemplo.com
+  caddy_0.reverse_proxy: "{{upstreams 8080}}"
+  caddy_1: www.exemplo.com
+  caddy_1.redir: https://exemplo.com{uri} permanent
+```
+(Use sufixos numerados `caddy_0`, `caddy_1`… quando o container tem **mais de um** site.)
+
+**Cabeçalhos / compressão:**
+```yaml
+labels:
+  caddy: app.exemplo.com
+  caddy.reverse_proxy: "{{upstreams 3000}}"
+  caddy.encode: gzip zstd
+  caddy.header.-Server: ""          # remove o header Server
+```
+
+**Basic auth:**
+```yaml
+labels:
+  caddy: admin.exemplo.com
+  caddy.reverse_proxy: "{{upstreams 8080}}"
+  caddy.basicauth.usuario: $2a$14$hash_bcrypt   # gere com: caddy hash-password
+```
+
+**Sub-path (roteia /api para outra app):**
+```yaml
+labels:
+  caddy: exemplo.com
+  caddy.handle_path./api/*: ""
+  caddy.handle_path./api/*.reverse_proxy: "{{upstreams 9000}}"
+```
+
+**TLS interno (sem ACME, para uso interno/sem domínio público):**
+```yaml
+labels:
+  caddy: https://app.local
+  caddy.reverse_proxy: "{{upstreams 8080}}"
+  caddy.tls: internal
+```
+
+### Global (no serviço `caddy`, não nas apps)
+Opções globais vão como label **no próprio `caddy`**:
+```yaml
+# no serviço caddy:
+labels:
+  - caddy.email=seu-email@exemplo.com        # ACME
+  - caddy.acme_ca=https://acme-staging-v02.api.letsencrypt.org/directory   # staging p/ testes
+```
+
+---
+
+## Segurança — docker.sock
+
+O Caddy precisa ler o `docker.sock` (montado `:ro`). Isso dá visibilidade da API do Docker ao
+container — em produção, o ideal é colocar um **docker-socket-proxy**
+([tecnativa/docker-socket-proxy](https://github.com/Tecnativa/docker-socket-proxy)) na frente,
+limitando a API só ao necessário (`CONTAINERS`, `SERVICES`, `TASKS`, `NETWORKS`), e apontar o Caddy
+para o proxy via `DOCKER_HOST=tcp://socket-proxy:2375` em vez de montar o socket direto.
+
+## Swarm vs standalone
+
+| Arquivo | Modo | App Template | Labels em | Roda em |
+|---|---|---|---|---|
+| `docker-compose.yml` | Swarm | type 2 | `deploy.labels` dos serviços | **manager** (lê os serviços) |
+| `docker-compose.standalone.yml` | standalone | type 3 | `labels` dos containers | host único |
 
 ## Troubleshooting
 
 | Sintoma | Causa | Ação |
 |---|---|---|
-| TLS não emite | DNS do domínio não aponta para o host, ou 80/443 bloqueadas | ajuste o DNS e libere 80/443; veja `docker logs` do Caddy |
-| `dial tcp: lookup app` falha | Caddy e o alvo não compartilham a rede `web` | coloque o container alvo na rede `web` e use o nome dele |
-| Alterei o Caddyfile e não aplicou | Caddy não recarregou | `caddy reload` (standalone) ou recrie a stack / novo `_v2` (Swarm) |
-| Certificados sumiram ao reagendar | volume `caddy-data` local ao nó (multi-worker) | fixe o serviço no nó (`WORKER_HOSTNAME`) |
-| Rate limit do Let's Encrypt | muitos testes de emissão | use o CA de staging durante testes (`acme_ca` no Caddyfile) |
+| TLS não emite | DNS do domínio não aponta para o host, ou 80/443 bloqueadas | ajuste DNS e libere 80/443; veja `docker logs` do caddy |
+| App não aparece no Caddy | container fora da rede `web`, ou label no lugar errado (Swarm usa `deploy.labels`) | ponha o alvo na `web` e confira onde colocou os labels |
+| `{{upstreams}}` aponta errado | mais de uma rede no container | garanta que o alvo está em `CADDY_INGRESS_NETWORKS` (a `web`) |
+| Muitos erros de emissão (rate limit LE) | testes repetidos | use `CADDY_ACME_CA` = staging do Let's Encrypt durante testes |
+| Certificados sumiram ao reagendar | `caddy-data` local ao nó | fixe o serviço no nó (`WORKER_HOSTNAME`) |
+| Não lê os serviços (Swarm) | rodando em worker | o Caddy precisa do **manager** (constraint `node.role == manager`) |

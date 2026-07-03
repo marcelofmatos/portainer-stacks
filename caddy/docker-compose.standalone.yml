@@ -1,18 +1,17 @@
-# Stack "caddy" — Caddy 2 (reverse proxy + HTTPS automático) (variante Docker Compose)
-# Alternativa ao `balancer`: Caddy é o ponto de entrada (:80/:443) e cuida do TLS sozinho.
-# A config é um Caddyfile montado de um arquivo local (bind mount): aponte CADDY_CONFIG_FILE para o
-# seu Caddyfile (default ./config/Caddyfile).
-# Pré-req: rede externa `web` (docker network create web) para alcançar os containers a proxiar.
-# NÃO rode Caddy e Traefik no mesmo host (ambos disputam 80/443).
+# Stack "caddy" — caddy-docker-proxy (reverse proxy + HTTPS automático por labels) (variante Docker Compose)
+# Alternativa ao `balancer`: configura-se por LABELS dos containers (auto-descoberta, estilo Traefik),
+# sem Caddyfile central. O Caddy obtém/renova os certificados TLS sozinho.
+# Pré-req: rede externa `web` (docker network create web) — é por ela que o Caddy alcança os alvos.
+# NÃO rode Caddy e Traefik no mesmo host (disputam 80/443).
 # Porte: Leve (64 MB → 512 MB RAM)
 services:
   caddy:
-    image: caddy:${CADDY_IMAGE_TAG:-2-alpine}
+    image: lucaslorentz/caddy-docker-proxy:${CADDY_IMAGE_TAG:-2.9-alpine}
     restart: unless-stopped
     environment:
-      - CADDY_ACME_EMAIL=${CADDY_ACME_EMAIL:-} # e-mail do ACME (recomendado)
+      - CADDY_INGRESS_NETWORKS=${PROXY_NET:-web} # rede onde o Caddy alcança os containers a proxiar
     volumes:
-      - ${CADDY_CONFIG_FILE:-./config/Caddyfile}:/etc/caddy/Caddyfile:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro # lê os labels dos containers (ver Segurança no README)
       - caddy-data:/data # certificados TLS + estado do ACME — NÃO apague
       - caddy-config:/config # config autogerenciada do Caddy
     networks:
@@ -21,6 +20,10 @@ services:
       - "80:80"
       - "443:443"
       - "443:443/udp" # HTTP/3 (QUIC)
+    labels:
+      # E-mail do ACME (opcional, recomendado p/ avisos de expiração): descomente e preencha.
+      # - caddy.email=seu-email@exemplo.com
+      - caddy.acme_ca=${CADDY_ACME_CA:-https://acme-v02.api.letsencrypt.org/directory}
 
 networks:
   web:

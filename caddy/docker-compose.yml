@@ -1,28 +1,22 @@
-# Stack "caddy" — Caddy 2 (reverse proxy + HTTPS automático) — Docker Swarm
-# Alternativa ao `balancer` (Traefik): Caddy é o ponto de entrada (:80/:443) e obtém/renova os
-# certificados TLS sozinho (Let's Encrypt/ZeroSSL). A configuração é um Caddyfile.
+# Stack "caddy" — caddy-docker-proxy (reverse proxy + HTTPS automático por labels) — Docker Swarm
+# Alternativa ao `balancer` (Traefik): configura-se por LABELS dos serviços (auto-descoberta), sem
+# Caddyfile central. Cada serviço declara suas rotas em `deploy.labels` (ex.: caddy + caddy.reverse_proxy).
+# O Caddy obtém/renova os certificados TLS sozinho (Let's Encrypt/ZeroSSL).
 #
-# PRÉ-REQUISITO: o serviço usa 1 Docker config EXTERNO (nome configurável em CADDY_CONFIG_NAME):
-#   <CADDY_CONFIG_NAME> -> /etc/caddy/Caddyfile  (ver config/Caddyfile)
-# Crie-o antes do deploy (instruções no README). Config é imutável: para mudar, crie _v2.
-#
-# Entra na rede `web` para alcançar os containers a proxiar pelo nome (ex.: reverse_proxy app:8080).
-# NÃO use Caddy e Traefik (balancer) ao mesmo tempo no mesmo host: ambos disputam as portas 80/443.
+# RODA NO MANAGER: precisa do docker.sock do manager para ler os serviços Swarm.
+# NÃO use Caddy e Traefik (balancer) ao mesmo tempo no mesmo host (disputam as portas 80/443).
 #
 # NOTA (volumes em Swarm): os certificados ficam no volume `caddy-data` (local ao nó). Em cluster
-# multi-worker, fixe o serviço definindo WORKER_HOSTNAME e descomentando o constraint de hostname,
-# senão os certificados "pulam" de nó a cada reagendamento.
+# multi-manager, fixe o serviço definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
 # Porte: Leve (64 MB → 512 MB RAM)
 # Hardware (1 réplica): mínimo 0.5 vCPU · 128 MB RAM · 2 GB disco · ideal 1 vCPU · 256 MB RAM · 5 GB disco
 services:
   caddy:
-    image: caddy:${CADDY_IMAGE_TAG:-2-alpine}
+    image: lucaslorentz/caddy-docker-proxy:${CADDY_IMAGE_TAG:-2.9-alpine}
     environment:
-      - CADDY_ACME_EMAIL=${CADDY_ACME_EMAIL:-} # e-mail do ACME (recomendado)
-    configs:
-      - source: caddy_caddyfile
-        target: /etc/caddy/Caddyfile
+      - CADDY_INGRESS_NETWORKS=${PROXY_NET:-web} # rede onde o Caddy alcança os serviços a proxiar
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro # lê os labels dos serviços (ver Segurança no README)
       - caddy-data:/data # certificados TLS + estado do ACME — NÃO apague
       - caddy-config:/config # config autogerenciada do Caddy
     networks:
@@ -43,14 +37,13 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.role == worker
-          # descomente em cluster multi-worker p/ fixar os certificados no nó:
+          - node.role == manager # precisa ler os serviços Swarm pelo docker.sock do manager
+          # descomente em cluster multi-manager p/ fixar os certificados no nó:
           # - node.hostname == ${WORKER_HOSTNAME:-}
-
-configs:
-  caddy_caddyfile:
-    name: ${CADDY_CONFIG_NAME:-caddy_caddyfile_v1}
-    external: true
+      labels:
+        # E-mail do ACME (opcional, recomendado p/ avisos de expiração): descomente e preencha.
+        # - caddy.email=seu-email@exemplo.com
+        - caddy.acme_ca=${CADDY_ACME_CA:-https://acme-v02.api.letsencrypt.org/directory}
 
 networks:
   web:
