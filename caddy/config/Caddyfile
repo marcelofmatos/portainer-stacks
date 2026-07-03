@@ -1,0 +1,24 @@
+# Caddyfile — configuração do Caddy. Edite este arquivo (ou aponte CADDY_CONFIG_FILE para o seu).
+# HTTPS automático (Let's Encrypt): defina CADDY_ACME_EMAIL no deploy.
+# Docs do Caddyfile: https://caddyserver.com/docs/caddyfile
+
+{
+	email {$CADDY_ACME_EMAIL}
+}
+
+# ── Exemplos (descomente e ajuste) ─────────────────────────────────────────────
+# Reverse proxy para um serviço na rede `web` (pelo nome do serviço/container):
+# app.exemplo.com {
+# 	reverse_proxy app:8080
+# }
+#
+# Servir arquivos estáticos (monte a pasta em /srv no compose):
+# site.exemplo.com {
+# 	root * /srv
+# 	file_server
+# }
+
+# Placeholder inicial: responde em HTTP :80 até você configurar seus sites.
+:80 {
+	respond "Caddy no ar — edite o Caddyfile para configurar seus sites." 200
+}

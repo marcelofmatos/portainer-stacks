@@ -1,0 +1,34 @@
+# Stack "caddy" — Caddy 2 (reverse proxy + HTTPS automático) (variante Docker Compose)
+# Alternativa ao `balancer`: Caddy é o ponto de entrada (:80/:443) e cuida do TLS sozinho.
+# A config é um Caddyfile montado de um arquivo local (bind mount): aponte CADDY_CONFIG_FILE para o
+# seu Caddyfile (default ./config/Caddyfile).
+# Pré-req: rede externa `web` (docker network create web) para alcançar os containers a proxiar.
+# NÃO rode Caddy e Traefik no mesmo host (ambos disputam 80/443).
+# Porte: Leve (64 MB → 512 MB RAM)
+services:
+  caddy:
+    image: caddy:${CADDY_IMAGE_TAG:-2-alpine}
+    restart: unless-stopped
+    environment:
+      - CADDY_ACME_EMAIL=${CADDY_ACME_EMAIL:-} # e-mail do ACME (recomendado)
+    volumes:
+      - ${CADDY_CONFIG_FILE:-./config/Caddyfile}:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data # certificados TLS + estado do ACME — NÃO apague
+      - caddy-config:/config # config autogerenciada do Caddy
+    networks:
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp" # HTTP/3 (QUIC)
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+
+volumes:
+  caddy-data:
+    driver: local
+  caddy-config:
+    driver: local

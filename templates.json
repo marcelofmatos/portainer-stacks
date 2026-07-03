@@ -93,6 +93,81 @@
     },
     {
       "type": 2,
+      "title": "caddy — reverse proxy + HTTPS automatico",
+      "name": "caddy",
+      "description": "Caddy 2: reverse proxy com HTTPS automatico (Let's Encrypt/ZeroSSL), configurado por Caddyfile. Ponto de entrada :80/:443. Alternativa ao balancer (Traefik).",
+      "note": "Alternativa ao Traefik: nao rode os dois no mesmo host (disputam 80/443). Crie antes o Docker config do Caddyfile: docker config create caddy_caddyfile_v1 caddy/config/Caddyfile. Requer a rede `web`.",
+      "categories": [
+        "networking",
+        "proxy",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/caddy.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "caddy/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "CADDY_ACME_EMAIL",
+          "label": "E-mail do ACME",
+          "description": "Recomendado (avisos de expiracao do Let's Encrypt)"
+        },
+        {
+          "name": "CADDY_CONFIG_NAME",
+          "label": "Nome do Docker config (Caddyfile)",
+          "default": "caddy_caddyfile_v1"
+        },
+        {
+          "name": "CADDY_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "2-alpine"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede",
+          "default": "web"
+        }
+      ]
+    },
+    {
+      "type": 3,
+      "title": "caddy — reverse proxy + HTTPS automatico",
+      "name": "caddy",
+      "description": "Caddy 2: reverse proxy com HTTPS automatico (Let's Encrypt/ZeroSSL), configurado por Caddyfile. Ponto de entrada :80/:443. Alternativa ao balancer (Traefik).",
+      "note": "Alternativa ao Traefik: nao rode os dois no mesmo host (disputam 80/443). O Caddyfile e montado de um arquivo local (aponte CADDY_CONFIG_FILE, default config/Caddyfile). Requer a rede `web`.",
+      "categories": [
+        "networking",
+        "proxy",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/caddy.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "caddy/docker-compose.standalone.yml"
+      },
+      "env": [
+        {
+          "name": "CADDY_ACME_EMAIL",
+          "label": "E-mail do ACME",
+          "description": "Recomendado (avisos de expiracao do Let's Encrypt)"
+        },
+        {
+          "name": "CADDY_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "2-alpine"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede",
+          "default": "web"
+        }
+      ]
+    },
+    {
+      "type": 2,
       "title": "drive — ownCloud",
       "name": "drive",
       "description": "Servidor de arquivos ownCloud (server 10.x) com MySQL e Redis, publicado via Traefik v3 com TLS. Pode autenticar usuarios via LDAP (stack account).",
