@@ -1,0 +1,50 @@
+# Stack "claude-code-organizer" — Claude Code Organizer (CCO) (Docker Swarm)
+# Dashboard para gerenciar a configuração do Claude Code (memories, skills, MCP servers,
+# rules, hooks, settings). Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt.
+#
+# Autocontido: a config vive num volume (cco-data) montado em /data — dentro dele ficam
+# /data/.claude e /data/.claude.json. Um volume novo nasce VAZIO; popule-o (docker cp ou o
+# Backup/restore do próprio CCO) para o dashboard ter o que gerenciar.
+#
+# ⚠ Segurança: o CCO NÃO tem autenticação própria. Se exposto na internet, proteja com
+# forward-auth (ex.: Authelia) — descomente a label de middleware e o README.
+#
+# Obrigatória: CCO_FQDN.
+# NOTA (volumes em Swarm): volumes são locais ao nó; em cluster multi-worker, fixe
+# WORKER_HOSTNAME e descomente o constraint de hostname.
+services:
+  app:
+    image: ghcr.io/marcelofmatos/claude-code-organizer:${CCO_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+    environment:
+      - HOME=/data
+      - CCO_PORT=3847
+    volumes:
+      - cco-data:/data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}   # fixe o nó: volume é local
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.cco.rule=Host(`${CCO_FQDN}`)
+        - traefik.http.routers.cco.entrypoints=websecure
+        - traefik.http.routers.cco.tls=true
+        - traefik.http.routers.cco.tls.certresolver=letsencryptresolver
+        - traefik.http.services.cco.loadbalancer.server.port=3847
+        # ⚠ Proteja com forward-auth (o CCO não tem login). Ex. (ajuste ao seu middleware):
+        # - traefik.http.routers.cco.middlewares=${CCO_AUTH_MIDDLEWARE:-}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay
+volumes:
+  cco-data:
+    driver: local
