@@ -686,7 +686,7 @@
       "title": "element — Matrix (Synapse) + Element Web",
       "name": "element",
       "description": "Matrix self-hosted: homeserver Synapse + cliente Element Web + PostgreSQL embarcado, publicado via Traefik v3 com TLS.",
-      "note": "Crie as redes externas: docker network create web && docker network create data. Apos o deploy, crie o 1o usuario via register_new_matrix_user no container do synapse (veja README).",
+      "note": "Crie a rede externa: docker network create web. Apos o deploy, crie o 1o usuario via register_new_matrix_user no container do synapse (veja README).",
       "categories": [
         "communication",
         "Porte: Médio"
@@ -2826,7 +2826,11 @@
       "name": "claude-code-organizer",
       "description": "Dashboard para gerenciar a configuração do Claude Code (memories, skills, MCP servers, rules, hooks, settings) entre escopos global e por projeto. A config vive num volume persistente.",
       "note": "Volume novo nasce vazio — popule cco-data com seu .claude e .claude.json. O CCO não tem autenticação própria: proteja com forward-auth (ex.: Authelia). Crie antes a rede externa do proxy (docker network create web).",
-      "categories": ["tools", "ai", "Porte: Leve"],
+      "categories": [
+        "tools",
+        "ai",
+        "Porte: Leve"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/claude-ai.png",
       "repository": {

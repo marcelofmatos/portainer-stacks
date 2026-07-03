@@ -4,7 +4,7 @@
 # Variante Docker Compose (host standalone). Traefik pelo provider docker (labels no container).
 #
 # Pré-requisitos:
-#   1. Redes externas (bridge):  docker network create web   &&   docker network create data
+#   1. Rede externa (bridge):  docker network create web
 #   2. Traefik (stack balancer, provider docker) rodando; DNS de MATRIX_SERVER_NAME e ELEMENT_FQDN no host.
 #   3. Obrigatórias: MATRIX_SERVER_NAME, ELEMENT_FQDN, MATRIX_DB_PASSWORD.
 #   4. 1º usuário (admin):  docker exec -it <container_synapse> register_new_matrix_user -c /data/homeserver.yaml http://localhost:8008
@@ -72,8 +72,7 @@ services:
     image: postgres:${MATRIX_DB_IMAGE_TAG:-16-alpine}
     restart: unless-stopped
     networks:
-      - default # acesso do synapse
-      - data # SÓ para ferramentas de admin (pgadmin4) via host `<stack>_db` (ex.: element_db)
+      - default # acesso do synapse (rede interna da stack)
     environment:
       - POSTGRES_DB=${SYNAPSE_DB_NAME:-synapse}
       - POSTGRES_USER=${SYNAPSE_DB_USER:-synapse}
@@ -86,9 +85,6 @@ networks:
   web: # externa bridge: criada pela stack balancer (Traefik)
     external: true
     name: ${PROXY_NET:-web}
-  data: # externa bridge: liga o banco às ferramentas de admin (pgadmin4 etc.)
-    external: true
-    name: ${DATA_NET:-data}
   default: # interna desta stack: synapse <-> db
     driver: bridge
 

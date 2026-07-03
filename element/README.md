@@ -12,17 +12,16 @@ Tudo publicado pelo **Traefik v3** com TLS Let's Encrypt. É o análogo "Matrix"
 
 > **Swarm vs standalone.** `docker-compose.yml` = Docker **Swarm** (App Template type 2).
 > `docker-compose.standalone.yml` = Docker **standalone** (type 3): labels do Traefik no container
-> (provider `docker`), redes `web`/`data` bridge (`docker network create web && docker network
-> create data`), `restart`/`depends_on` no lugar de `deploy`. Variáveis e uso são idênticos.
+> (provider `docker`), rede `web` bridge (`docker network create web`), `restart`/`depends_on` no
+> lugar de `deploy`. Variáveis e uso são idênticos.
 
 ---
 
 ## Pré-requisitos
 
-1. Redes externas (uma vez por cluster):
+1. Rede externa (uma vez por cluster):
    ```bash
    docker network create --driver overlay --attachable web
-   docker network create --driver overlay --attachable data
    ```
 2. Stack `balancer` (Traefik) rodando.
 3. **Dois** registros DNS apontando para o host:
@@ -45,7 +44,7 @@ Tudo publicado pelo **Traefik v3** com TLS Let's Encrypt. É o análogo "Matrix"
 | `SYNAPSE_IMAGE_TAG` | — | `latest` | Tag de `matrixdotorg/synapse` |
 | `ELEMENT_IMAGE_TAG` | — | `latest` | Tag de `ghcr.io/marcelofmatos/element` (imagem white-label custom) |
 | `MATRIX_DB_IMAGE_TAG` | — | `16-alpine` | Tag de `postgres` |
-| `PROXY_NET` / `DATA_NET` | — | `web` / `data` | Nome das redes externas |
+| `PROXY_NET` | — | `web` | Nome da rede externa do Traefik |
 
 > **Por que `MATRIX_SERVER_NAME` = host do Synapse?** Mantendo a identidade no mesmo domínio
 > onde o homeserver é servido, **não é preciso delegação `.well-known`** para o cliente
@@ -92,15 +91,10 @@ flowchart LR
     db[(db<br/>PostgreSQL<br/>locale C)]
   end
 
-  subgraph data[rede data]
-    pgadmin[pgadmin4<br/>opcional]
-  end
-
   user -->|https ELEMENT_FQDN| traefik --> element
   user -->|https MATRIX_SERVER_NAME| traefik --> synapse
   element -. serve config.json (gerado do template via env)<br/>base_url p/ MATRIX_SERVER_NAME .-> user
   synapse -->|psycopg2 :5432| db
-  pgadmin -. admin via host element_db .-> db
 ```
 
 O cliente **Element** é estático: ele roda no navegador e fala com o homeserver **direto pela

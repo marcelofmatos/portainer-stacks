@@ -730,7 +730,7 @@
       "title": "element — Matrix (chat seguro)",
       "name": "element",
       "description": "Matrix self-hosted: homeserver Synapse + cliente web Element + PostgreSQL embarcado. Mensageria segura e federavel (DMs, salas, chamadas), publicada via Traefik v3 com TLS.",
-      "note": "Apos o deploy, crie o 1o usuario no container do synapse: register_new_matrix_user -c /data/homeserver.yaml https://localhost:8008 (veja o README). MATRIX_SERVER_NAME e o dominio do homeserver e vira a identidade (@usuario:dominio). Requer as redes 'web' (balancer) e 'data'.",
+      "note": "Apos o deploy, crie o 1o usuario no container do synapse: register_new_matrix_user -c /data/homeserver.yaml https://localhost:8008 (veja o README). MATRIX_SERVER_NAME e o dominio do homeserver e vira a identidade (@usuario:dominio). Requer a rede 'web' (balancer).",
       "categories": [
         "communication",
         "Porte: Médio"
@@ -2910,7 +2910,11 @@
       "name": "claude-code-organizer",
       "description": "Dashboard para gerenciar a configuração do Claude Code (memories, skills, MCP servers, rules, hooks, settings) entre escopos global e por projeto. A config vive num volume persistente.",
       "note": "Volume novo nasce vazio — popule cco-data com seu .claude e .claude.json. O CCO não tem autenticação própria: proteja com forward-auth (ex.: Authelia).",
-      "categories": ["tools", "ai", "Porte: Leve"],
+      "categories": [
+        "tools",
+        "ai",
+        "Porte: Leve"
+      ],
       "platform": "linux",
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/claude-ai.png",
       "repository": {

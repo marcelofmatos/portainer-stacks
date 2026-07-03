@@ -2,9 +2,8 @@
 # │ Stack "element" — Matrix (Synapse) + Element Web + PostgreSQL embarcado     │
 # └───────────────────────────────────────────────────────────────────────────┘
 # Pré-requisitos de deploy:
-#   1. Crie as redes externas (uma vez por cluster):
+#   1. Crie a rede externa (uma vez por cluster):
 #        docker network create --driver overlay --attachable web
-#        docker network create --driver overlay --attachable data
 #   2. Tenha a stack `balancer` (Traefik) rodando e o DNS de MATRIX_SERVER_NAME e
 #      ELEMENT_FQDN apontando p/ o host.
 #   3. Defina as variáveis OBRIGATÓRIAS no deploy (Portainer pede no formulário):
@@ -24,9 +23,8 @@
 #       (branding criado — paleta marcelomatos.dev); publicado pelo Traefik em ELEMENT_FQDN.
 #       Gera /app/config.json apontando p/ o homeserver a partir das envs ELEMENT_* no start.
 #       Código da imagem: https://github.com/marcelofmatos/element
-#   - `db` (PostgreSQL) é o banco PRÓPRIO desta stack (locale C, exigido pelo Synapse).
-#       * fica na `default` (o Synapse o acessa pelo nome `db`)
-#       * fica TAMBÉM na `data` SÓ para ferramentas de admin (pgadmin4) o alcançarem como `<stack>_db` (ex.: element_db)
+#   - `db` (PostgreSQL) é o banco PRÓPRIO desta stack (locale C, exigido pelo Synapse), só na rede
+#       interna `default` (o Synapse o acessa pelo nome `db`).
 #   - Volumes dedicados (`synapse-data`, `db-data`): para migrar de host, basta copiar esses volumes.
 #
 # VOLUME EM SWARM: volumes são locais ao nó. Em cluster com +1 worker, fixe os serviços no nó
@@ -107,8 +105,7 @@ services:
   db:
     image: postgres:${MATRIX_DB_IMAGE_TAG:-16-alpine}
     networks:
-      - default # acesso do synapse
-      - data # SÓ para ferramentas de admin (pgadmin4) via host `<stack>_db` (ex.: element_db)
+      - default # acesso do synapse (rede interna da stack)
     environment:
       - POSTGRES_DB=${SYNAPSE_DB_NAME:-synapse}
       - POSTGRES_USER=${SYNAPSE_DB_USER:-synapse}
@@ -127,9 +124,6 @@ networks:
   web: # externa: criada pela stack balancer (Traefik)
     external: true
     name: ${PROXY_NET:-web}
-  data: # externa: liga o banco às ferramentas de admin (pgadmin4 etc.)
-    external: true
-    name: ${DATA_NET:-data}
   default: # interna desta stack: synapse <-> db
     driver: overlay
 
