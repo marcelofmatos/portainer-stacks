@@ -8,29 +8,35 @@ Toda a customização é feita por **variáveis de ambiente** (com defaults sens
 fica no repositório.
 
 ## Usar como App Template no Portainer
-1. No Portainer: **Settings → App Templates**.
-2. Em **URL**, informe o `templates.json` cru deste repositório:
-   ```
-   https://raw.githubusercontent.com/marcelofmatos/portainer-stacks/main/templates.json
-   ```
-3. Salve. As stacks aparecem em **App Templates**; ao escolher uma, o Portainer pede as variáveis
-   de ambiente e faz o deploy a partir do `docker-compose.yml` correspondente neste repo.
 
-### Swarm ou standalone (Docker sem Swarm)
+Há **dois arquivos de template** — use a URL conforme o modo do host (em **Settings → App Templates → URL**):
 
-A maioria das stacks tem **duas variantes**, e o Portainer mostra a certa conforme o ambiente:
+| Host | URL do template |
+|---|---|
+| **Docker Swarm** | `https://raw.githubusercontent.com/marcelofmatos/portainer-stacks/main/templates.json` |
+| **Docker standalone** | `https://raw.githubusercontent.com/marcelofmatos/portainer-stacks/main/templates-standalone.json` |
 
-- **Swarm** → `docker-compose.yml` (App Template **type 2**): Traefik via provider `swarm`
-  (`deploy.labels`), redes overlay.
-- **Standalone** → `docker-compose.standalone.yml` (App Template **type 3**): Traefik via provider
-  `docker` (labels no container), redes **bridge**, `restart` no lugar de `deploy`. Crie as redes
-  externas como bridge (ex.: `docker network create web`).
+Salve e as stacks aparecem em **App Templates**; ao escolher uma, o Portainer pede as variáveis de
+ambiente e faz o deploy a partir do compose correspondente.
 
-Num host standalone só aparecem as entradas type 3, e vice-versa. Nas stacks que usavam **Docker
-configs** (Swarm), a variante standalone monta o arquivo de config como **bind mount de host**
-(ex.: `AUTHELIA_CONFIG_FILE`, `HAPROXY_CONFIG_FILE`, `LITELLM_CONFIG_FILE`, `SSP_CONFIG_FILE`).
+> **Por que dois arquivos?** Um host **standalone** só lista App Templates de *compose* (type 3),
+> mas um host **Swarm** lista *tanto* Swarm stacks (type 2) quanto compose (type 3) — então um
+> arquivo único faria cada stack aparecer **duplicada** no Swarm. Separar por arquivo evita isso:
+> cada Portainer aponta só para o seu.
+
+### Diferença entre as variantes
+
+- **Swarm** (`templates.json` → `docker-compose.yml`): Traefik via provider `swarm` (`deploy.labels`),
+  redes overlay.
+- **Standalone** (`templates-standalone.json` → `docker-compose.standalone.yml`): Traefik via provider
+  `docker` (labels no container), redes **bridge** (`docker network create web`), `restart` no lugar
+  de `deploy`. Nas stacks que usavam **Docker configs**, a variante standalone monta o arquivo como
+  **bind mount de host** (`AUTHELIA_CONFIG_FILE`, `HAPROXY_CONFIG_FILE`, `LITELLM_CONFIG_FILE`,
+  `SSP_CONFIG_FILE`).
+
 Só ficam em Swarm o **`swarmprom`** (`mode: global` multi-nó) e o **`docker-service-update`**
-(`docker service update --force` é exclusivo do Swarm) — não fazem sentido em host único.
+(`docker service update --force` é exclusivo do Swarm) — não fazem sentido em host único, então não
+estão no template standalone.
 
 ## Requisitos de hardware
 

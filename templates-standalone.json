@@ -2,11 +2,11 @@
   "version": "2",
   "templates": [
     {
-      "type": 2,
+      "type": 3,
       "title": "balancer — Traefik v3",
       "name": "balancer",
-      "description": "Reverse proxy Traefik v3 para Docker Swarm com TLS automatico (Let's Encrypt) e dashboard protegido. Cria o ponto de entrada da rede publica `web`.",
-      "note": "Rode no manager. A rede overlay publica precisa existir: `docker network create --driver overlay --attachable web`. HTTP_AUTH_BASIC no formato usuario:hash (use `htpasswd -nbB`).",
+      "description": "Reverse proxy Traefik v3: TLS Let's Encrypt automatico, provider Docker (le os labels do container) e dashboard protegido por basicauth. Cria/usa a rede externa `web`.",
+      "note": "Crie a rede externa: docker network create web. Variaveis: DOMAIN, ACME_EMAIL, HTTP_AUTH_BASIC (user:hash bcrypt do dashboard).",
       "categories": [
         "proxy",
         "networking",
@@ -16,7 +16,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/traefik.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "balancer/docker-compose.yml"
+        "stackfile": "balancer/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -47,11 +47,11 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "caddy — reverse proxy + HTTPS automatico",
       "name": "caddy",
-      "description": "Caddy com caddy-docker-proxy: reverse proxy com HTTPS automatico configurado por LABELS dos servicos (auto-descoberta, estilo Traefik). Ponto de entrada :80/:443. Alternativa ao balancer (Traefik).",
-      "note": "Le o docker.sock (roda no MANAGER em Swarm). Cada servico declara suas rotas em deploy.labels (caddy: dominio + caddy.reverse_proxy). Requer a rede `web` (CADDY_INGRESS_NETWORKS). Nao rode junto do Traefik (disputam 80/443). Veja o README.",
+      "description": "Caddy com caddy-docker-proxy: reverse proxy com HTTPS automatico configurado por LABELS dos containers (auto-descoberta, estilo Traefik). Ponto de entrada :80/:443. Alternativa ao balancer (Traefik).",
+      "note": "Le o docker.sock. Cada container declara suas rotas em labels (caddy: dominio + caddy.reverse_proxy). Requer a rede `web` (CADDY_INGRESS_NETWORKS). Nao rode junto do Traefik (disputam 80/443). Veja o README.",
       "categories": [
         "networking",
         "proxy",
@@ -61,7 +61,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/caddy.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "caddy/docker-compose.yml"
+        "stackfile": "caddy/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -84,7 +84,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "drive — ownCloud",
       "name": "drive",
       "description": "Servidor de arquivos ownCloud (server 10.x) com MySQL e Redis, publicado via Traefik v3 com TLS. Pode autenticar usuarios via LDAP (stack account).",
@@ -98,7 +98,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/owncloud.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "drive/docker-compose.yml"
+        "stackfile": "drive/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -154,11 +154,11 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "account — OpenLDAP + LAM + self-service-password",
       "name": "account",
       "description": "Diretorio OpenLDAP com LDAP Account Manager (administracao) e self-service-password (troca de senha). Expoe a rede `ldap` para outras stacks autenticarem.",
-      "note": "PRE-REQUISITO: crie antes os Docker configs do self-service-password (`docker config create account_ssp_config_v1 ...` e `account_ssp_css_custom_v1 ...`). Veja o README da stack.",
+      "note": "PRE-REQUISITO: o self-service-password le a config de um arquivo local (bind mount) - aponte SSP_CONFIG_FILE para o seu config.inc.local.php (default config/ssp-config.inc.local.php). Crie a rede `ldap`. Veja o README.",
       "categories": [
         "authentication",
         "ldap",
@@ -168,7 +168,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/ldap-account-manager.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "account/docker-compose.yml"
+        "stackfile": "account/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -220,11 +220,11 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "lldap — Light LDAP",
       "name": "lldap",
       "description": "Servidor LDAP leve (usuarios + grupos) com UI web. Alternativa simples ao OpenLDAP/AD; expoe a rede `ldap` para outras stacks autenticarem (host lldap_server:3890).",
-      "note": "Gere segredos fortes para LLDAP_JWT_SECRET e LLDAP_KEY_SEED (openssl rand -hex 32). A rede overlay `ldap` precisa existir.",
+      "note": "Gere segredos fortes para LLDAP_JWT_SECRET e LLDAP_KEY_SEED (openssl rand -hex 32). A rede `ldap` precisa existir.",
       "categories": [
         "authentication",
         "ldap",
@@ -234,7 +234,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/lldap.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "lldap/docker-compose.yml"
+        "stackfile": "lldap/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -281,11 +281,11 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "phpmyadmin — admin MySQL/MariaDB",
       "name": "phpmyadmin",
       "description": "phpMyAdmin publicado via Traefik v3 com TLS. Entra na rede `data` e alcanca a stack mariadb pelo host `mariadb`. PMA_ARBITRARY permite informar outro host na tela de login.",
-      "note": "Requer a rede `web` (stack balancer) e a rede `data` (docker network create --driver overlay --attachable data).",
+      "note": "Requer a rede `web` (stack balancer) e a rede `data` (docker network create data).",
       "categories": [
         "database",
         "tools",
@@ -295,7 +295,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/phpmyadmin.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "phpmyadmin/docker-compose.yml"
+        "stackfile": "phpmyadmin/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -326,11 +326,11 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "error-pages — paginas de erro do Traefik",
       "name": "error-pages",
       "description": "Paginas de erro customizadas para o Traefik (tarampampam/error-pages). Funciona como middleware `errors` que captura respostas 4xx/5xx das outras stacks.",
-      "note": "Apos o deploy, aplique nas outras stacks o middleware: traefik.http.routers.<r>.middlewares=error-pages@swarm",
+      "note": "Apos o deploy, aplique nas outras stacks o middleware: traefik.http.routers.<r>.middlewares=error-pages@docker",
       "categories": [
         "proxy",
         "tools",
@@ -340,7 +340,7 @@
       "logo": "https://api.iconify.design/tabler/error-404.svg?color=%23ef4444&height=128",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "error-pages/docker-compose.yml"
+        "stackfile": "error-pages/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -362,7 +362,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "keycloak — IAM/SSO",
       "name": "keycloak",
       "description": "Keycloak (identidade, SSO, OIDC/SAML) com PostgreSQL, publicado via Traefik v3 com TLS.",
@@ -376,7 +376,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/keycloak.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "keycloak/docker-compose.yml"
+        "stackfile": "keycloak/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -407,7 +407,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "pgadmin4 — admin PostgreSQL",
       "name": "pgadmin4",
       "description": "pgAdmin 4 publicado via Traefik v3 com TLS, para administrar bancos PostgreSQL do cluster.",
@@ -421,7 +421,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/pgadmin.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "pgadmin4/docker-compose.yml"
+        "stackfile": "pgadmin4/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -447,7 +447,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "stirlingpdf — ferramentas de PDF",
       "name": "stirlingpdf",
       "description": "Stirling-PDF: suite de ferramentas de PDF (merge, split, OCR, conversao...) self-hosted, via Traefik v3 com TLS.",
@@ -460,7 +460,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/stirling-pdf.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "stirlingpdf/docker-compose.yml"
+        "stackfile": "stirlingpdf/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -486,51 +486,7 @@
       ]
     },
     {
-      "type": 2,
-      "title": "swarmprom — monitoramento Swarm",
-      "name": "swarmprom",
-      "description": "Monitoramento nativo de Docker Swarm: Prometheus, Grafana, Alertmanager, node-exporter e cAdvisor. Expoe o Grafana via Traefik v3.",
-      "note": "node-exporter e cAdvisor rodam em modo global. Prometheus/Grafana podem exigir configuracao adicional (datasources/dashboards) - veja o README.",
-      "categories": [
-        "monitoring",
-        "Porte: Pesado"
-      ],
-      "platform": "linux",
-      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/grafana.png",
-      "repository": {
-        "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "swarmprom/docker-compose.yml"
-      },
-      "env": [
-        {
-          "name": "SWARMPROM_GRAFANA_FQDN",
-          "label": "Dominio do Grafana",
-          "description": "Ex.: grafana.exemplo.com"
-        },
-        {
-          "name": "GRAFANA_ADMIN_PASSWORD",
-          "label": "Senha admin Grafana",
-          "description": "Senha do admin do Grafana"
-        },
-        {
-          "name": "GRAFANA_ADMIN_USER",
-          "label": "Usuario admin Grafana",
-          "default": "admin"
-        },
-        {
-          "name": "PROMETHEUS_RETENTION",
-          "label": "Retencao Prometheus",
-          "default": "15d"
-        },
-        {
-          "name": "PROXY_NET",
-          "label": "Rede do proxy",
-          "default": "web"
-        }
-      ]
-    },
-    {
-      "type": 2,
+      "type": 3,
       "title": "workflows — n8n",
       "name": "workflows",
       "description": "n8n (automacao de workflows low-code) com PostgreSQL, publicado via Traefik v3 com TLS.",
@@ -543,7 +499,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/n8n.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "workflows/docker-compose.yml"
+        "stackfile": "workflows/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -574,11 +530,11 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "home-assistant — automação residencial",
       "name": "home-assistant",
       "description": "Home Assistant (Container): plataforma open source de automação residencial — dashboards, automacoes e integracoes com dispositivos e servicos. Publicado via Traefik v3 com TLS. Estado/config no volume /config (SQLite).",
-      "note": "Versao Container atras de proxy (contexto servidor/cloud). Descoberta automatica de dispositivos locais (mDNS/Bluetooth/Zigbee USB) exige network_mode host ou hardware dedicado (HAOS) e nao se aplica em Swarm overlay. Para IP real do cliente, configure o bloco http (use_x_forwarded_for + trusted_proxies) no configuration.yaml - veja o README. Requer a rede 'web' (balancer).",
+      "note": "Versao Container atras de proxy (contexto servidor/cloud). Descoberta automatica de dispositivos locais (mDNS/Bluetooth/Zigbee USB) exige network_mode host ou hardware dedicado (HAOS) e nao se aplica neste modo. Para IP real do cliente, configure o bloco http (use_x_forwarded_for + trusted_proxies) no configuration.yaml - veja o README. Requer a rede 'web' (balancer).",
       "categories": [
         "automation",
         "iot"
@@ -587,7 +543,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/home-assistant.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "home-assistant/docker-compose.yml"
+        "stackfile": "home-assistant/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -608,7 +564,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "ollama — runtime de LLMs",
       "name": "ollama",
       "description": "Ollama: executa modelos de linguagem (LLMs) localmente. Exposicao via Traefik opcional.",
@@ -621,7 +577,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/ollama.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "ollama/docker-compose.yml"
+        "stackfile": "ollama/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -642,11 +598,11 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "authelia — autenticacao/2FA",
       "name": "authelia",
       "description": "Authelia: portal de autenticacao e 2FA (forward-auth) para proteger servicos atras do Traefik. Inclui Redis.",
-      "note": "PRE-REQUISITO: crie o Docker config `authelia_config_v1` a partir de config/configuration.yml. Aplique nas stacks o middleware authelia@swarm. Veja o README.",
+      "note": "PRE-REQUISITO: a config e montada de um arquivo local (bind mount) - aponte AUTHELIA_CONFIG_FILE para o seu configuration.yml (default config/configuration.yml). Aplique nas stacks o middleware authelia@docker. Veja o README.",
       "categories": [
         "authentication",
         "security",
@@ -656,7 +612,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/authelia.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "authelia/docker-compose.yml"
+        "stackfile": "authelia/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -692,7 +648,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "rocketchat — chat de equipe",
       "name": "rocketchat",
       "description": "Rocket.Chat (mensageria de equipe) com MongoDB (replica set), publicado via Traefik v3 com TLS.",
@@ -705,7 +661,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/rocket-chat.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "rocketchat/docker-compose.yml"
+        "stackfile": "rocketchat/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -726,11 +682,11 @@
       ]
     },
     {
-      "type": 2,
-      "title": "element — Matrix (chat seguro)",
+      "type": 3,
+      "title": "element — Matrix (Synapse) + Element Web",
       "name": "element",
-      "description": "Matrix self-hosted: homeserver Synapse + cliente web Element + PostgreSQL embarcado. Mensageria segura e federavel (DMs, salas, chamadas), publicada via Traefik v3 com TLS.",
-      "note": "Apos o deploy, crie o 1o usuario no container do synapse: register_new_matrix_user -c /data/homeserver.yaml https://localhost:8008 (veja o README). MATRIX_SERVER_NAME e o dominio do homeserver e vira a identidade (@usuario:dominio). Requer as redes 'web' (balancer) e 'data'.",
+      "description": "Matrix self-hosted: homeserver Synapse + cliente Element Web + PostgreSQL embarcado, publicado via Traefik v3 com TLS.",
+      "note": "Crie as redes externas: docker network create web && docker network create data. Apos o deploy, crie o 1o usuario via register_new_matrix_user no container do synapse (veja README).",
       "categories": [
         "communication",
         "Porte: Médio"
@@ -739,7 +695,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/element.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "element/docker-compose.yml"
+        "stackfile": "element/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -815,7 +771,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "minio — object storage S3",
       "name": "minio",
       "description": "MinIO: armazenamento de objetos compativel com S3, com console web. Dois dominios (API e console) via Traefik v3.",
@@ -828,7 +784,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/minio.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "minio/docker-compose.yml"
+        "stackfile": "minio/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -859,11 +815,11 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "litellm — gateway de LLMs",
       "name": "litellm",
       "description": "LiteLLM Proxy: gateway OpenAI-compativel para varios provedores de LLM, publicado via Traefik v3 com TLS.",
-      "note": "PRE-REQUISITO: crie o Docker config `litellm_config_v1` a partir de config/config.yaml (lista de modelos). Veja o README.",
+      "note": "PRE-REQUISITO: o model_list e montado de um arquivo local (bind mount) - aponte LITELLM_CONFIG_FILE para o seu config.yaml (default config/config.yaml). Veja o README.",
       "categories": [
         "ai",
         "Porte: Médio"
@@ -872,7 +828,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/selfhst/icons/png/litellm.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "litellm/docker-compose.yml"
+        "stackfile": "litellm/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -908,7 +864,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "chromadb — vector database",
       "name": "chromadb",
       "description": "ChromaDB: banco de dados vetorial para IA/RAG, publicado via Traefik v3 com TLS.",
@@ -922,7 +878,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/chroma.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "chromadb/docker-compose.yml"
+        "stackfile": "chromadb/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -948,7 +904,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "openspeedtest — teste de velocidade",
       "name": "openspeedtest",
       "description": "OpenSpeedTest: teste de velocidade de rede self-hosted (HTML5), publicado via Traefik v3 com TLS.",
@@ -961,7 +917,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/openspeedtest.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "openspeedtest/docker-compose.yml"
+        "stackfile": "openspeedtest/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -977,7 +933,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "joomla — CMS",
       "name": "joomla",
       "description": "Joomla (CMS) com MySQL, publicado via Traefik v3 com TLS.",
@@ -990,7 +946,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/joomla.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "joomla/docker-compose.yml"
+        "stackfile": "joomla/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -1016,7 +972,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "moodle — LMS",
       "name": "moodle",
       "description": "Moodle (ambiente de ensino a distancia) com MariaDB, imagens Bitnami, publicado via Traefik v3 com TLS.",
@@ -1030,7 +986,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/moodle.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "moodle/docker-compose.yml"
+        "stackfile": "moodle/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -1071,7 +1027,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "excalidraw — quadro branco",
       "name": "excalidraw",
       "description": "Excalidraw: quadro branco / desenho colaborativo (imagem oficial), publicado via Traefik v3 com TLS.",
@@ -1084,7 +1040,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/excalidraw.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "excalidraw/docker-compose.yml"
+        "stackfile": "excalidraw/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -1100,11 +1056,11 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "mariadb — banco MariaDB",
       "name": "mariadb",
-      "description": "Banco de dados MariaDB compartilhado (sem proxy). Entra na rede overlay `data` para outras stacks conectarem por `mariadb:3306`.",
-      "note": "PRE-REQUISITO: crie a rede compartilhada: `docker network create --driver overlay --attachable data`. Para acesso externo, descomente o bloco ports no compose.",
+      "description": "Banco de dados MariaDB compartilhado (sem proxy). Entra na rede `data` para outras stacks conectarem por `mariadb:3306`.",
+      "note": "PRE-REQUISITO: crie a rede compartilhada: `docker network create data`. Para acesso externo, descomente o bloco ports no compose.",
       "categories": [
         "database",
         "Porte: Médio"
@@ -1113,7 +1069,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/mariadb.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "mariadb/docker-compose.yml"
+        "stackfile": "mariadb/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -1144,11 +1100,11 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "postgres-pgvector — PostgreSQL + pgvector",
       "name": "postgres-pgvector",
-      "description": "PostgreSQL com a extensao pgvector nativa (imagem oficial pgvector/pgvector), para IA/RAG (embeddings). Entra na rede overlay `data` para outras stacks conectarem por `postgres:5432`.",
-      "note": "PRE-REQUISITO: crie a rede `data` (docker network create --driver overlay --attachable data). A extensao e por banco: rode CREATE EXTENSION IF NOT EXISTS vector; em cada banco que usar vetores (ver README).",
+      "description": "PostgreSQL com a extensao pgvector nativa (imagem oficial pgvector/pgvector), para IA/RAG (embeddings). Entra na rede `data` para outras stacks conectarem por `postgres:5432`.",
+      "note": "PRE-REQUISITO: crie a rede `data` (docker network create data). A extensao e por banco: rode CREATE EXTENSION IF NOT EXISTS vector; em cada banco que usar vetores (ver README).",
       "categories": [
         "database",
         "ai",
@@ -1158,7 +1114,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/postgresql.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "postgres-pgvector/docker-compose.yml"
+        "stackfile": "postgres-pgvector/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -1189,11 +1145,11 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "redis — cache compartilhado",
       "name": "redis",
-      "description": "Redis como cache/memoria compartilhado (sem proxy). Entra na rede overlay `data` para outras stacks conectarem por `redis:6379`.",
-      "note": "PRE-REQUISITO: crie a rede `data` (docker network create --driver overlay --attachable data). Defina REDIS_PASSWORD para proteger o cache.",
+      "description": "Redis como cache/memoria compartilhado (sem proxy). Entra na rede `data` para outras stacks conectarem por `redis:6379`.",
+      "note": "PRE-REQUISITO: crie a rede `data` (docker network create data). Defina REDIS_PASSWORD para proteger o cache.",
       "categories": [
         "database",
         "cache",
@@ -1203,7 +1159,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/redis.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "redis/docker-compose.yml"
+        "stackfile": "redis/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -1234,7 +1190,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "evolution-api — WhatsApp API",
       "name": "evolution-api",
       "description": "Evolution API (gateway de WhatsApp) via Traefik v3. Usa o PostgreSQL (stack postgres-pgvector) e o Redis (stack redis) compartilhados na rede `data`.",
@@ -1248,7 +1204,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/whatsapp.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "evolution-api/docker-compose.yml"
+        "stackfile": "evolution-api/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -1295,7 +1251,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "wordpress — CMS/blog",
       "name": "wordpress",
       "description": "WordPress via Traefik v3 com TLS, com MariaDB embarcado (banco proprio da stack, na rede `data` so para ferramentas de admin).",
@@ -1308,7 +1264,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/wordpress.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "wordpress/docker-compose.yml"
+        "stackfile": "wordpress/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -1354,7 +1310,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "wikijs — wiki em Markdown",
       "name": "wikijs",
       "description": "Wiki.js: wiki moderno baseado em Markdown (busca, versionamento, ACL). Via Traefik v3, com PostgreSQL embarcado (banco proprio da stack).",
@@ -1368,7 +1324,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/wikijs.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "wikijs/docker-compose.yml"
+        "stackfile": "wikijs/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -1409,11 +1365,11 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "supabase — backend self-hosted",
       "name": "supabase",
-      "description": "Supabase self-hosted (Postgres + Studio + Kong/API + Auth + REST + Realtime + Storage + Functions...) adaptado para Docker Swarm. Studio e API expostos via Traefik v3.",
-      "note": "Adaptacao best-effort p/ Swarm. Gere as chaves (JWT_SECRET, ANON_KEY, SERVICE_ROLE_KEY etc.) conforme a doc da Supabase antes do deploy. Veja o README.",
+      "description": "Supabase self-hosted (Postgres + Studio + Kong/API + Auth + REST + Realtime + Storage + Functions...). Studio e API expostos via Traefik v3.",
+      "note": "Adaptacao best-effort. Gere as chaves (JWT_SECRET, ANON_KEY, SERVICE_ROLE_KEY etc.) conforme a doc da Supabase antes do deploy. Veja o README.",
       "categories": [
         "database",
         "ai",
@@ -1424,7 +1380,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/supabase.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "supabase/docker-compose.yml"
+        "stackfile": "supabase/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -1490,7 +1446,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "mailtester — MailCatcher",
       "name": "mailtester",
       "description": "Servidor SMTP de captura para dev/homologacao: os apps enviam e-mail, nada sai de verdade e tudo cai numa UI web. Apps na rede `web` usam o host mailtester_mailcatcher:1025.",
@@ -1504,7 +1460,7 @@
       "logo": "https://api.iconify.design/tabler/mailbox.svg?color=%230ea5e9&height=128",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "mailtester/docker-compose.yml"
+        "stackfile": "mailtester/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -1520,7 +1476,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "ligerosmart — help desk / ITSM",
       "name": "ligerosmart",
       "description": "LigeroSmart (central de serviços / help desk, base OTRS) com MariaDB, Elasticsearch e Grafana. Adaptado do projeto público LigeroSmart/ligerosmart-stack para Traefik v3.",
@@ -1534,7 +1490,7 @@
       "logo": "https://avatars.githubusercontent.com/LigeroSmart",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "ligerosmart/docker-compose.yml"
+        "stackfile": "ligerosmart/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -1590,47 +1546,7 @@
       ]
     },
     {
-      "type": 2,
-      "title": "docker-service-update — webhook de deploy Swarm",
-      "name": "docker-service-update",
-      "description": "Webhook HTTP que recebe o nome de uma imagem e forca o re-deploy (service update --force) dos servicos Swarm que a usam. Para chamar de pipelines de CI/CD apos publicar a imagem. Publicado via Traefik v3 com TLS e protegido por basicauth.",
-      "note": "Roda no MANAGER (acessa /var/run/docker.sock). Requer a rede `web` (stack balancer). O endpoint forca re-deploy de qualquer servico: UPDATE_AUTH_BASIC obrigatorio, formato usuario:hash (htpasswd -nbB).",
-      "categories": [
-        "ci-cd",
-        "tools",
-        "Porte: Leve"
-      ],
-      "platform": "linux",
-      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/docker.png",
-      "repository": {
-        "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "docker-service-update/docker-compose.yml"
-      },
-      "env": [
-        {
-          "name": "UPDATE_FQDN",
-          "label": "Dominio (FQDN)",
-          "description": "Ex.: deploy.exemplo.com"
-        },
-        {
-          "name": "UPDATE_AUTH_BASIC",
-          "label": "Basicauth do webhook",
-          "description": "Formato usuario:hash_bcrypt (htpasswd -nbB)"
-        },
-        {
-          "name": "APP_IMAGE_TAG",
-          "label": "Tag da imagem",
-          "default": "latest"
-        },
-        {
-          "name": "PROXY_NET",
-          "label": "Rede do proxy",
-          "default": "web"
-        }
-      ]
-    },
-    {
-      "type": 2,
+      "type": 3,
       "title": "espocrm — CRM",
       "name": "espocrm",
       "description": "EspoCRM (CRM open source: contas, contatos, oportunidades, funil, e-mail, automacoes). Publicado via Traefik v3 com TLS e reaproveita o MariaDB compartilhado (stack mariadb) na rede data. Inclui o daemon de jobs agendados.",
@@ -1644,7 +1560,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/espocrm.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "espocrm/docker-compose.yml"
+        "stackfile": "espocrm/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -1691,7 +1607,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "twenty — CRM",
       "name": "twenty",
       "description": "Twenty (CRM open source moderno, UI estilo Notion/Airtable: contatos, empresas, oportunidades, workflows). Publicado via Traefik v3 com TLS e reaproveita PostgreSQL (stack postgres-pgvector) e Redis (stack redis) na rede data. Inclui worker de jobs assincronos.",
@@ -1705,7 +1621,7 @@
       "logo": "https://api.iconify.design/tabler/address-book.svg?color=%23a855f7&height=128",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "twenty/docker-compose.yml"
+        "stackfile": "twenty/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -1752,7 +1668,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "chatwoot — atendimento omnichannel",
       "name": "chatwoot",
       "description": "Chatwoot (atendimento ao cliente / CRM de conversas: caixa de entrada compartilhada, WhatsApp, e-mail, chat de site). Publicado via Traefik v3 com TLS e reaproveita PostgreSQL (stack postgres-pgvector) e Redis (stack redis) na rede data. Integra com a stack evolution-api como canal de WhatsApp.",
@@ -1767,7 +1683,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/chatwoot.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "chatwoot/docker-compose.yml"
+        "stackfile": "chatwoot/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -1814,7 +1730,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "typebot — construtor de chatbots",
       "name": "typebot",
       "description": "Typebot (builder visual de chatbots/fluxos conversacionais) com builder e viewer. Publicado via Traefik v3 com TLS e reaproveita o PostgreSQL compartilhado (stack postgres-pgvector) na rede data. Os fluxos publicados podem ser entregues no WhatsApp via stack evolution-api.",
@@ -1828,7 +1744,7 @@
       "logo": "https://api.iconify.design/tabler/message-chatbot.svg?color=%230ea5e9&height=128",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "typebot/docker-compose.yml"
+        "stackfile": "typebot/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -1875,7 +1791,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "flowise — agentes de IA (LLM)",
       "name": "flowise",
       "description": "Flowise (construtor visual de chatbots/agentes LLM, RAG e fluxos). Publicado via Traefik v3 com TLS, persiste em SQLite no volume local e protege o acesso por usuario/senha. Consome LLMs das stacks litellm/ollama e pode entregar respostas no WhatsApp via stack evolution-api.",
@@ -1890,7 +1806,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/flowise.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "flowise/docker-compose.yml"
+        "stackfile": "flowise/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -1916,11 +1832,11 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "mongodb — banco NoSQL compartilhado",
       "name": "mongodb",
-      "description": "MongoDB como banco NoSQL interno/compartilhado do cluster. NAO usa Traefik nem a rede web: fica na rede overlay `data` e outras stacks conectam pelo host mongodb:27017. Admin via web pela stack mongo-express.",
-      "note": "Banco interno. Requer a rede `data`: docker network create --driver overlay --attachable data. Nao exponha 27017 na internet.",
+      "description": "MongoDB como banco NoSQL interno/compartilhado do cluster. NAO usa Traefik nem a rede web: fica na rede `data` e outras stacks conectam pelo host mongodb:27017. Admin via web pela stack mongo-express.",
+      "note": "Banco interno. Requer a rede `data`: docker network create data. Nao exponha 27017 na internet.",
       "categories": [
         "database",
         "Porte: Médio"
@@ -1929,7 +1845,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/mongodb.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "mongodb/docker-compose.yml"
+        "stackfile": "mongodb/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -1955,7 +1871,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "mongo-express — admin do MongoDB",
       "name": "mongo-express",
       "description": "Mongo Express: interface web de administracao do MongoDB. Publicado via Traefik v3 com TLS, conecta no MongoDB compartilhado (stack mongodb) na rede data. Protegido por basicauth proprio.",
@@ -1969,7 +1885,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/mongodb.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "mongo-express/docker-compose.yml"
+        "stackfile": "mongo-express/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2005,7 +1921,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "redisinsight — GUI do Redis",
       "name": "redisinsight",
       "description": "RedisInsight: interface grafica de administracao do Redis. Publicado via Traefik v3 com TLS, conecta no Redis compartilhado (stack redis) na rede data. Como nao tem login proprio, e protegido por basicauth do Traefik.",
@@ -2019,7 +1935,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/redis.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "redisinsight/docker-compose.yml"
+        "stackfile": "redisinsight/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2040,7 +1956,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "zabbix — monitoramento",
       "name": "zabbix",
       "description": "Zabbix (monitoramento de infraestrutura/servicos): server + web + agent. Publicado via Traefik v3 com TLS e reaproveita o PostgreSQL compartilhado (stack postgres-pgvector) na rede data. O server importa o schema automaticamente num banco vazio.",
@@ -2053,7 +1969,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/zabbix.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "zabbix/docker-compose.yml"
+        "stackfile": "zabbix/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2095,10 +2011,10 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "elasticsearch — busca/indice",
       "name": "elasticsearch",
-      "description": "Elasticsearch single-node como backend interno de busca/indice. NAO usa Traefik nem a rede web: fica na rede overlay data e outras stacks conectam pelo host elasticsearch:9200.",
+      "description": "Elasticsearch single-node como backend interno de busca/indice. NAO usa Traefik nem a rede web: fica na rede data e outras stacks conectam pelo host elasticsearch:9200.",
       "note": "Backend interno. Requer a rede `data` e `vm.max_map_count=262144` no host (ver README). Nao exponha 9200 na internet.",
       "categories": [
         "database",
@@ -2109,7 +2025,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/elasticsearch.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "elasticsearch/docker-compose.yml"
+        "stackfile": "elasticsearch/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2135,7 +2051,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "protonmail-bridge — SMTP/IMAP ProtonMail",
       "name": "protonmail-bridge",
       "description": "ProtonMail Bridge: expoe a conta ProtonMail como SMTP/IMAP interno para outras stacks enviarem/lerem e-mail. UI web (porta 3000) publicada via Traefik v3 com TLS e protegida pelo WEBUI_AUTH_TOKEN.",
@@ -2148,7 +2064,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/proton-mail.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "protonmail-bridge/docker-compose.yml"
+        "stackfile": "protonmail-bridge/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2169,7 +2085,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "ssh-server — OpenSSH/SFTP",
       "name": "ssh-server",
       "description": "Servidor OpenSSH (imagem linuxserver) para acesso SSH/SFTP ao cluster. NAO usa Traefik (SSH e TCP): publica a porta no no. Recomenda-se autenticacao por chave publica.",
@@ -2183,7 +2099,7 @@
       "logo": "https://api.iconify.design/tabler/terminal-2.svg?color=%2310b981&height=128",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "ssh-server/docker-compose.yml"
+        "stackfile": "ssh-server/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2214,7 +2130,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "socat — relay TCP",
       "name": "socat",
       "description": "socat encaminha uma porta publicada no no para um destino alcancavel pelo container. Util para expor de forma controlada um servico interno (ex.: um banco na rede data) para fora do cluster.",
@@ -2228,7 +2144,7 @@
       "logo": "https://api.iconify.design/tabler/transfer.svg?color=%23f59e0b&height=128",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "socat/docker-compose.yml"
+        "stackfile": "socat/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2249,11 +2165,11 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "redirect — hub de redirects HTTP",
       "name": "redirect",
-      "description": "Redirecionador HTTP: dominio -> destino (301/302) via morbz/docker-web-redirect, publicado pelo Traefik v3 com TLS. O formulario configura 1 redirect; para varios na mesma stack, duplique o bloco de servico no compose.",
-      "note": "Requer a rede `web` (stack balancer) e DNS de cada dominio de origem apontando para o host. REDIRECT_TYPE: redirect (302) ou 'redirect permanent' (301). Para varios redirects, duplique o bloco de servico no docker-compose.yml.",
+      "description": "Hub de redirects HTTP: dominio -> destino (301/302) via morbz/docker-web-redirect, publicado via Traefik v3 com TLS. O formulario configura 1 redirect; para varios, duplique o servico no compose.",
+      "note": "Requer a rede `web` e DNS de cada dominio de origem apontando para o host. Para varios redirects, duplique o servico no docker-compose.standalone.yml.",
       "categories": [
         "networking",
         "tools",
@@ -2263,7 +2179,7 @@
       "logo": "https://api.iconify.design/tabler/route.svg?color=%238b5cf6&height=128",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "redirect/docker-compose.yml"
+        "stackfile": "redirect/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2284,7 +2200,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "botpress — plataforma de chatbots",
       "name": "botpress",
       "description": "Botpress (plataforma open source para criar chatbots/assistentes). Publicado via Traefik v3 com TLS e reaproveita o PostgreSQL compartilhado (stack postgres-pgvector) na rede data. Pode entregar respostas no WhatsApp via stack evolution-api.",
@@ -2298,7 +2214,7 @@
       "logo": "https://api.iconify.design/tabler/robot.svg?color=%230ea5e9&height=128",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "botpress/docker-compose.yml"
+        "stackfile": "botpress/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2330,11 +2246,11 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "haproxy — load balancer TCP/HTTP",
       "name": "haproxy",
-      "description": "HAProxy para balanceamento/proxy TCP ou HTTP de servicos internos. A pagina de stats (porta 8404) e publicada via Traefik v3 com TLS e protegida por basicauth. Configuracao via Docker config externo.",
-      "note": "Requer a rede `web` (stack balancer) e a rede `data`. Crie o Docker config: docker config create haproxy_config_v1 haproxy/config/haproxy.cfg. HAPROXY_AUTH_BASIC no formato usuario:hash (htpasswd -nbB).",
+      "description": "HAProxy para balanceamento/proxy TCP ou HTTP de servicos internos. A pagina de stats (porta 8404) e publicada via Traefik v3 com TLS e protegida por basicauth. Configuracao via arquivo local (bind mount).",
+      "note": "Requer a rede `web` (stack balancer) e a rede `data`. A config e montada de um arquivo local - aponte HAPROXY_CONFIG_FILE para o seu haproxy.cfg (default config/haproxy.cfg). HAPROXY_AUTH_BASIC no formato usuario:hash (htpasswd -nbB).",
       "categories": [
         "proxy",
         "networking",
@@ -2344,7 +2260,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/haproxy.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "haproxy/docker-compose.yml"
+        "stackfile": "haproxy/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2370,7 +2286,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "phpnetmap — mapa de rede (SNMP)",
       "name": "phpnetmap",
       "description": "PHPNetMap descobre e mapeia a topologia da rede via SNMP (tabelas FIB/CAM e ARP), exibindo conexoes entre hosts e status das portas. App PHP (Yii) com SQLite embutido, publicado via Traefik v3 com TLS.",
@@ -2384,7 +2300,7 @@
       "logo": "https://api.iconify.design/tabler/topology-star-3.svg?color=%2306b6d4&height=128",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "phpnetmap/docker-compose.yml"
+        "stackfile": "phpnetmap/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2410,7 +2326,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "open-webui — chat de LLMs",
       "name": "open-webui",
       "description": "Open WebUI: interface de chat (estilo ChatGPT) para Ollama e endpoints OpenAI-compatible (stacks ollama/litellm). Publicado via Traefik v3 com TLS; persiste em volume local.",
@@ -2423,7 +2339,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/open-webui.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "open-webui/docker-compose.yml"
+        "stackfile": "open-webui/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2459,7 +2375,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "librechat — UI multi-provedor de LLMs",
       "name": "librechat",
       "description": "LibreChat: UI de chat multi-provedor (OpenAI/Anthropic/Ollama/litellm) com busca, RAG e agentes. Publicado via Traefik v3 com TLS. Reaproveita o MongoDB compartilhado (stack mongodb) e sobe um Meilisearch proprio.",
@@ -2472,7 +2388,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/librechat.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "librechat/docker-compose.yml"
+        "stackfile": "librechat/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2523,7 +2439,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "dify — LLMOps / RAG",
       "name": "dify",
       "description": "Dify: plataforma para criar apps de LLM (chatbots, agentes, workflows, RAG, datasets). Servicos api/worker/web/sandbox publicados via Traefik v3 com TLS. Reaproveita PostgreSQL, Redis e Qdrant na rede data.",
@@ -2536,7 +2452,7 @@
       "logo": "https://api.iconify.design/tabler/apps.svg?color=%236366f1&height=128",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "dify/docker-compose.yml"
+        "stackfile": "dify/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2582,7 +2498,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "qdrant — vector database",
       "name": "qdrant",
       "description": "Qdrant: banco de dados vetorial de alta performance (RAG, busca semantica). Publicado via Traefik v3 com TLS (REST 6333) e disponivel na rede data para outras stacks (ex.: dify) por qdrant:6333.",
@@ -2596,7 +2512,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/qdrant.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "qdrant/docker-compose.yml"
+        "stackfile": "qdrant/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2617,7 +2533,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "langfuse — observabilidade de LLM",
       "name": "langfuse",
       "description": "Langfuse (v2): tracing/observabilidade de aplicacoes LLM (traces, prompts, custos, avaliacoes). Publicado via Traefik v3 com TLS e reaproveita o PostgreSQL compartilhado (stack postgres-pgvector).",
@@ -2631,7 +2547,7 @@
       "logo": "https://api.iconify.design/tabler/telescope.svg?color=%2310b981&height=128",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "langfuse/docker-compose.yml"
+        "stackfile": "langfuse/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2678,7 +2594,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "comfyui — geracao de imagem (GPU)",
       "name": "comfyui",
       "description": "ComfyUI: editor por nos para Stable Diffusion / geracao de imagem. Publicado via Traefik v3 com TLS e protegido por basicauth. REQUER GPU NVIDIA no no.",
@@ -2691,7 +2607,7 @@
       "logo": "https://api.iconify.design/tabler/photo-ai.svg?color=%23ec4899&height=128",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "comfyui/docker-compose.yml"
+        "stackfile": "comfyui/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2717,7 +2633,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "ragflow — motor de RAG",
       "name": "ragflow",
       "description": "RAGFlow: motor de RAG com parsing avancado de documentos (OCR, tabelas, layout) e busca hibrida. Publicado via Traefik v3 com TLS. Reaproveita MariaDB, Redis, Elasticsearch e MinIO na rede data.",
@@ -2730,7 +2646,7 @@
       "logo": "https://api.iconify.design/tabler/file-search.svg?color=%23f59e0b&height=128",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "ragflow/docker-compose.yml"
+        "stackfile": "ragflow/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2766,7 +2682,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "searxng — meta-busca",
       "name": "searxng",
       "description": "SearXNG: meta-mecanismo de busca (agrega varios buscadores, sem rastreamento). Util como backend de web search para agentes/RAG (flowise, dify). Publicado via Traefik v3 com TLS e disponivel na rede data por searxng:8080.",
@@ -2780,7 +2696,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/searxng.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "searxng/docker-compose.yml"
+        "stackfile": "searxng/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2806,7 +2722,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "anythingllm — RAG tudo-em-um",
       "name": "anythingllm",
       "description": "AnythingLLM: app completo de RAG/chat com documentos e agentes (workspaces, ingestao de arquivos, multiplos provedores de LLM e vector stores). Publicado via Traefik v3 com TLS; LLM/vetor configurados na UI.",
@@ -2819,7 +2735,7 @@
       "logo": "https://api.iconify.design/tabler/brain.svg?color=%238b5cf6&height=128",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "anythingllm/docker-compose.yml"
+        "stackfile": "anythingllm/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2840,7 +2756,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "cloudflared — Cloudflare Tunnel",
       "name": "cloudflared",
       "description": "Cloudflare Tunnel: publica serviços internos na internet por um túnel de saída, sem abrir portas nem IP público. Modo remote-managed (token); ingress configurado no painel Cloudflare Zero Trust. Complementa o Traefik (balancer).",
@@ -2854,7 +2770,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/cloudflared.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "cloudflared/docker-compose.yml"
+        "stackfile": "cloudflared/docker-compose.standalone.yml"
       },
       "env": [
         {
@@ -2870,7 +2786,7 @@
       ]
     },
     {
-      "type": 2,
+      "type": 3,
       "title": "onedrive — sync Microsoft OneDrive",
       "name": "onedrive",
       "description": "Cliente de sincronizacao do Microsoft OneDrive (abraunegg/driveone): sincroniza uma pasta (volume) com o OneDrive. Daemon de background, SEM interface web. Autenticacao OAuth interativa na 1a vez.",
@@ -2884,7 +2800,7 @@
       "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/microsoft-onedrive.png",
       "repository": {
         "url": "https://github.com/marcelofmatos/portainer-stacks",
-        "stackfile": "onedrive/docker-compose.yml"
+        "stackfile": "onedrive/docker-compose.standalone.yml"
       },
       "env": [
         {
