@@ -1,0 +1,57 @@
+# Stack "zabbix-status-page" — Página de status pública alimentada pela API do Zabbix (Docker Swarm)
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Imagem pública: ghcr.io/marcelofmatos/zabbix-status-page (repo marcelofmatos/zabbix-status-page).
+#
+# Consome um Zabbix EXTERNO (>= 6.4) via API JSON-RPC com token (não sobe um Zabbix aqui).
+# Toda customização é feita por variáveis de ambiente (ver README e bloco abaixo).
+# Obrigatórias: STATUS_FQDN, ZABBIX_URL, ZABBIX_TOKEN.
+#
+# NOTA (volumes em Swarm): o volume do histórico de uptime é local ao nó. Em cluster com
+# mais de um worker, fixe o serviço definindo WORKER_HOSTNAME e descomentando o constraint.
+# Porte: Leve (128–256 MB RAM)
+services:
+  app:
+    image: ghcr.io/marcelofmatos/zabbix-status-page:${APP_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+    environment:
+      - ZABBIX_URL=${ZABBIX_URL}
+      - ZABBIX_TOKEN=${ZABBIX_TOKEN}
+      - ZABBIX_GROUPS_IDS=${ZABBIX_GROUPS_IDS:-}
+      - ZABBIX_HOSTS_IDS=${ZABBIX_HOSTS_IDS:-}
+      - ZABBIX_STATUS_BY_GROUPS=${ZABBIX_STATUS_BY_GROUPS:-on}
+      - ZABBIX_KNOWLEADS=${ZABBIX_KNOWLEADS:-on}
+      - ZABBIX_KNOWLEADS_COMMENTS=${ZABBIX_KNOWLEADS_COMMENTS:-on}
+      - ZABBIX_MIN_SEVERITY=${ZABBIX_MIN_SEVERITY:-0}
+      - PAGE_TITLE=${PAGE_TITLE:-Status}
+      - TZ=${TZ:-UTC}
+      - POLL_INTERVAL_SECONDS=${POLL_INTERVAL_SECONDS:-60}
+      - HISTORY_DAYS=${HISTORY_DAYS:-90}
+    volumes:
+      - status-data:/data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}   # fixe em cluster multi-worker (volume local ao nó)
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.statuspage.rule=Host(`${STATUS_FQDN}`)
+        - traefik.http.routers.statuspage.entrypoints=websecure
+        - traefik.http.routers.statuspage.tls=true
+        - traefik.http.routers.statuspage.tls.certresolver=letsencryptresolver
+        - traefik.http.services.statuspage.loadbalancer.server.port=8080
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay
+
+volumes:
+  status-data:
+    driver: local

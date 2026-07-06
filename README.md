@@ -52,7 +52,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 
 | Porte | RAM (mín → ideal) | Stacks |
 |---|---|---|
-| **Leve** | 64 MB → 512 MB | `error-pages`, `cloudflared`, `caddy`, `socat`, `redirect`, `onedrive`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis`, `claude-code-organizer` |
+| **Leve** | 64 MB → 512 MB | `error-pages`, `cloudflared`, `caddy`, `socat`, `redirect`, `onedrive`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis`, `claude-code-organizer`, `zabbix-status-page` |
 | **Médio** | 512 MB → 2 GB | `account`, `keycloak`, `zabbix`, `mariadb`, `postgres-pgvector`, `mongodb`, `chromadb`, `qdrant`, `minio`, `workflows`, `evolution-api`, `joomla`, `wordpress`, `wikijs`, `espocrm`, `typebot`, `stirlingpdf`, `flowise`, `litellm`, `open-webui`, `element`, `home-assistant` |
 | **Pesado** | 2 GB → 4–8 GB | `swarmprom`, `elasticsearch`, `drive`, `rocketchat`, `moodle`, `twenty`, `botpress`, `langfuse`, `librechat`, `anythingllm`, `chatwoot`, `ligerosmart`, `dify`, `supabase` |
 | **GPU / ML** | 8 GB+ (GPU recomendada) | `ollama`, `comfyui`, `ragflow` |
@@ -67,6 +67,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 | [`error-pages`](error-pages/) | Páginas de erro customizadas (middleware do Traefik) | [README](error-pages/README.md) |
 | [`swarmprom`](swarmprom/) | Monitoramento Swarm (Prometheus/Grafana/cAdvisor/node-exporter) | [README](swarmprom/README.md) |
 | [`zabbix`](zabbix/) | Monitoramento (server+web+agent) — usa `postgres-pgvector` | [README](zabbix/README.md) |
+| [`zabbix-status-page`](zabbix-status-page/) | Página de status pública alimentada pela API do Zabbix (uptime 90d) | [README](zabbix-status-page/README.md) |
 | [`phpnetmap`](phpnetmap/) | Mapa/monitoramento de rede via SNMP | [README](phpnetmap/README.md) |
 | [`haproxy`](haproxy/) | Load balancer TCP/HTTP + página de stats | [README](haproxy/README.md) |
 | [`cloudflared`](cloudflared/) | Cloudflare Tunnel (expõe serviços sem abrir portas/IP público) | [README](cloudflared/README.md) |

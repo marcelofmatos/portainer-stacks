@@ -2854,6 +2854,95 @@
           "default": "web"
         }
       ]
+    },
+    {
+      "type": 3,
+      "title": "zabbix-status-page — página de status",
+      "name": "zabbix-status-page",
+      "description": "Página de status pública alimentada pela API do Zabbix (>= 6.4): estado geral, detalhamento por host group, incidentes e histórico de uptime de 90 dias. Publicada via Traefik v3 com TLS. Consome um Zabbix externo por token (não sobe um Zabbix).",
+      "note": "Requer a rede `web` (stack balancer) e um Zabbix >= 6.4 acessível com um token de API (usuário read-only). DNS do FQDN apontando para o host.",
+      "categories": [
+        "monitoring",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/zabbix.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "zabbix-status-page/docker-compose.standalone.yml"
+      },
+      "env": [
+        {
+          "name": "STATUS_FQDN",
+          "label": "Domínio (FQDN)",
+          "description": "Ex.: status.exemplo.com"
+        },
+        {
+          "name": "ZABBIX_URL",
+          "label": "URL do Zabbix",
+          "description": "Base do Zabbix (>= 6.4), ex.: https://zabbix.exemplo.com/zabbix/"
+        },
+        {
+          "name": "ZABBIX_TOKEN",
+          "label": "Token da API",
+          "description": "Token Bearer somente-leitura (segredo)"
+        },
+        {
+          "name": "PAGE_TITLE",
+          "label": "Título da página",
+          "default": "Status"
+        },
+        {
+          "name": "TZ",
+          "label": "Fuso horário",
+          "default": "UTC"
+        },
+        {
+          "name": "ZABBIX_STATUS_BY_GROUPS",
+          "label": "Agrupar por host group (on/off)",
+          "default": "on"
+        },
+        {
+          "name": "ZABBIX_KNOWLEADS",
+          "label": "Exibir incidentes (on/off)",
+          "default": "on"
+        },
+        {
+          "name": "ZABBIX_KNOWLEADS_COMMENTS",
+          "label": "Comentários de acknowledge (on/off)",
+          "default": "on"
+        },
+        {
+          "name": "ZABBIX_GROUPS_IDS",
+          "label": "Filtrar host groups (CSV de IDs)",
+          "default": ""
+        },
+        {
+          "name": "ZABBIX_HOSTS_IDS",
+          "label": "Filtrar hosts (CSV de IDs)",
+          "default": ""
+        },
+        {
+          "name": "ZABBIX_MIN_SEVERITY",
+          "label": "Severidade mínima (0-5)",
+          "default": "0"
+        },
+        {
+          "name": "POLL_INTERVAL_SECONDS",
+          "label": "Intervalo de coleta (s)",
+          "default": "60"
+        },
+        {
+          "name": "HISTORY_DAYS",
+          "label": "Histórico (dias)",
+          "default": "90"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
+      ]
     }
   ]
 }
