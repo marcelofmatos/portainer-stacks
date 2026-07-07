@@ -2928,6 +2928,12 @@
           "default": "0"
         },
         {
+          "name": "ZABBIX_TLS_INSECURE",
+          "label": "Pular verificação do certificado TLS (on/off)",
+          "description": "on aceita certificado self-signed do Zabbix. Inseguro (MITM) — prefira NODE_EXTRA_CA_CERTS.",
+          "default": "off"
+        },
+        {
           "name": "POLL_INTERVAL_SECONDS",
           "label": "Intervalo de coleta (s)",
           "default": "60"

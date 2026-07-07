@@ -40,6 +40,7 @@ desatualizada).
 | `ZABBIX_GROUPS_IDS` | não | vazio | CSV de IDs de host groups a incluir. Vazio = todos. |
 | `ZABBIX_HOSTS_IDS` | não | vazio | CSV de IDs de hosts a incluir. Vazio = todos. |
 | `ZABBIX_MIN_SEVERITY` | não | `0` | Severidade mínima (0–5) considerada como problema. |
+| `ZABBIX_TLS_INSECURE` | não | `off` | `on` desativa a verificação do certificado TLS nas chamadas ao Zabbix (self-signed / cadeia incompleta). **Inseguro** (MITM) — prefira montar a CA via `NODE_EXTRA_CA_CERTS`. |
 | `POLL_INTERVAL_SECONDS` | não | `60` | Intervalo entre coletas no Zabbix. |
 | `HISTORY_DAYS` | não | `90` | Janela do histórico de uptime, em dias. |
 | `APP_IMAGE_TAG` | não | `latest` | Tag da imagem. |
@@ -73,6 +74,7 @@ partir do primeiro start (histórico honesto, cresce até `HISTORY_DAYS`).
 | Sintoma | Causa provável | Ação |
 |---|---|---|
 | Página presa em "dados desatualizados" | Zabbix inacessível, URL/token errados ou Zabbix < 6.4 | Confira `ZABBIX_URL`/`ZABBIX_TOKEN`; teste a API; garanta Zabbix ≥ 6.4 (auth por header Bearer). |
+| Log `UNABLE_TO_VERIFY_LEAF_SIGNATURE` | Certificado do Zabbix self-signed ou cadeia incompleta | Monte a CA e use `NODE_EXTRA_CA_CERTS` (seguro); ou, em rede confiável, `ZABBIX_TLS_INSECURE=on`. |
 | Sem incidentes mesmo havendo problemas | `ZABBIX_KNOWLEADS=off` ou token sem permissão nos grupos | Ligue `ZABBIX_KNOWLEADS`; use um usuário com leitura nos host groups. |
 | Histórico não persiste após recriar | Volume `status-data` não fixado ao nó (multi-worker) | Fixe `WORKER_HOSTNAME` e descomente o constraint de hostname (volume é local ao nó). |
 | 404 no Traefik | Serviço fora da rede `web` ou FQDN/DNS errado | Confira `STATUS_FQDN`, DNS e a rede `web`. |
