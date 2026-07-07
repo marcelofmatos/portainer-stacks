@@ -2982,12 +2982,12 @@
           "default": "on"
         },
         {
-          "name": "ZABBIX_KNOWLEADS",
+          "name": "ZABBIX_KNOWLEDGES",
           "label": "Exibir incidentes (on/off)",
           "default": "on"
         },
         {
-          "name": "ZABBIX_KNOWLEADS_COMMENTS",
+          "name": "ZABBIX_KNOWLEDGES_COMMENTS",
           "label": "Comentários de acknowledge (on/off)",
           "default": "on"
         },
