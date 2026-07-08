@@ -57,6 +57,8 @@ services:
         - traefik.http.routers.supabase-studio.tls=true
         - traefik.http.routers.supabase-studio.tls.certresolver=letsencryptresolver
         - traefik.http.services.supabase-studio.loadbalancer.server.port=3000
+        - caddy=${SUPABASE_STUDIO_FQDN}
+        - caddy.reverse_proxy={{upstreams 3000}}
 
   kong:
     image: kong:${KONG_IMAGE_TAG:-2.8.1}
@@ -87,6 +89,8 @@ services:
         - traefik.http.routers.supabase-api.tls=true
         - traefik.http.routers.supabase-api.tls.certresolver=letsencryptresolver
         - traefik.http.services.supabase-api.loadbalancer.server.port=8000
+        - caddy=${SUPABASE_API_FQDN}
+        - caddy.reverse_proxy={{upstreams 8000}}
 
   auth:
     image: supabase/gotrue:${GOTRUE_IMAGE_TAG:-v2.149.0}

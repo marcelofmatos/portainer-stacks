@@ -21,6 +21,8 @@ services:
     - traefik.http.routers.langfuse.tls=true
     - traefik.http.routers.langfuse.tls.certresolver=letsencryptresolver
     - traefik.http.services.langfuse.loadbalancer.server.port=3000
+    - caddy=${LANGFUSE_FQDN}
+    - caddy.reverse_proxy={{upstreams 3000}}
     - traefik.docker.network=${PROXY_NET:-web}
   db:
     restart: unless-stopped

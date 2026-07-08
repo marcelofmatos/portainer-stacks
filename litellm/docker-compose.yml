@@ -46,6 +46,8 @@ services:
         - traefik.http.routers.litellm.tls=true
         - traefik.http.routers.litellm.tls.certresolver=letsencryptresolver
         - traefik.http.services.litellm.loadbalancer.server.port=4000
+        - caddy=${LITELLM_FQDN}
+        - caddy.reverse_proxy={{upstreams 4000}}
 
 networks:
   web:

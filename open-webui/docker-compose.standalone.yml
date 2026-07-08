@@ -23,6 +23,8 @@ services:
     - traefik.http.routers.open-webui.tls=true
     - traefik.http.routers.open-webui.tls.certresolver=letsencryptresolver
     - traefik.http.services.open-webui.loadbalancer.server.port=8080
+    - caddy=${OPENWEBUI_FQDN}
+    - caddy.reverse_proxy={{upstreams 8080}}
     - traefik.docker.network=${PROXY_NET:-web}
 networks:
   web:

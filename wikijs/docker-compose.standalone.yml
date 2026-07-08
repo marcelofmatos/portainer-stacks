@@ -21,6 +21,8 @@ services:
     - traefik.http.routers.wikijs.tls=true
     - traefik.http.routers.wikijs.tls.certresolver=letsencryptresolver
     - traefik.http.services.wikijs.loadbalancer.server.port=3000
+    - caddy=${WIKIJS_FQDN}
+    - caddy.reverse_proxy={{upstreams 3000}}
     - traefik.docker.network=${PROXY_NET:-web}
   db:
     restart: unless-stopped

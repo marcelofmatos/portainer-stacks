@@ -25,6 +25,8 @@ services:
     - traefik.http.routers.keycloak.tls=true
     - traefik.http.routers.keycloak.tls.certresolver=letsencryptresolver
     - traefik.http.services.keycloak.loadbalancer.server.port=8080
+    - caddy=${KEYCLOAK_FQDN}
+    - caddy.reverse_proxy={{upstreams 8080}}
     - traefik.docker.network=${PROXY_NET:-web}
   db:
     restart: unless-stopped

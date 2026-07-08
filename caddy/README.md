@@ -238,10 +238,14 @@ labels:
 ```
 
 ### Aplicando às stacks deste repo
-As stacks deste repositório vêm com labels **`traefik.*`** (para o `balancer`). Se você usa **Caddy
-no lugar do Traefik**, os labels `traefik.*` são ignorados — adicione os `caddy.*` equivalentes ao
-serviço da app (ver tabela abaixo) e garanta que ele está na rede `web`. Um serviço pode ter os dois
-conjuntos de labels convivendo; cada proxy lê só o seu.
+A **maioria das stacks já traz os labels `caddy.*` ao lado dos `traefik.*`** — são **agnósticas de
+proxy**: rodando atrás do Traefik (`balancer`) **ou** do Caddy, o proxy presente descobre e roteia
+(cada um lê só o seu namespace; o outro é ignorado). Basta o serviço estar na rede `web`.
+
+Ainda **só têm `traefik.*`** (o `caddy.*` exige tradução manual por usarem middleware/path):
+`authelia` (forward-auth); `comfyui`, `docker-service-update`, `haproxy`, `mongo-express`,
+`redisinsight` (basic auth); `dify`, `ligerosmart` (path/rewrite); `error-pages` (middleware de erro).
+O `balancer` é o próprio Traefik — não recebe `caddy.*`. Traduza esses com a tabela abaixo.
 
 ## Tradução Caddy ↔ Traefik
 

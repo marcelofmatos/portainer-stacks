@@ -35,6 +35,8 @@ services:
         - traefik.http.routers.ollama.tls=true
         - traefik.http.routers.ollama.tls.certresolver=letsencryptresolver
         - traefik.http.services.ollama.loadbalancer.server.port=11434
+        - caddy=${OLLAMA_FQDN}
+        - caddy.reverse_proxy={{upstreams 11434}}
       # --- GPU NVIDIA (opcional) -------------------------------------------------
       # Requer nvidia-container-toolkit instalado no host e o runtime NVIDIA
       # configurado no Docker daemon. Descomente para reservar a(s) GPU(s) ao serviço.

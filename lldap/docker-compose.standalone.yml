@@ -24,6 +24,8 @@ services:
     - traefik.http.routers.lldap.tls=true
     - traefik.http.routers.lldap.tls.certresolver=letsencryptresolver
     - traefik.http.services.lldap.loadbalancer.server.port=17170
+    - caddy=${LLDAP_FQDN}
+    - caddy.reverse_proxy={{upstreams 17170}}
     - traefik.docker.network=${PROXY_NET:-web}
 networks:
   web:

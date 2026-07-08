@@ -44,6 +44,8 @@ services:
         - traefik.http.routers.workflows.tls=true
         - traefik.http.routers.workflows.tls.certresolver=letsencryptresolver
         - traefik.http.services.workflows.loadbalancer.server.port=5678
+        - caddy=${N8N_FQDN}
+        - caddy.reverse_proxy={{upstreams 5678}}
 
   db:
     image: postgres:${POSTGRES_IMAGE_TAG:-16-alpine}

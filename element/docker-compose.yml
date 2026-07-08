@@ -75,6 +75,8 @@ services:
         - traefik.http.routers.synapse.tls=true
         - traefik.http.routers.synapse.tls.certresolver=letsencryptresolver
         - traefik.http.services.synapse.loadbalancer.server.port=8008
+        - caddy=${MATRIX_SERVER_NAME}
+        - caddy.reverse_proxy={{upstreams 8008}}
 
   web:
     # Imagem custom white-label (branding criado; config.json gerado do template via env).
@@ -99,6 +101,8 @@ services:
         - traefik.http.routers.element.tls=true
         - traefik.http.routers.element.tls.certresolver=letsencryptresolver
         - traefik.http.services.element.loadbalancer.server.port=8080 # imagem element-web (nginx rootless) escuta em 8080
+        - caddy=${ELEMENT_FQDN}
+        - caddy.reverse_proxy={{upstreams 8080}}
 
   # Banco de dados PRÓPRIO da stack (não compartilhe com outras stacks).
   # locale=C é EXIGIDO pelo Synapse (init só vale na 1ª criação do volume).

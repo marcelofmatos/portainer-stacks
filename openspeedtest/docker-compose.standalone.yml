@@ -14,6 +14,8 @@ services:
     - traefik.http.routers.openspeedtest.tls=true
     - traefik.http.routers.openspeedtest.tls.certresolver=letsencryptresolver
     - traefik.http.services.openspeedtest.loadbalancer.server.port=3000
+    - caddy=${OPENSPEEDTEST_FQDN}
+    - caddy.reverse_proxy={{upstreams 3000}}
     - traefik.docker.network=${PROXY_NET:-web}
 networks:
   web:

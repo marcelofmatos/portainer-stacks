@@ -19,6 +19,8 @@ services:
     - traefik.http.routers.phpnetmap.tls=true
     - traefik.http.routers.phpnetmap.tls.certresolver=letsencryptresolver
     - traefik.http.services.phpnetmap.loadbalancer.server.port=80
+    - caddy=${PHPNETMAP_FQDN}
+    - caddy.reverse_proxy={{upstreams 80}}
     - traefik.docker.network=${PROXY_NET:-web}
 networks:
   web:

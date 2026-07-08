@@ -18,6 +18,8 @@ services:
     - traefik.http.routers.protonmail-bridge.tls=true
     - traefik.http.routers.protonmail-bridge.tls.certresolver=letsencryptresolver
     - traefik.http.services.protonmail-bridge.loadbalancer.server.port=3000
+    - caddy=${PROTONMAIL_FQDN}
+    - caddy.reverse_proxy={{upstreams 3000}}
     - traefik.docker.network=${PROXY_NET:-web}
 networks:
   web:

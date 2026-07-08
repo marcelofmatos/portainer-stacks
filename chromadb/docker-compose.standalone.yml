@@ -20,6 +20,8 @@ services:
     - traefik.http.routers.chromadb.tls=true
     - traefik.http.routers.chromadb.tls.certresolver=letsencryptresolver
     - traefik.http.services.chromadb.loadbalancer.server.port=8000
+    - caddy=${CHROMA_FQDN}
+    - caddy.reverse_proxy={{upstreams 8000}}
     - traefik.docker.network=${PROXY_NET:-web}
 networks:
   web:

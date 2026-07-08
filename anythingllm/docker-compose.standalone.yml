@@ -21,6 +21,8 @@ services:
     - traefik.http.routers.anythingllm.tls=true
     - traefik.http.routers.anythingllm.tls.certresolver=letsencryptresolver
     - traefik.http.services.anythingllm.loadbalancer.server.port=3001
+    - caddy=${ANYTHINGLLM_FQDN}
+    - caddy.reverse_proxy={{upstreams 3001}}
     - traefik.docker.network=${PROXY_NET:-web}
 networks:
   web:

@@ -23,6 +23,8 @@ services:
     - traefik.http.routers.cco.tls=true
     - traefik.http.routers.cco.tls.certresolver=letsencryptresolver
     - traefik.http.services.cco.loadbalancer.server.port=3847
+    - caddy=${CCO_FQDN}
+    - caddy.reverse_proxy={{upstreams 3847}}
     - traefik.docker.network=${PROXY_NET:-web}
     # ⚠ Proteja com forward-auth (o CCO não tem login). Ex. (ajuste ao seu middleware):
     # - traefik.http.routers.cco.middlewares=${CCO_AUTH_MIDDLEWARE:-}

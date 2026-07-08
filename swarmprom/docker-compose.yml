@@ -84,6 +84,8 @@ services:
         - traefik.http.routers.swarmprom-grafana.tls=true
         - traefik.http.routers.swarmprom-grafana.tls.certresolver=letsencryptresolver
         - traefik.http.services.swarmprom-grafana.loadbalancer.server.port=3000
+        - caddy=${SWARMPROM_GRAFANA_FQDN}
+        - caddy.reverse_proxy={{upstreams 3000}}
 
   node-exporter:
     image: prom/node-exporter:${NODE_EXPORTER_IMAGE_TAG:-latest}

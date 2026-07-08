@@ -49,6 +49,8 @@ services:
         - traefik.http.routers.langfuse.tls=true
         - traefik.http.routers.langfuse.tls.certresolver=letsencryptresolver
         - traefik.http.services.langfuse.loadbalancer.server.port=3000
+        - caddy=${LANGFUSE_FQDN}
+        - caddy.reverse_proxy={{upstreams 3000}}
 
   # Banco de dados PRÓPRIO da stack (não compartilhe com outras stacks).
   db:

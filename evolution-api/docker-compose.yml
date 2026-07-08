@@ -51,6 +51,8 @@ services:
         - traefik.http.routers.evolution-api.tls=true
         - traefik.http.routers.evolution-api.tls.certresolver=letsencryptresolver
         - traefik.http.services.evolution-api.loadbalancer.server.port=8080
+        - caddy=${EVOLUTION_FQDN}
+        - caddy.reverse_proxy={{upstreams 8080}}
 
   # Banco de dados PRÓPRIO da stack (não compartilhe com outras stacks).
   db:

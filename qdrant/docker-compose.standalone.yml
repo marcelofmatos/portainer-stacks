@@ -19,6 +19,8 @@ services:
     - traefik.http.routers.qdrant.tls=true
     - traefik.http.routers.qdrant.tls.certresolver=letsencryptresolver
     - traefik.http.services.qdrant.loadbalancer.server.port=6333
+    - caddy=${QDRANT_FQDN}
+    - caddy.reverse_proxy={{upstreams 6333}}
     - traefik.docker.network=${PROXY_NET:-web}
 networks:
   web:

@@ -59,6 +59,8 @@ services:
         - traefik.http.routers.zabbix.tls=true
         - traefik.http.routers.zabbix.tls.certresolver=letsencryptresolver
         - traefik.http.services.zabbix.loadbalancer.server.port=8080
+        - caddy=${ZABBIX_FQDN}
+        - caddy.reverse_proxy={{upstreams 8080}}
 
   zabbix-agent:
     image: zabbix/zabbix-agent2:${ZABBIX_IMAGE_TAG:-alpine-7.0-latest}

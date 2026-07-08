@@ -35,6 +35,8 @@ services:
         - traefik.http.routers.searxng.tls=true
         - traefik.http.routers.searxng.tls.certresolver=letsencryptresolver
         - traefik.http.services.searxng.loadbalancer.server.port=8080
+        - caddy=${SEARXNG_FQDN}
+        - caddy.reverse_proxy={{upstreams 8080}}
 
 networks:
   web:

@@ -32,6 +32,8 @@ services:
     - traefik.http.routers.drive.tls=true
     - traefik.http.routers.drive.tls.certresolver=letsencryptresolver
     - traefik.http.services.drive.loadbalancer.server.port=8080
+    - caddy=${DRIVE_FQDN}
+    - caddy.reverse_proxy={{upstreams 8080}}
     - traefik.http.routers.drive.middlewares=drive-hsts
     - traefik.http.middlewares.drive-hsts.headers.stsSeconds=31536000
     - traefik.http.middlewares.drive-hsts.headers.stsIncludeSubdomains=true

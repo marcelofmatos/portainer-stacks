@@ -34,6 +34,8 @@ services:
     - traefik.http.routers.zabbix.tls=true
     - traefik.http.routers.zabbix.tls.certresolver=letsencryptresolver
     - traefik.http.services.zabbix.loadbalancer.server.port=8080
+    - caddy=${ZABBIX_FQDN}
+    - caddy.reverse_proxy={{upstreams 8080}}
     - traefik.docker.network=${PROXY_NET:-web}
   zabbix-agent:
     restart: unless-stopped

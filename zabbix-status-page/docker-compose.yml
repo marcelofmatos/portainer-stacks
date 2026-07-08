@@ -45,6 +45,8 @@ services:
         - traefik.http.routers.statuspage.tls=true
         - traefik.http.routers.statuspage.tls.certresolver=letsencryptresolver
         - traefik.http.services.statuspage.loadbalancer.server.port=8080
+        - caddy=${STATUS_FQDN}
+        - caddy.reverse_proxy={{upstreams 8080}}
 
 networks:
   web:

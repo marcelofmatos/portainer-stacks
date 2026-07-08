@@ -39,6 +39,8 @@ services:
         - traefik.http.routers.flowise.tls=true
         - traefik.http.routers.flowise.tls.certresolver=letsencryptresolver
         - traefik.http.services.flowise.loadbalancer.server.port=3000
+        - caddy=${FLOWISE_FQDN}
+        - caddy.reverse_proxy={{upstreams 3000}}
 
 networks:
   web:

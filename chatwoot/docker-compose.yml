@@ -63,6 +63,8 @@ services:
         - traefik.http.routers.chatwoot.tls=true
         - traefik.http.routers.chatwoot.tls.certresolver=letsencryptresolver
         - traefik.http.services.chatwoot.loadbalancer.server.port=3000
+        - caddy=${CHATWOOT_FQDN}
+        - caddy.reverse_proxy={{upstreams 3000}}
 
   sidekiq:
     image: chatwoot/chatwoot:${CHATWOOT_IMAGE_TAG:-v4.6.0}

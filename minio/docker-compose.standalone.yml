@@ -22,12 +22,16 @@ services:
     - traefik.http.routers.minio-s3.tls.certresolver=letsencryptresolver
     - traefik.http.routers.minio-s3.service=minio-s3
     - traefik.http.services.minio-s3.loadbalancer.server.port=9000
+    - caddy_0=${MINIO_S3_FQDN}
+    - caddy_0.reverse_proxy={{upstreams 9000}}
     - traefik.http.routers.minio-console.rule=Host(`${MINIO_CONSOLE_FQDN}`)
     - traefik.http.routers.minio-console.entrypoints=websecure
     - traefik.http.routers.minio-console.tls=true
     - traefik.http.routers.minio-console.tls.certresolver=letsencryptresolver
     - traefik.http.routers.minio-console.service=minio-console
     - traefik.http.services.minio-console.loadbalancer.server.port=9001
+    - caddy_1=${MINIO_CONSOLE_FQDN}
+    - caddy_1.reverse_proxy={{upstreams 9001}}
     - traefik.docker.network=${PROXY_NET:-web}
 networks:
   web:

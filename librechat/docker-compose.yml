@@ -45,6 +45,8 @@ services:
         - traefik.http.routers.librechat.tls=true
         - traefik.http.routers.librechat.tls.certresolver=letsencryptresolver
         - traefik.http.services.librechat.loadbalancer.server.port=3080
+        - caddy=${LIBRECHAT_FQDN}
+        - caddy.reverse_proxy={{upstreams 3080}}
 
   meilisearch:
     image: getmeili/meilisearch:${LIBRECHAT_MEILI_IMAGE_TAG:-v1.12}

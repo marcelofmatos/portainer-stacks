@@ -34,6 +34,8 @@ services:
     - traefik.http.routers.ragflow.tls=true
     - traefik.http.routers.ragflow.tls.certresolver=letsencryptresolver
     - traefik.http.services.ragflow.loadbalancer.server.port=80
+    - caddy=${RAGFLOW_FQDN}
+    - caddy.reverse_proxy={{upstreams 80}}
     - traefik.docker.network=${PROXY_NET:-web}
 networks:
   web:

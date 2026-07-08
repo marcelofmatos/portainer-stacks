@@ -21,6 +21,8 @@ services:
     - traefik.http.routers.botpress.tls=true
     - traefik.http.routers.botpress.tls.certresolver=letsencryptresolver
     - traefik.http.services.botpress.loadbalancer.server.port=3000
+    - caddy=${BOTPRESS_FQDN}
+    - caddy.reverse_proxy={{upstreams 3000}}
     - traefik.docker.network=${PROXY_NET:-web}
   db:
     restart: unless-stopped

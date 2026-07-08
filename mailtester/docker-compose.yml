@@ -31,6 +31,8 @@ services:
         - traefik.http.routers.mailtester.tls=true
         - traefik.http.routers.mailtester.tls.certresolver=letsencryptresolver
         - traefik.http.services.mailtester.loadbalancer.server.port=1080
+        - caddy=${MAILTESTER_FQDN}
+        - caddy.reverse_proxy={{upstreams 1080}}
 
 networks:
   web:

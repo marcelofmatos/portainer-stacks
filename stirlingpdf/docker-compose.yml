@@ -36,6 +36,8 @@ services:
         - traefik.http.routers.stirling.tls=true
         - traefik.http.routers.stirling.tls.certresolver=letsencryptresolver
         - traefik.http.services.stirling.loadbalancer.server.port=8080
+        - caddy=${STIRLING_FQDN}
+        - caddy.reverse_proxy={{upstreams 8080}}
 
 networks:
   web:

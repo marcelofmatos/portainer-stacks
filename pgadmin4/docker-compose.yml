@@ -35,6 +35,8 @@ services:
         - traefik.http.routers.pgadmin.tls=true
         - traefik.http.routers.pgadmin.tls.certresolver=letsencryptresolver
         - traefik.http.services.pgadmin.loadbalancer.server.port=80
+        - caddy=${PGADMIN_FQDN}
+        - caddy.reverse_proxy={{upstreams 80}}
 
 networks:
   web:

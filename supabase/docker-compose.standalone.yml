@@ -27,6 +27,8 @@ services:
     - traefik.http.routers.supabase-studio.tls=true
     - traefik.http.routers.supabase-studio.tls.certresolver=letsencryptresolver
     - traefik.http.services.supabase-studio.loadbalancer.server.port=3000
+    - caddy=${SUPABASE_STUDIO_FQDN}
+    - caddy.reverse_proxy={{upstreams 3000}}
     - traefik.docker.network=${PROXY_NET:-web}
   kong:
     restart: unless-stopped
@@ -55,6 +57,8 @@ services:
     - traefik.http.routers.supabase-api.tls=true
     - traefik.http.routers.supabase-api.tls.certresolver=letsencryptresolver
     - traefik.http.services.supabase-api.loadbalancer.server.port=8000
+    - caddy=${SUPABASE_API_FQDN}
+    - caddy.reverse_proxy={{upstreams 8000}}
     - traefik.docker.network=${PROXY_NET:-web}
   auth:
     restart: unless-stopped

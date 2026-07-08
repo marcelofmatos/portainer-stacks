@@ -27,6 +27,8 @@ services:
     - traefik.http.routers.typebot-builder.tls=true
     - traefik.http.routers.typebot-builder.tls.certresolver=letsencryptresolver
     - traefik.http.services.typebot-builder.loadbalancer.server.port=3000
+    - caddy=${TYPEBOT_BUILDER_FQDN}
+    - caddy.reverse_proxy={{upstreams 3000}}
     - traefik.docker.network=${PROXY_NET:-web}
   viewer:
     restart: unless-stopped
@@ -52,6 +54,8 @@ services:
     - traefik.http.routers.typebot-viewer.tls=true
     - traefik.http.routers.typebot-viewer.tls.certresolver=letsencryptresolver
     - traefik.http.services.typebot-viewer.loadbalancer.server.port=3000
+    - caddy=${TYPEBOT_VIEWER_FQDN}
+    - caddy.reverse_proxy={{upstreams 3000}}
     - traefik.docker.network=${PROXY_NET:-web}
   db:
     restart: unless-stopped

@@ -28,6 +28,8 @@ services:
         - traefik.http.routers.moodle.tls=true
         - traefik.http.routers.moodle.tls.certresolver=letsencryptresolver
         - traefik.http.services.moodle.loadbalancer.server.port=8080
+        - caddy=${MOODLE_FQDN}
+        - caddy.reverse_proxy={{upstreams 8080}}
     environment:
       - MOODLE_DATABASE_HOST=db
       - MOODLE_DATABASE_PORT_NUMBER=3306

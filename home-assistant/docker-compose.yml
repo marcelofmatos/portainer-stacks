@@ -50,6 +50,8 @@ services:
         - traefik.http.routers.homeassistant.tls=true
         - traefik.http.routers.homeassistant.tls.certresolver=letsencryptresolver
         - traefik.http.services.homeassistant.loadbalancer.server.port=8123
+        - caddy=${HOMEASSISTANT_FQDN}
+        - caddy.reverse_proxy={{upstreams 8123}}
 
 networks:
   web: # externa: criada pela stack balancer (Traefik)

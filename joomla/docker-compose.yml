@@ -28,6 +28,8 @@ services:
         - traefik.http.routers.joomla.tls=true
         - traefik.http.routers.joomla.tls.certresolver=letsencryptresolver
         - traefik.http.services.joomla.loadbalancer.server.port=80
+        - caddy=${JOOMLA_FQDN}
+        - caddy.reverse_proxy={{upstreams 80}}
     environment:
       - JOOMLA_DB_HOST=db
       - JOOMLA_DB_USER=${JOOMLA_DB_USER:-joomla}

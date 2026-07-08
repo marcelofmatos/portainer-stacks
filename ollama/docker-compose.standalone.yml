@@ -19,6 +19,8 @@ services:
     - traefik.http.routers.ollama.tls=true
     - traefik.http.routers.ollama.tls.certresolver=letsencryptresolver
     - traefik.http.services.ollama.loadbalancer.server.port=11434
+    - caddy=${OLLAMA_FQDN}
+    - caddy.reverse_proxy={{upstreams 11434}}
     - traefik.docker.network=${PROXY_NET:-web}
 networks:
   web:

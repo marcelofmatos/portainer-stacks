@@ -51,6 +51,8 @@ services:
         - traefik.http.routers.twenty.tls=true
         - traefik.http.routers.twenty.tls.certresolver=letsencryptresolver
         - traefik.http.services.twenty.loadbalancer.server.port=3000
+        - caddy=${TWENTY_FQDN}
+        - caddy.reverse_proxy={{upstreams 3000}}
 
   worker:
     image: twentycrm/twenty:${TWENTY_IMAGE_TAG:-latest}

@@ -27,6 +27,8 @@ services:
       - traefik.http.routers.account-manager.tls=true
       - traefik.http.routers.account-manager.tls.certresolver=letsencryptresolver
       - traefik.http.services.account-manager.loadbalancer.server.port=80
+      - caddy=${LAM_FQDN}
+      - caddy.reverse_proxy={{upstreams 80}}
       - traefik.docker.network=${PROXY_NET:-web}
 
   ldap:
@@ -66,6 +68,8 @@ services:
       - traefik.http.routers.account-user.tls=true
       - traefik.http.routers.account-user.tls.certresolver=letsencryptresolver
       - traefik.http.services.account-user.loadbalancer.server.port=80
+      - caddy=${SSP_FQDN}
+      - caddy.reverse_proxy={{upstreams 80}}
       - traefik.docker.network=${PROXY_NET:-web}
 
 networks:

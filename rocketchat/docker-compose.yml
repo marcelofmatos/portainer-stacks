@@ -37,6 +37,8 @@ services:
         - traefik.http.routers.rocketchat.tls=true
         - traefik.http.routers.rocketchat.tls.certresolver=letsencryptresolver
         - traefik.http.services.rocketchat.loadbalancer.server.port=3000
+        - caddy=${ROCKETCHAT_FQDN}
+        - caddy.reverse_proxy={{upstreams 3000}}
 
   db:
     image: mongo:${MONGO_IMAGE_TAG:-6.0}

@@ -43,6 +43,8 @@ services:
         - traefik.http.routers.typebot-builder.tls=true
         - traefik.http.routers.typebot-builder.tls.certresolver=letsencryptresolver
         - traefik.http.services.typebot-builder.loadbalancer.server.port=3000
+        - caddy=${TYPEBOT_BUILDER_FQDN}
+        - caddy.reverse_proxy={{upstreams 3000}}
 
   viewer:
     image: baptistearno/typebot-viewer:${TYPEBOT_IMAGE_TAG:-latest}
@@ -73,6 +75,8 @@ services:
         - traefik.http.routers.typebot-viewer.tls=true
         - traefik.http.routers.typebot-viewer.tls.certresolver=letsencryptresolver
         - traefik.http.services.typebot-viewer.loadbalancer.server.port=3000
+        - caddy=${TYPEBOT_VIEWER_FQDN}
+        - caddy.reverse_proxy={{upstreams 3000}}
 
   # Banco de dados PRÓPRIO da stack (não compartilhe com outras stacks).
   db:
