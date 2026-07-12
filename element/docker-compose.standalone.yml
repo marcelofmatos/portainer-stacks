@@ -58,6 +58,10 @@ services:
       - ELEMENT_BASE_URL=https://${MATRIX_SERVER_NAME} # base_url do homeserver
       - ELEMENT_SERVER_NAME=${MATRIX_SERVER_NAME} # server_name (identidade @user:server_name)
       - ELEMENT_BRAND=${ELEMENT_BRAND:-Chat} # nome da marca exibido no cliente
+      # Frase de destaque da tela de boas-vindas. Aceita HTML simples (<strong>, <em>, <br>) —
+      # o Element sanitiza a página ao renderizar. Definir VAZIA esconde a frase; por isso usa
+      # `-` e não `:-` (com `:-`, a string vazia cairia no default e não daria para escondê-la).
+      - "ELEMENT_TAGLINE=${ELEMENT_TAGLINE-Converse em tempo real com sua equipe e seus clientes num chat <strong>seguro</strong> e <strong>criptografado</strong>, direto do navegador.}"
     networks:
       - web # exposto pelo Traefik (o cliente fala com o homeserver pelo navegador, não pela rede interna)
     labels:

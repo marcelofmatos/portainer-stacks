@@ -36,6 +36,7 @@ Tudo publicado pelo **Traefik v3** com TLS Let's Encrypt. É o análogo "Matrix"
 | `ELEMENT_FQDN` | ✅ | — | Domínio do cliente web. Ex.: `chat.exemplo.com` |
 | `MATRIX_DB_PASSWORD` | ✅ | — | Senha do PostgreSQL embarcado (segredo) |
 | `ELEMENT_BRAND` | — | `Chat` | Nome da marca exibido no cliente (título e tela de boas-vindas). Ex.: `Acme Chat` |
+| `ELEMENT_TAGLINE` | — | `Converse em tempo real…` | Frase de destaque da tela de boas-vindas. Aceita HTML simples (`<strong>`, `<em>`, `<br>`) — o Element sanitiza a página ao renderizar. **Vazia = não exibe frase** |
 | `SYNAPSE_ENABLE_REGISTRATION` | — | `false` | `true` libera auto-cadastro público na web. Em `false`, cria-se usuários via CLI (recomendado) |
 | `SYNAPSE_REPORT_STATS` | — | `no` | Envia estatísticas anônimas ao matrix.org (`yes`/`no`) |
 | `SYNAPSE_DB_NAME` | — | `synapse` | Nome do banco |

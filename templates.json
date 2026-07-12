@@ -759,6 +759,12 @@
           "default": "Chat"
         },
         {
+          "name": "ELEMENT_TAGLINE",
+          "label": "Frase da tela de boas-vindas",
+          "description": "Frase de destaque abaixo do nome da marca. Aceita HTML simples (<strong>, <em>, <br>). Deixe VAZIA para nao exibir nenhuma frase.",
+          "default": "Converse em tempo real com sua equipe e seus clientes num chat <strong>seguro</strong> e <strong>criptografado</strong>, direto do navegador."
+        },
+        {
           "name": "MATRIX_DB_PASSWORD",
           "label": "Senha do PostgreSQL",
           "description": "Senha do banco embarcado do Synapse (segredo)"
