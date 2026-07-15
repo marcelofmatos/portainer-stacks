@@ -2994,6 +2994,40 @@
           "default": "web"
         }
       ]
+    },
+    {
+      "type": 3,
+      "title": "financial-coach — AI Financial Coach Agent",
+      "name": "financial-coach",
+      "description": "Coach financeiro multi-agente: analisa o orçamento, planeja poupança e monta estratégias de quitação de dívidas (avalanche/snowball) — renderizando cada resultado como card interativo num painel de relatório. Front Next.js + agente Google ADK (Gemini) numa imagem combinada, exposta via Traefik v3 com TLS.",
+      "note": "Requer a rede `web` (stack balancer) e uma chave Google/Gemini. Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy.",
+      "categories": [
+        "ai",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/google-gemini.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "financial-coach/docker-compose.standalone.yml"
+      },
+      "env": [
+        {
+          "name": "FINCOACH_FQDN",
+          "label": "Domínio (FQDN)",
+          "description": "Ex.: financial-coach.exemplo.com"
+        },
+        {
+          "name": "GOOGLE_API_KEY",
+          "label": "Google API Key",
+          "description": "Chave Google/Gemini usada pelo agente (segredo)"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
+      ]
     }
   ]
 }
