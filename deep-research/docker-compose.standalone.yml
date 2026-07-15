@@ -1,0 +1,33 @@
+# Stack "deep-research" — variante Docker Compose (host standalone). Variaveis, portas e uso no README.
+# Pre-requisito: crie a rede externa do proxy (docker network create web).
+# Imagem combinada: front Next.js em :3000 (exposto) + agente LangGraph/FastAPI em :8123 (interno).
+# App SEM login proprio: proteja com forward-auth (stack authelia) — label de middleware comentada.
+services:
+  app:
+    restart: unless-stopped
+    image: ghcr.io/marcelofmatos/ai-deep-research-agent:${DEEPRESEARCH_IMAGE_TAG:-latest}
+    networks:
+    - default
+    - web
+    environment:
+    - OPENAI_API_KEY=${OPENAI_API_KEY:?OPENAI_API_KEY e obrigatorio}
+    - TAVILY_API_KEY=${TAVILY_API_KEY:?TAVILY_API_KEY e obrigatorio}
+    - OPENAI_MODEL=${OPENAI_MODEL:-gpt-5.2}
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.deepresearch.rule=Host(`${DEEPRESEARCH_FQDN}`)
+    - traefik.http.routers.deepresearch.entrypoints=websecure
+    - traefik.http.routers.deepresearch.tls=true
+    - traefik.http.routers.deepresearch.tls.certresolver=letsencryptresolver
+    - traefik.http.services.deepresearch.loadbalancer.server.port=3000
+    # App sem login proprio — proteja com forward-auth (stack authelia):
+    # - traefik.http.routers.deepresearch.middlewares=${DEEPRESEARCH_AUTH_MIDDLEWARE:-}
+    - caddy=${DEEPRESEARCH_FQDN}
+    - caddy.reverse_proxy={{upstreams 3000}}
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge

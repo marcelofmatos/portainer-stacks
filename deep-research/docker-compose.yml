@@ -1,0 +1,42 @@
+# Stack "deep-research" — AI Deep Research Agent — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Assistente de pesquisa profunda (Next.js + agente LangGraph/FastAPI + Tavily). Imagem combinada:
+# front em :3000 (exposto) e agente em :8123 (interno, detem as chaves). Stateless — sem volume.
+# App SEM login proprio: proteja com forward-auth (stack authelia) — label de middleware comentada.
+#
+# Obrigatorias: DEEPRESEARCH_FQDN, OPENAI_API_KEY, TAVILY_API_KEY.
+# Porte: Leve/Medio (sem banco; o custo real e a API OpenAI/Tavily)
+services:
+  app:
+    image: ghcr.io/marcelofmatos/ai-deep-research-agent:${DEEPRESEARCH_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:?OPENAI_API_KEY e obrigatorio}
+      - TAVILY_API_KEY=${TAVILY_API_KEY:?TAVILY_API_KEY e obrigatorio}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-5.2}
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.deepresearch.rule=Host(`${DEEPRESEARCH_FQDN}`)
+        - traefik.http.routers.deepresearch.entrypoints=websecure
+        - traefik.http.routers.deepresearch.tls=true
+        - traefik.http.routers.deepresearch.tls.certresolver=letsencryptresolver
+        - traefik.http.services.deepresearch.loadbalancer.server.port=3000
+        # App sem login proprio — proteja com forward-auth (stack authelia):
+        # - traefik.http.routers.deepresearch.middlewares=${DEEPRESEARCH_AUTH_MIDDLEWARE:-}
+        - caddy=${DEEPRESEARCH_FQDN}
+        - caddy.reverse_proxy={{upstreams 3000}}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay

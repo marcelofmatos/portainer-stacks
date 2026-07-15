@@ -52,7 +52,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 
 | Porte | RAM (mín → ideal) | Stacks |
 |---|---|---|
-| **Leve** | 64 MB → 512 MB | `error-pages`, `cloudflared`, `caddy`, `socat`, `redirect`, `onedrive`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis`, `claude-code-organizer`, `zabbix-status-page` |
+| **Leve** | 64 MB → 512 MB | `error-pages`, `cloudflared`, `caddy`, `socat`, `redirect`, `onedrive`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis`, `claude-code-organizer`, `zabbix-status-page`, `deep-research` |
 | **Médio** | 512 MB → 2 GB | `account`, `keycloak`, `zabbix`, `mariadb`, `postgres-pgvector`, `mongodb`, `chromadb`, `qdrant`, `minio`, `workflows`, `evolution-api`, `joomla`, `wordpress`, `wikijs`, `espocrm`, `typebot`, `stirlingpdf`, `flowise`, `litellm`, `open-webui`, `element`, `home-assistant` |
 | **Pesado** | 2 GB → 4–8 GB | `swarmprom`, `elasticsearch`, `drive`, `rocketchat`, `moodle`, `twenty`, `botpress`, `langfuse`, `librechat`, `anythingllm`, `chatwoot`, `ligerosmart`, `dify`, `supabase` |
 | **GPU / ML** | 8 GB+ (GPU recomendada) | `ollama`, `comfyui`, `ragflow` |
@@ -145,6 +145,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 | [`ragflow`](ragflow/) | Motor de RAG — usa `mariadb`+`redis`+`elasticsearch`+`minio` | [README](ragflow/README.md) |
 | [`langfuse`](langfuse/) | Observabilidade/tracing de LLM — usa `postgres-pgvector` | [README](langfuse/README.md) |
 | [`searxng`](searxng/) | Meta-busca (web search para agentes/RAG) | [README](searxng/README.md) |
+| [`deep-research`](deep-research/) | Agente de pesquisa profunda (Next.js + LangGraph + Tavily) — imagem própria no GHCR | [README](deep-research/README.md) |
 | [`comfyui`](comfyui/) | Geração de imagem (Stable Diffusion) — requer GPU | [README](comfyui/README.md) |
 
 > Ordem sugerida de deploy: **balancer** primeiro (cria o ponto de entrada). Depois as demais em qualquer ordem; `error-pages`/`authelia` viram middlewares que você aplica nas outras stacks.
