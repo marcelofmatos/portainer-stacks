@@ -3063,6 +3063,40 @@
           "default": "web"
         }
       ]
+    },
+    {
+      "type": 3,
+      "title": "gen-ui-starter — Generative UI Starter",
+      "name": "gen-ui-starter",
+      "description": "Starter de UI generativa dirigida por agente: o assistente monta e atualiza componentes na tela (kanban de tarefas, cards de voo, dashboards com métricas/gráficos) além do chat — template para novos projetos. Front Next.js + CopilotKit e agente LangGraph (OpenAI) numa imagem combinada, exposta via Traefik v3 com TLS.",
+      "note": "Requer a rede `web` (stack balancer) e uma chave OpenAI. Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy.",
+      "categories": [
+        "ai",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/openai.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "gen-ui-starter/docker-compose.standalone.yml"
+      },
+      "env": [
+        {
+          "name": "GENUI_FQDN",
+          "label": "Domínio (FQDN)",
+          "description": "Ex.: gen-ui.exemplo.com"
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "label": "OpenAI API Key",
+          "description": "Chave da OpenAI usada pelo agente (segredo)"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
+      ]
     }
   ]
 }

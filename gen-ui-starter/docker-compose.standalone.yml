@@ -1,0 +1,31 @@
+# Stack "gen-ui-starter" — variante Docker Compose (host standalone). Variaveis, portas e uso no README.
+# Pre-requisito: crie a rede externa do proxy (docker network create web).
+# Imagem combinada: front Next.js em :3000 (exposto) + agente LangGraph/AG-UI em :8123 (interno).
+# App SEM login proprio: proteja com forward-auth (stack authelia) — label de middleware comentada.
+services:
+  app:
+    restart: unless-stopped
+    image: ghcr.io/marcelofmatos/generative-ui-starter-project:${GENUI_IMAGE_TAG:-latest}
+    networks:
+    - default
+    - web
+    environment:
+    - OPENAI_API_KEY=${OPENAI_API_KEY:?OPENAI_API_KEY e obrigatorio}
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.genui.rule=Host(`${GENUI_FQDN}`)
+    - traefik.http.routers.genui.entrypoints=websecure
+    - traefik.http.routers.genui.tls=true
+    - traefik.http.routers.genui.tls.certresolver=letsencryptresolver
+    - traefik.http.services.genui.loadbalancer.server.port=3000
+    # App sem login proprio — proteja com forward-auth (stack authelia):
+    # - traefik.http.routers.genui.middlewares=${GENUI_AUTH_MIDDLEWARE:-}
+    - caddy=${GENUI_FQDN}
+    - caddy.reverse_proxy={{upstreams 3000}}
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge

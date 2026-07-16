@@ -1,0 +1,40 @@
+# Stack "gen-ui-starter" — Generative UI Starter — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Demo/starter de UI generativa dirigida por agente (kanban, cards de voo, dashboards). Imagem combinada:
+# front Next.js em :3000 (exposto) e agente LangGraph/AG-UI em :8123 (interno, detem a chave). Stateless — sem volume.
+# App SEM login proprio: proteja com forward-auth (stack authelia) — label de middleware comentada.
+#
+# Obrigatorias: GENUI_FQDN, OPENAI_API_KEY.
+# Porte: Leve (sem banco; o custo real e a API OpenAI)
+services:
+  app:
+    image: ghcr.io/marcelofmatos/generative-ui-starter-project:${GENUI_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:?OPENAI_API_KEY e obrigatorio}
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.genui.rule=Host(`${GENUI_FQDN}`)
+        - traefik.http.routers.genui.entrypoints=websecure
+        - traefik.http.routers.genui.tls=true
+        - traefik.http.routers.genui.tls.certresolver=letsencryptresolver
+        - traefik.http.services.genui.loadbalancer.server.port=3000
+        # App sem login proprio — proteja com forward-auth (stack authelia):
+        # - traefik.http.routers.genui.middlewares=${GENUI_AUTH_MIDDLEWARE:-}
+        - caddy=${GENUI_FQDN}
+        - caddy.reverse_proxy={{upstreams 3000}}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay
