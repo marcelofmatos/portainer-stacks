@@ -1,0 +1,40 @@
+# Stack "dashboard-canvas" — AI Dashboard Canvas Agent — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Agente de UI generativa (Next.js + agente Google ADK/FastAPI + Gemini). Imagem combinada:
+# front em :3000 (exposto) e agente em :8000 (interno, detem a chave). Stateless — sem volume.
+# App SEM login proprio: proteja com forward-auth (stack authelia) — label de middleware comentada.
+#
+# Obrigatorias: DASHCANVAS_FQDN, GOOGLE_API_KEY.
+# Porte: Leve (sem banco; o custo real e a API Google/Gemini)
+services:
+  app:
+    image: ghcr.io/marcelofmatos/ai-dashboard-canvas-agent:${DASHCANVAS_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:?GOOGLE_API_KEY e obrigatorio}
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.dashcanvas.rule=Host(`${DASHCANVAS_FQDN}`)
+        - traefik.http.routers.dashcanvas.entrypoints=websecure
+        - traefik.http.routers.dashcanvas.tls=true
+        - traefik.http.routers.dashcanvas.tls.certresolver=letsencryptresolver
+        - traefik.http.services.dashcanvas.loadbalancer.server.port=3000
+        # App sem login proprio — proteja com forward-auth (stack authelia):
+        # - traefik.http.routers.dashcanvas.middlewares=${DASHCANVAS_AUTH_MIDDLEWARE:-}
+        - caddy=${DASHCANVAS_FQDN}
+        - caddy.reverse_proxy={{upstreams 3000}}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay

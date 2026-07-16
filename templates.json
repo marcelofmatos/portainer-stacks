@@ -3157,6 +3157,35 @@
           "description": "Chave da OpenAI usada pelo agente (segredo)"
         }
       ]
+    },
+    {
+      "type": 2,
+      "title": "dashboard-canvas — AI Dashboard Canvas Agent",
+      "name": "dashboard-canvas",
+      "description": "Agente de UI generativa que monta e edita um painel interativo por conversa: fixa métricas e desenha gráficos (linha/barra/pizza) num canvas, buscando dados na web via um sub-agente de busca do Google. Front Next.js + agente Google ADK (Gemini) numa imagem combinada, exposta via Traefik v3 com TLS.",
+      "note": "Requer a rede `web` (stack balancer) e uma chave Google/Gemini. Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy.",
+      "categories": [
+        "ai",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/google-gemini.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "dashboard-canvas/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "DASHCANVAS_FQDN",
+          "label": "Domínio (FQDN)",
+          "description": "Ex.: dashboard-canvas.exemplo.com"
+        },
+        {
+          "name": "GOOGLE_API_KEY",
+          "label": "Google API Key",
+          "description": "Chave Google/Gemini usada pelo agente (segredo)"
+        }
+      ]
     }
   ]
 }

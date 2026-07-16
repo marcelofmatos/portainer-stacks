@@ -1,0 +1,31 @@
+# Stack "dashboard-canvas" — variante Docker Compose (host standalone). Variaveis, portas e uso no README.
+# Pre-requisito: crie a rede externa do proxy (docker network create web).
+# Imagem combinada: front Next.js em :3000 (exposto) + agente Google ADK/FastAPI em :8000 (interno).
+# App SEM login proprio: proteja com forward-auth (stack authelia) — label de middleware comentada.
+services:
+  app:
+    restart: unless-stopped
+    image: ghcr.io/marcelofmatos/ai-dashboard-canvas-agent:${DASHCANVAS_IMAGE_TAG:-latest}
+    networks:
+    - default
+    - web
+    environment:
+    - GOOGLE_API_KEY=${GOOGLE_API_KEY:?GOOGLE_API_KEY e obrigatorio}
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.dashcanvas.rule=Host(`${DASHCANVAS_FQDN}`)
+    - traefik.http.routers.dashcanvas.entrypoints=websecure
+    - traefik.http.routers.dashcanvas.tls=true
+    - traefik.http.routers.dashcanvas.tls.certresolver=letsencryptresolver
+    - traefik.http.services.dashcanvas.loadbalancer.server.port=3000
+    # App sem login proprio — proteja com forward-auth (stack authelia):
+    # - traefik.http.routers.dashcanvas.middlewares=${DASHCANVAS_AUTH_MIDDLEWARE:-}
+    - caddy=${DASHCANVAS_FQDN}
+    - caddy.reverse_proxy={{upstreams 3000}}
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge
