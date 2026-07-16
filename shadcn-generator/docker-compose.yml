@@ -1,0 +1,41 @@
+# Stack "shadcn-generator" — AI shadcn Component Generator (shadify) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Descreva uma UI em texto e receba um componente shadcn/ui interativo + export React. Imagem
+# combinada: Caddy em :3000 (exposto) serve a UI e faz proxy de /api/* para o runtime Hono :4000,
+# que fala com o agente Python LangGraph :8123. Stateless — sem volume.
+#
+# Obrigatorias: SHADCN_FQDN, OPENAI_API_KEY, TAVILY_API_KEY.
+# Porte: Leve (sem banco; o custo real e a API OpenAI + Tavily)
+services:
+  app:
+    image: ghcr.io/marcelofmatos/ai-shadcn-component-generator:${SHADCN_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:?OPENAI_API_KEY e obrigatorio}
+      - TAVILY_API_KEY=${TAVILY_API_KEY:?TAVILY_API_KEY e obrigatorio}
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.shadcn.rule=Host(`${SHADCN_FQDN}`)
+        - traefik.http.routers.shadcn.entrypoints=websecure
+        - traefik.http.routers.shadcn.tls=true
+        - traefik.http.routers.shadcn.tls.certresolver=letsencryptresolver
+        - traefik.http.services.shadcn.loadbalancer.server.port=3000
+        # App sem login proprio — proteja com forward-auth (stack authelia):
+        # - traefik.http.routers.shadcn.middlewares=${SHADCN_AUTH_MIDDLEWARE:-}
+        - caddy=${SHADCN_FQDN}
+        - caddy.reverse_proxy={{upstreams 3000}}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay

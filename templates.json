@@ -3186,6 +3186,40 @@
           "description": "Chave Google/Gemini usada pelo agente (segredo)"
         }
       ]
+    },
+    {
+      "type": 2,
+      "title": "shadcn-generator — AI shadcn Component Generator",
+      "name": "shadcn-generator",
+      "description": "Descreva uma UI em linguagem natural e receba um componente shadcn/ui interativo, renderizado ao vivo no chat e exportável como React. UI Vite + React com CopilotKit + AG-UI, runtime Hono/CopilotKit (Node/tsx) e agente Python LangGraph (OpenAI + Tavily) numa imagem combinada, exposta via Traefik v3 com TLS.",
+      "note": "Requer a rede `web` (stack balancer) e chaves OpenAI + Tavily. Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy.",
+      "categories": [
+        "ai",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/openai.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "shadcn-generator/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "SHADCN_FQDN",
+          "label": "Domínio (FQDN)",
+          "description": "Ex.: shadcn.exemplo.com"
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "label": "OpenAI API Key",
+          "description": "Chave da OpenAI usada pelo agente e pelo runtime (segredo)"
+        },
+        {
+          "name": "TAVILY_API_KEY",
+          "label": "Tavily API Key",
+          "description": "Chave da Tavily usada pelo agente para web search (segredo)"
+        }
+      ]
     }
   ]
 }
