@@ -1,0 +1,31 @@
+# Stack "mcp-apps-showcase" — variante Docker Compose (host standalone). Variaveis, portas e uso no README.
+# Pre-requisito: crie a rede externa do proxy (docker network create web).
+# Imagem combinada node-only: front Next.js/CopilotKit em :3000 (exposto) + servidor MCP em :3001 (interno).
+# App SEM login proprio: proteja com forward-auth (stack authelia) — label de middleware comentada.
+services:
+  app:
+    restart: unless-stopped
+    image: ghcr.io/marcelofmatos/mcp-apps-generative-ui-showcase:${MCPAPPS_IMAGE_TAG:-latest}
+    networks:
+    - default
+    - web
+    environment:
+    - OPENAI_API_KEY=${OPENAI_API_KEY:?OPENAI_API_KEY e obrigatorio}
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.mcpapps.rule=Host(`${MCPAPPS_FQDN}`)
+    - traefik.http.routers.mcpapps.entrypoints=websecure
+    - traefik.http.routers.mcpapps.tls=true
+    - traefik.http.routers.mcpapps.tls.certresolver=letsencryptresolver
+    - traefik.http.services.mcpapps.loadbalancer.server.port=3000
+    # App sem login proprio — proteja com forward-auth (stack authelia):
+    # - traefik.http.routers.mcpapps.middlewares=${MCPAPPS_AUTH_MIDDLEWARE:-}
+    - caddy=${MCPAPPS_FQDN}
+    - caddy.reverse_proxy={{upstreams 3000}}
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge

@@ -1,0 +1,41 @@
+# Stack "mcp-apps-showcase" — MCP Apps Generative UI Showcase — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Apps interativos (voos, hoteis, portfolio, kanban) renderizados no chat via MCP Apps.
+# Imagem combinada node-only: front Next.js/CopilotKit em :3000 (exposto, detem a chave) e
+# servidor MCP em :3001 (interno, serve os apps). Stateless — sem volume.
+# App SEM login proprio: proteja com forward-auth (stack authelia) — label de middleware comentada.
+#
+# Obrigatorias: MCPAPPS_FQDN, OPENAI_API_KEY.
+# Porte: Leve (sem banco; o custo real e a API OpenAI)
+services:
+  app:
+    image: ghcr.io/marcelofmatos/mcp-apps-generative-ui-showcase:${MCPAPPS_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:?OPENAI_API_KEY e obrigatorio}
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.mcpapps.rule=Host(`${MCPAPPS_FQDN}`)
+        - traefik.http.routers.mcpapps.entrypoints=websecure
+        - traefik.http.routers.mcpapps.tls=true
+        - traefik.http.routers.mcpapps.tls.certresolver=letsencryptresolver
+        - traefik.http.services.mcpapps.loadbalancer.server.port=3000
+        # App sem login proprio — proteja com forward-auth (stack authelia):
+        # - traefik.http.routers.mcpapps.middlewares=${MCPAPPS_AUTH_MIDDLEWARE:-}
+        - caddy=${MCPAPPS_FQDN}
+        - caddy.reverse_proxy={{upstreams 3000}}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay

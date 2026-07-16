@@ -3098,6 +3098,36 @@
           "description": "Chave Google/Gemini usada pelo agente (segredo)"
         }
       ]
+    },
+    {
+      "type": 2,
+      "title": "mcp-apps-showcase — MCP Apps Generative UI Showcase",
+      "name": "mcp-apps-showcase",
+      "description": "Apps interativos (voos, hotéis, portfólio, kanban) renderizados dentro do chat via MCP Apps (SEP-1865): o servidor MCP registra ferramentas ligadas a apps HTML montados como iframes sandbox. Front Next.js + CopilotKit e servidor MCP Node numa imagem combinada, exposta via Traefik v3 com TLS.",
+      "note": "Requer a rede `web` (stack balancer) e uma chave OpenAI. Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy.",
+      "categories": [
+        "ai",
+        "chatbot",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/mcp.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "mcp-apps-showcase/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "MCPAPPS_FQDN",
+          "label": "Domínio (FQDN)",
+          "description": "Ex.: mcp-apps.exemplo.com"
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "label": "OpenAI API Key",
+          "description": "Chave da OpenAI usada pelo front (segredo)"
+        }
+      ]
     }
   ]
 }
