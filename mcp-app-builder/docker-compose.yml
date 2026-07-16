@@ -1,0 +1,43 @@
+# Stack "mcp-app-builder" — AI MCP App Builder — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Descreva um app MCP no chat e receba uma instancia viva renderizada inline. Front Next.js
+# (CopilotKit + AG-UI + agente Mastra) em :3000 (exposto), imagem node-only. Stateless — sem volume.
+# E2B e OPCIONAL: sem ele o app usa MCP servers pre-conectados (default Excalidraw); com ele,
+# desbloqueia provisionar sandboxes novos em runtime.
+# App SEM login proprio: proteja com forward-auth (stack authelia) — label de middleware comentada.
+#
+# Obrigatorias: MCPBUILDER_FQDN, OPENAI_API_KEY.  Opcional: E2B_API_KEY.
+# Porte: Leve (sem banco; o custo real e a API OpenAI + E2B se provisionar sandboxes)
+services:
+  app:
+    image: ghcr.io/marcelofmatos/ai-mcp-app-builder:${MCPBUILDER_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:?OPENAI_API_KEY e obrigatorio}
+      - E2B_API_KEY=${E2B_API_KEY:-}
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.mcpbuilder.rule=Host(`${MCPBUILDER_FQDN}`)
+        - traefik.http.routers.mcpbuilder.entrypoints=websecure
+        - traefik.http.routers.mcpbuilder.tls=true
+        - traefik.http.routers.mcpbuilder.tls.certresolver=letsencryptresolver
+        - traefik.http.services.mcpbuilder.loadbalancer.server.port=3000
+        # App sem login proprio — proteja com forward-auth (stack authelia):
+        # - traefik.http.routers.mcpbuilder.middlewares=${MCPBUILDER_AUTH_MIDDLEWARE:-}
+        - caddy=${MCPBUILDER_FQDN}
+        - caddy.reverse_proxy={{upstreams 3000}}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay

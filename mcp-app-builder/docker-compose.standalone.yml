@@ -1,0 +1,33 @@
+# Stack "mcp-app-builder" — variante Docker Compose (host standalone). Variaveis, portas e uso no README.
+# Pre-requisito: crie a rede externa do proxy (docker network create web).
+# Front Next.js (CopilotKit + AG-UI + agente Mastra) em :3000 (exposto), imagem node-only.
+# E2B e OPCIONAL: sem ele usa MCP servers pre-conectados (default Excalidraw); com ele, provisiona sandboxes.
+# App SEM login proprio: proteja com forward-auth (stack authelia) — label de middleware comentada.
+services:
+  app:
+    restart: unless-stopped
+    image: ghcr.io/marcelofmatos/ai-mcp-app-builder:${MCPBUILDER_IMAGE_TAG:-latest}
+    networks:
+    - default
+    - web
+    environment:
+    - OPENAI_API_KEY=${OPENAI_API_KEY:?OPENAI_API_KEY e obrigatorio}
+    - E2B_API_KEY=${E2B_API_KEY:-}
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.mcpbuilder.rule=Host(`${MCPBUILDER_FQDN}`)
+    - traefik.http.routers.mcpbuilder.entrypoints=websecure
+    - traefik.http.routers.mcpbuilder.tls=true
+    - traefik.http.routers.mcpbuilder.tls.certresolver=letsencryptresolver
+    - traefik.http.services.mcpbuilder.loadbalancer.server.port=3000
+    # App sem login proprio — proteja com forward-auth (stack authelia):
+    # - traefik.http.routers.mcpbuilder.middlewares=${MCPBUILDER_AUTH_MIDDLEWARE:-}
+    - caddy=${MCPBUILDER_FQDN}
+    - caddy.reverse_proxy={{upstreams 3000}}
+    - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge

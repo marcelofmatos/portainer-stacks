@@ -52,7 +52,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 
 | Porte | RAM (mín → ideal) | Stacks |
 |---|---|---|
-| **Leve** | 64 MB → 512 MB | `error-pages`, `cloudflared`, `caddy`, `socat`, `redirect`, `onedrive`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis`, `claude-code-organizer`, `zabbix-status-page`, `deep-research`, `financial-coach`, `mcp-apps-showcase`, `gen-ui-starter`, `dashboard-canvas`, `shadcn-generator` |
+| **Leve** | 64 MB → 512 MB | `error-pages`, `cloudflared`, `caddy`, `socat`, `redirect`, `onedrive`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis`, `claude-code-organizer`, `zabbix-status-page`, `deep-research`, `financial-coach`, `mcp-apps-showcase`, `gen-ui-starter`, `dashboard-canvas`, `shadcn-generator`, `mcp-app-builder` |
 | **Médio** | 512 MB → 2 GB | `account`, `keycloak`, `zabbix`, `mariadb`, `postgres-pgvector`, `mongodb`, `chromadb`, `qdrant`, `minio`, `workflows`, `evolution-api`, `joomla`, `wordpress`, `wikijs`, `espocrm`, `typebot`, `stirlingpdf`, `flowise`, `litellm`, `open-webui`, `element`, `home-assistant` |
 | **Pesado** | 2 GB → 4–8 GB | `swarmprom`, `elasticsearch`, `drive`, `rocketchat`, `moodle`, `twenty`, `botpress`, `langfuse`, `librechat`, `anythingllm`, `chatwoot`, `ligerosmart`, `dify`, `supabase` |
 | **GPU / ML** | 8 GB+ (GPU recomendada) | `ollama`, `comfyui`, `ragflow` |
@@ -151,6 +151,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 | [`gen-ui-starter`](gen-ui-starter/) | Starter de UI generativa dirigida por agente (kanban/cards/dashboards) — Next.js + CopilotKit + agente LangGraph, imagem própria no GHCR | [README](gen-ui-starter/README.md) |
 | [`dashboard-canvas`](dashboard-canvas/) | Agente de UI generativa que monta painéis interativos (métricas/gráficos) por conversa — Next.js + CopilotKit + agente Google ADK/Gemini, imagem própria no GHCR | [README](dashboard-canvas/README.md) |
 | [`shadcn-generator`](shadcn-generator/) | Gera componentes shadcn/ui interativos a partir de texto, exportáveis como React — Vite/React + CopilotKit + agente LangGraph (OpenAI + Tavily), imagem própria no GHCR | [README](shadcn-generator/README.md) |
+| [`mcp-app-builder`](mcp-app-builder/) | Descreva um app MCP no chat e receba uma instância viva renderizada inline — Next.js + CopilotKit/AG-UI + agente Mastra + E2B (opcional), imagem própria no GHCR | [README](mcp-app-builder/README.md) |
 | [`comfyui`](comfyui/) | Geração de imagem (Stable Diffusion) — requer GPU | [README](comfyui/README.md) |
 
 > Ordem sugerida de deploy: **balancer** primeiro (cria o ponto de entrada). Depois as demais em qualquer ordem; `error-pages`/`authelia` viram middlewares que você aplica nas outras stacks.

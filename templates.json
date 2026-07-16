@@ -3220,6 +3220,42 @@
           "description": "Chave da Tavily usada pelo agente para web search (segredo)"
         }
       ]
+    },
+    {
+      "type": 2,
+      "title": "mcp-app-builder — AI MCP App Builder",
+      "name": "mcp-app-builder",
+      "description": "Descreva um app MCP no chat e receba uma instância viva renderizada inline — o agente autora um app MCP novo em runtime (o componente emitido é um app inteiro). Front Next.js + CopilotKit/AG-UI + agente Mastra, exposto via Traefik v3 com TLS. E2B é opcional (desbloqueia sandboxes novos em runtime); sem ele, usa MCP servers pré-conectados (default Excalidraw).",
+      "note": "Requer a rede `web` (stack balancer) e uma chave OpenAI. `E2B_API_KEY` é opcional (sandboxes em runtime). Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy.",
+      "categories": [
+        "ai",
+        "development",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/mcp.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "mcp-app-builder/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "MCPBUILDER_FQDN",
+          "label": "Domínio (FQDN)",
+          "description": "Ex.: mcp-app-builder.exemplo.com"
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "label": "OpenAI API Key",
+          "description": "Chave OpenAI usada pelo chat/agente Mastra (segredo)"
+        },
+        {
+          "name": "E2B_API_KEY",
+          "label": "E2B API Key (opcional)",
+          "description": "Sandboxes E2B em runtime; vazio usa MCP pré-conectados (Excalidraw)",
+          "default": ""
+        }
+      ]
     }
   ]
 }
