@@ -13,10 +13,10 @@ UI. Publicado via **Traefik v3** com TLS Let's Encrypt.
 ```mermaid
 flowchart LR
     user((Usuário)) -->|HTTPS · web| traefik[Traefik · web]
-    traefik -->|GRAFANA_FQDN · 3000| grafana[grafana]
-    grafana -->|9090 · data| prom[(prometheus)]
-    grafana -.->|5432 · data| pg[(postgres)]
-    grafana --> vol[(grafana-data<br/>dashboards + plugins)]
+    traefik -->|GRAFANA_FQDN · 3000| dashboard["dashboard (Grafana)"]
+    dashboard -->|9090 · data| prom[(prometheus)]
+    dashboard -.->|5432 · data| pg[(postgres)]
+    dashboard --> vol[(grafana-data<br/>dashboards + plugins)]
 ```
 
 O Grafana entra na rede **`data`** para alcançar datasources deste cluster pelo **nome do serviço**

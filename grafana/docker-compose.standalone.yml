@@ -3,7 +3,7 @@
 # Pré-requisito: crie as redes externas usadas pela stack (docker network create web; e data para
 # alcançar datasources internos do cluster).
 services:
-  grafana:
+  dashboard:
     image: grafana/grafana:${GRAFANA_IMAGE_TAG:-latest}
     restart: unless-stopped
     networks:
