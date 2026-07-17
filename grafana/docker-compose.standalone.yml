@@ -1,0 +1,41 @@
+# Stack "grafana" — Grafana (dashboards / observabilidade) — variante Docker Compose (host standalone).
+# Variáveis, portas e uso no README.
+# Pré-requisito: crie as redes externas usadas pela stack (docker network create web; e data para
+# alcançar datasources internos do cluster).
+services:
+  grafana:
+    image: grafana/grafana:${GRAFANA_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    networks:
+      - web # exposto pelo Traefik
+      - data # alcança datasources internos pelo nome (prometheus, postgres...)
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD} # OBRIGATÓRIA (segredo)
+      - GF_SERVER_ROOT_URL=https://${GRAFANA_FQDN}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=${GRAFANA_PLUGINS:-} # lista separada por vírgula (ex.: grafana-piechart-panel)
+    volumes:
+      - grafana-data:/var/lib/grafana # dashboards, plugins, banco interno — copie p/ migrar de host
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.grafana.rule=Host(`${GRAFANA_FQDN}`)
+      - traefik.http.routers.grafana.entrypoints=websecure
+      - traefik.http.routers.grafana.tls=true
+      - traefik.http.routers.grafana.tls.certresolver=letsencryptresolver
+      - traefik.http.services.grafana.loadbalancer.server.port=3000
+      - traefik.docker.network=${PROXY_NET:-web}
+      - caddy=${GRAFANA_FQDN}
+      - caddy.reverse_proxy={{upstreams 3000}}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+
+volumes:
+  grafana-data:
+    driver: local

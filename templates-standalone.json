@@ -3211,6 +3211,62 @@
           "default": "web"
         }
       ]
+    },
+    {
+      "type": 3,
+      "title": "grafana — dashboards e observabilidade",
+      "name": "grafana",
+      "description": "Grafana: dashboards e visualizacao de metricas/logs/traces. Sobe vazio e voce conecta os datasources (Prometheus, PostgreSQL, Loki, InfluxDB...) na UI — inclusive os deste cluster pela rede data. Publicado via Traefik v3 com TLS.",
+      "note": "Requer a rede web (balancer) e a rede data (para alcancar datasources internos pelo nome). Defina GRAFANA_ADMIN_PASSWORD. Diferente do swarmprom (que ja vem com Prometheus+Grafana): esta stack e SO o Grafana.",
+      "categories": [
+        "monitoring",
+        "tools",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/grafana.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "grafana/docker-compose.standalone.yml"
+      },
+      "env": [
+        {
+          "name": "GRAFANA_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: grafana.exemplo.com"
+        },
+        {
+          "name": "GRAFANA_ADMIN_PASSWORD",
+          "label": "Senha do admin",
+          "description": "Senha do usuario admin (segredo)"
+        },
+        {
+          "name": "GRAFANA_ADMIN_USER",
+          "label": "Usuario admin",
+          "default": "admin"
+        },
+        {
+          "name": "GRAFANA_PLUGINS",
+          "label": "Plugins (lista por virgula)",
+          "description": "Ex.: grafana-piechart-panel,grafana-clock-panel",
+          "default": ""
+        },
+        {
+          "name": "GRAFANA_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "latest"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        },
+        {
+          "name": "DATA_NET",
+          "label": "Rede de dados",
+          "default": "data"
+        }
+      ]
     }
   ]
 }

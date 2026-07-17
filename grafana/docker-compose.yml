@@ -1,0 +1,58 @@
+# Stack "grafana" — Grafana (dashboards / observabilidade) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# "Traga seus datasources": o Grafana sobe vazio e você conecta as fontes (Prometheus, PostgreSQL,
+# Loki, InfluxDB, etc.) na UI. Entra também na rede `data` para alcançar datasources DESTE cluster
+# pelo nome do serviço (ex.: `prometheus:9090`, `postgres:5432`, `mariadb:3306`).
+#
+# Diferente do `swarmprom`, que já vem com Prometheus + Alertmanager + Grafana + exporters. Use esta
+# stack quando quiser SÓ o Grafana.
+#
+# Obrigatórias: GRAFANA_FQDN, GRAFANA_ADMIN_PASSWORD.
+#
+# NOTA (volume em Swarm): `grafana-data` (dashboards, plugins, banco interno) é local ao nó. Em
+# cluster multi-worker, fixe o serviço definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+# Porte: Leve (64 MB → 512 MB RAM)
+# Hardware (1 réplica): mínimo 0.5 vCPU · 256 MB RAM · 2 GB disco · ideal 1 vCPU · 512 MB RAM · 5 GB disco
+services:
+  grafana:
+    image: grafana/grafana:${GRAFANA_IMAGE_TAG:-latest}
+    networks:
+      - web # exposto pelo Traefik
+      - data # alcança datasources internos do cluster pelo nome (prometheus, postgres...)
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD} # OBRIGATÓRIA (segredo)
+      - GF_SERVER_ROOT_URL=https://${GRAFANA_FQDN}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=${GRAFANA_PLUGINS:-} # lista separada por vírgula (ex.: grafana-piechart-panel)
+    volumes:
+      - grafana-data:/var/lib/grafana # dashboards, plugins, banco interno — copie p/ migrar de host
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # descomente em cluster multi-worker p/ fixar o volume no nó:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.grafana.rule=Host(`${GRAFANA_FQDN}`)
+        - traefik.http.routers.grafana.entrypoints=websecure
+        - traefik.http.routers.grafana.tls=true
+        - traefik.http.routers.grafana.tls.certresolver=letsencryptresolver
+        - traefik.http.services.grafana.loadbalancer.server.port=3000
+        - caddy=${GRAFANA_FQDN}
+        - caddy.reverse_proxy={{upstreams 3000}}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+
+volumes:
+  grafana-data:
+    driver: local
