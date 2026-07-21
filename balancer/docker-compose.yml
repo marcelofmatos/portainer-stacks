@@ -36,6 +36,10 @@ services:
       labels:
         - traefik.enable=true
         - traefik.http.services.balancer-traefik.loadbalancer.server.port=8080
+        # O dashboard e servido pelo handler interno da API. Sem esta linha o router cai
+        # no service do provider docker e tenta proxiar para a 8080 do proprio container,
+        # que so existe com --api.insecure=true -> 502 Bad Gateway.
+        - traefik.http.routers.balancer-traefik.service=api@internal
         - traefik.http.routers.balancer-traefik.entrypoints=websecure
         - traefik.http.routers.balancer-traefik.tls=true
         - traefik.http.routers.balancer-traefik.tls.certresolver=letsencryptresolver

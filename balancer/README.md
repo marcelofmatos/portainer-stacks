@@ -57,5 +57,25 @@ Cada serviço exposto entra na rede `web` e declara, em `deploy.labels`:
 |---|---|---|
 | 404 em todos os serviços | rede `web` não existe / Traefik não subiu no manager | criar a rede; conferir placement `node.role == manager` |
 | Certificado não emite | DNS não aponta / porta 80 fechada / rate limit do LE | conferir DNS e firewall; ver `logs` |
-| Dashboard 401 eterno | `HTTP_AUTH_BASIC` inválido | regenerar com `htpasswd -nbB`; cuidado com `$` em alguns shells |
+| Dashboard 401 eterno | `$` do hash comido pela interpolação do Compose | dobrar cada `$` do `HTTP_AUTH_BASIC` (ver nota abaixo) |
+| Dashboard 502 Bad Gateway | router sem `service=api@internal` | atualizar a stack — a 8080 só existe com `--api.insecure=true` |
 | Serviço novo não aparece | faltou `traefik.enable=true` ou está fora da `web` | adicionar label/rede |
+
+> **`$` de hash de senha precisa virar `$$`.** O Compose interpola os valores do `.env`
+> (e do `stack.env` que o Portainer gera), então um hash bcrypt `$2y$05$...` ou apr1
+> `$apr1$...` perde os pedaços **sem gerar erro** — o sintoma é `401` mesmo com a senha
+> correta. Gere já escapado, ou converta um valor existente:
+>
+> ```bash
+> htpasswd -nbB <usuario> '<senha>' | sed 's/\$/$$/g'
+> ```
+>
+> Para conferir o que realmente chegou no container:
+>
+> ```bash
+> docker inspect <container-do-traefik> \
+>   --format '{{index .Config.Labels "traefik.http.middlewares.traefik-auth.basicauth.users"}}'
+> ```
+>
+> Um hash íntegro começa com `$2y$05$` (bcrypt, 60 caracteres) ou `$apr1$`. Se aparecer só
+> `usuario:` ou um fragmento curto, foi a interpolação.
