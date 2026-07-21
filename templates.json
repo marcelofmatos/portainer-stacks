@@ -6,7 +6,7 @@
       "title": "balancer — Traefik v3",
       "name": "balancer",
       "description": "Reverse proxy Traefik v3 para Docker Swarm com TLS automatico (Let's Encrypt) e dashboard protegido. Cria o ponto de entrada da rede publica `web`.",
-      "note": "Rode no manager. A rede overlay publica precisa existir: `docker network create --driver overlay --attachable web`. HTTP_AUTH_BASIC no formato usuario:hash (use `htpasswd -nbB`).",
+      "note": "Rode no manager. A rede overlay publica precisa existir: `docker network create --driver overlay --attachable web`. HTTP_AUTH_BASIC no formato usuario:hash (use `htpasswd -nbB`). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/balancer/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "proxy",
         "networking",
@@ -51,7 +51,7 @@
       "title": "caddy — reverse proxy + HTTPS automatico",
       "name": "caddy",
       "description": "Caddy com caddy-docker-proxy: reverse proxy com HTTPS automatico configurado por LABELS dos servicos (auto-descoberta, estilo Traefik). Ponto de entrada :80/:443. Alternativa ao balancer (Traefik).",
-      "note": "Le o docker.sock (roda no MANAGER em Swarm). Cada servico declara suas rotas em deploy.labels (caddy: dominio + caddy.reverse_proxy). Requer a rede `web` (CADDY_INGRESS_NETWORKS). Nao rode junto do Traefik (disputam 80/443). Veja o README.",
+      "note": "Le o docker.sock (roda no MANAGER em Swarm). Cada servico declara suas rotas em deploy.labels (caddy: dominio + caddy.reverse_proxy). Requer a rede `web` (CADDY_INGRESS_NETWORKS). Nao rode junto do Traefik (disputam 80/443). Veja o README. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/caddy/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "networking",
         "proxy",
@@ -79,7 +79,18 @@
           "name": "CADDY_ACME_CA",
           "label": "Endpoint ACME",
           "description": "Troque pelo staging do Let's Encrypt durante testes",
-          "default": "https://acme-v02.api.letsencrypt.org/directory"
+          "default": "https://acme-v02.api.letsencrypt.org/directory",
+          "select": [
+            {
+              "text": "Produção — Let's Encrypt",
+              "value": "https://acme-v02.api.letsencrypt.org/directory",
+              "default": true
+            },
+            {
+              "text": "Staging — testes, sem rate limit",
+              "value": "https://acme-staging-v02.api.letsencrypt.org/directory"
+            }
+          ]
         }
       ]
     },
@@ -88,7 +99,7 @@
       "title": "drive — ownCloud",
       "name": "drive",
       "description": "Servidor de arquivos ownCloud (server 10.x) com MySQL e Redis, publicado via Traefik v3 com TLS. Pode autenticar usuarios via LDAP (stack account).",
-      "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. Para LDAP, requer a rede `ldap` e a stack account.",
+      "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. Para LDAP, requer a rede `ldap` e a stack account. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/drive/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "storage",
         "productivity",
@@ -129,7 +140,22 @@
         {
           "name": "OWNCLOUD_DEFAULT_LANGUAGE",
           "label": "Idioma padrao",
-          "default": "pt_BR"
+          "default": "pt_BR",
+          "select": [
+            {
+              "text": "Português (pt_BR)",
+              "value": "pt_BR",
+              "default": true
+            },
+            {
+              "text": "English (en_US)",
+              "value": "en_US"
+            },
+            {
+              "text": "Español (es_ES)",
+              "value": "es_ES"
+            }
+          ]
         },
         {
           "name": "OWNCLOUD_MAX_UPLOAD",
@@ -158,7 +184,7 @@
       "title": "account — OpenLDAP + LAM + self-service-password",
       "name": "account",
       "description": "Diretorio OpenLDAP com LDAP Account Manager (administracao) e self-service-password (troca de senha). Expoe a rede `ldap` para outras stacks autenticarem.",
-      "note": "PRE-REQUISITO: crie antes os Docker configs do self-service-password (`docker config create account_ssp_config_v1 ...` e `account_ssp_css_custom_v1 ...`). Veja o README da stack.",
+      "note": "PRE-REQUISITO: crie antes os Docker configs do self-service-password (`docker config create account_ssp_config_v1 ...` e `account_ssp_css_custom_v1 ...`). Veja o README da stack. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/account/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "authentication",
         "ldap",
@@ -224,7 +250,7 @@
       "title": "lldap — Light LDAP",
       "name": "lldap",
       "description": "Servidor LDAP leve (usuarios + grupos) com UI web. Alternativa simples ao OpenLDAP/AD; expoe a rede `ldap` para outras stacks autenticarem (host lldap_server:3890).",
-      "note": "Gere segredos fortes para LLDAP_JWT_SECRET e LLDAP_KEY_SEED (openssl rand -hex 32). A rede overlay `ldap` precisa existir.",
+      "note": "Gere segredos fortes para LLDAP_JWT_SECRET e LLDAP_KEY_SEED (openssl rand -hex 32). A rede overlay `ldap` precisa existir. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/lldap/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "authentication",
         "ldap",
@@ -285,7 +311,7 @@
       "title": "phpmyadmin — admin MySQL/MariaDB",
       "name": "phpmyadmin",
       "description": "phpMyAdmin publicado via Traefik v3 com TLS. Entra na rede `data` e alcanca a stack mariadb pelo host `mariadb`. PMA_ARBITRARY permite informar outro host na tela de login.",
-      "note": "Requer a rede `web` (stack balancer) e a rede `data` (docker network create --driver overlay --attachable data).",
+      "note": "Requer a rede `web` (stack balancer) e a rede `data` (docker network create --driver overlay --attachable data). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/phpmyadmin/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "database",
         "tools",
@@ -330,7 +356,7 @@
       "title": "error-pages — paginas de erro do Traefik",
       "name": "error-pages",
       "description": "Paginas de erro customizadas para o Traefik (tarampampam/error-pages). Funciona como middleware `errors` que captura respostas 4xx/5xx das outras stacks.",
-      "note": "Apos o deploy, aplique nas outras stacks o middleware: traefik.http.routers.<r>.middlewares=error-pages@swarm",
+      "note": "Apos o deploy, aplique nas outras stacks o middleware: traefik.http.routers.<r>.middlewares=error-pages@swarm <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/error-pages/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "proxy",
         "tools",
@@ -366,7 +392,7 @@
       "title": "keycloak — IAM/SSO",
       "name": "keycloak",
       "description": "Keycloak (identidade, SSO, OIDC/SAML) com PostgreSQL, publicado via Traefik v3 com TLS.",
-      "note": "Requer a rede `web`. Configure os realms apos o primeiro acesso com o admin bootstrap.",
+      "note": "Requer a rede `web`. Configure os realms apos o primeiro acesso com o admin bootstrap. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/keycloak/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "authentication",
         "identity",
@@ -411,7 +437,7 @@
       "title": "pgadmin4 — admin PostgreSQL",
       "name": "pgadmin4",
       "description": "pgAdmin 4 publicado via Traefik v3 com TLS, para administrar bancos PostgreSQL do cluster.",
-      "note": "Requer a rede `web`. Informe o host do banco ao adicionar um server no pgAdmin.",
+      "note": "Requer a rede `web`. Informe o host do banco ao adicionar um server no pgAdmin. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/pgadmin4/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "database",
         "tools",
@@ -471,7 +497,18 @@
         {
           "name": "STIRLING_ENABLE_SECURITY",
           "label": "Habilitar login",
-          "default": "false"
+          "default": "false",
+          "select": [
+            {
+              "text": "Não",
+              "value": "false",
+              "default": true
+            },
+            {
+              "text": "Sim",
+              "value": "true"
+            }
+          ]
         },
         {
           "name": "STIRLING_LANGS",
@@ -483,14 +520,15 @@
           "label": "Rede do proxy",
           "default": "web"
         }
-      ]
+      ],
+      "note": "<a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/stirlingpdf/README.md\" target=\"_blank\">📖 Documentação da stack</a>"
     },
     {
       "type": 2,
       "title": "swarmprom — monitoramento Swarm",
       "name": "swarmprom",
       "description": "Monitoramento nativo de Docker Swarm: Prometheus, Grafana, Alertmanager, node-exporter e cAdvisor. Expoe o Grafana via Traefik v3.",
-      "note": "node-exporter e cAdvisor rodam em modo global. Prometheus/Grafana podem exigir configuracao adicional (datasources/dashboards) - veja o README.",
+      "note": "node-exporter e cAdvisor rodam em modo global. Prometheus/Grafana podem exigir configuracao adicional (datasources/dashboards) - veja o README. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/swarmprom/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "monitoring",
         "Porte: Pesado"
@@ -534,7 +572,7 @@
       "title": "workflows — n8n",
       "name": "workflows",
       "description": "n8n (automacao de workflows low-code) com PostgreSQL, publicado via Traefik v3 com TLS.",
-      "note": "Requer a rede `web`. Gere a N8N_ENCRYPTION_KEY com `openssl rand -hex 32` (nao altere depois).",
+      "note": "Requer a rede `web`. Gere a N8N_ENCRYPTION_KEY com `openssl rand -hex 32` (nao altere depois). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/workflows/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "automation",
         "Porte: Médio"
@@ -578,7 +616,7 @@
       "title": "home-assistant — automação residencial",
       "name": "home-assistant",
       "description": "Home Assistant (Container): plataforma open source de automação residencial — dashboards, automacoes e integracoes com dispositivos e servicos. Publicado via Traefik v3 com TLS. Estado/config no volume /config (SQLite).",
-      "note": "Versao Container atras de proxy (contexto servidor/cloud). Descoberta automatica de dispositivos locais (mDNS/Bluetooth/Zigbee USB) exige network_mode host ou hardware dedicado (HAOS) e nao se aplica em Swarm overlay. Para IP real do cliente, configure o bloco http (use_x_forwarded_for + trusted_proxies) no configuration.yaml - veja o README. Requer a rede 'web' (balancer).",
+      "note": "Versao Container atras de proxy (contexto servidor/cloud). Descoberta automatica de dispositivos locais (mDNS/Bluetooth/Zigbee USB) exige network_mode host ou hardware dedicado (HAOS) e nao se aplica em Swarm overlay. Para IP real do cliente, configure o bloco http (use_x_forwarded_for + trusted_proxies) no configuration.yaml - veja o README. Requer a rede 'web' (balancer). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/home-assistant/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "automation",
         "iot"
@@ -612,7 +650,7 @@
       "title": "ollama — runtime de LLMs",
       "name": "ollama",
       "description": "Ollama: executa modelos de linguagem (LLMs) localmente. Exposicao via Traefik opcional.",
-      "note": "ATENCAO: o Ollama nao tem autenticacao nativa. Proteja com basicauth no Traefik ou nao exponha publicamente. GPU NVIDIA opcional (ver README).",
+      "note": "ATENCAO: o Ollama nao tem autenticacao nativa. Proteja com basicauth no Traefik ou nao exponha publicamente. GPU NVIDIA opcional (ver README). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/ollama/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "Porte: GPU/ML"
@@ -646,7 +684,7 @@
       "title": "authelia — autenticacao/2FA",
       "name": "authelia",
       "description": "Authelia: portal de autenticacao e 2FA (forward-auth) para proteger servicos atras do Traefik. Inclui Redis.",
-      "note": "PRE-REQUISITO: crie o Docker config `authelia_config_v1` a partir de config/configuration.yml. Aplique nas stacks o middleware authelia@swarm. Veja o README.",
+      "note": "PRE-REQUISITO: crie o Docker config `authelia_config_v1` a partir de config/configuration.yml. Aplique nas stacks o middleware authelia@swarm. Veja o README. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/authelia/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "authentication",
         "security",
@@ -696,7 +734,7 @@
       "title": "rocketchat — chat de equipe",
       "name": "rocketchat",
       "description": "Rocket.Chat (mensageria de equipe) com MongoDB (replica set), publicado via Traefik v3 com TLS.",
-      "note": "Na primeira vez e preciso inicializar o replica set do MongoDB (`rs.initiate()`) - veja o README.",
+      "note": "Na primeira vez e preciso inicializar o replica set do MongoDB (`rs.initiate()`) - veja o README. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/rocketchat/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "communication",
         "Porte: Pesado"
@@ -730,7 +768,7 @@
       "title": "element — Matrix (chat seguro)",
       "name": "element",
       "description": "Matrix self-hosted: homeserver Synapse + cliente web Element + PostgreSQL embarcado. Mensageria segura e federavel (DMs, salas, chamadas), publicada via Traefik v3 com TLS.",
-      "note": "Apos o deploy, crie o 1o usuario no container do synapse: register_new_matrix_user -c /data/homeserver.yaml https://localhost:8008 (veja o README). MATRIX_SERVER_NAME e o dominio do homeserver e vira a identidade (@usuario:dominio). Requer a rede 'web' (balancer).",
+      "note": "Apos o deploy, crie o 1o usuario no container do synapse: register_new_matrix_user -c /data/homeserver.yaml https://localhost:8008 (veja o README). MATRIX_SERVER_NAME e o dominio do homeserver e vira a identidade (@usuario:dominio). Requer a rede 'web' (balancer). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/element/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "communication",
         "Porte: Médio"
@@ -773,13 +811,35 @@
           "name": "SYNAPSE_ENABLE_REGISTRATION",
           "label": "Registro aberto na web",
           "description": "true para permitir auto-cadastro publico; false (recomendado) cria usuarios via CLI",
-          "default": "false"
+          "default": "false",
+          "select": [
+            {
+              "text": "Não",
+              "value": "false",
+              "default": true
+            },
+            {
+              "text": "Sim",
+              "value": "true"
+            }
+          ]
         },
         {
           "name": "SYNAPSE_REPORT_STATS",
           "label": "Enviar estatisticas anonimas",
           "description": "yes/no",
-          "default": "no"
+          "default": "no",
+          "select": [
+            {
+              "text": "Não",
+              "value": "no",
+              "default": true
+            },
+            {
+              "text": "Sim",
+              "value": "yes"
+            }
+          ]
         },
         {
           "name": "SYNAPSE_DB_NAME",
@@ -825,7 +885,7 @@
       "title": "minio — object storage S3",
       "name": "minio",
       "description": "MinIO: armazenamento de objetos compativel com S3, com console web. Dois dominios (API e console) via Traefik v3.",
-      "note": "Requer a rede `web` e DNS para os dois FQDNs (API S3 e console).",
+      "note": "Requer a rede `web` e DNS para os dois FQDNs (API S3 e console). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/minio/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "storage",
         "Porte: Médio"
@@ -869,7 +929,7 @@
       "title": "litellm — gateway de LLMs",
       "name": "litellm",
       "description": "LiteLLM Proxy: gateway OpenAI-compativel para varios provedores de LLM, publicado via Traefik v3 com TLS.",
-      "note": "PRE-REQUISITO: crie o Docker config `litellm_config_v1` a partir de config/config.yaml (lista de modelos). Veja o README.",
+      "note": "PRE-REQUISITO: crie o Docker config `litellm_config_v1` a partir de config/config.yaml (lista de modelos). Veja o README. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/litellm/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "Porte: Médio"
@@ -918,7 +978,7 @@
       "title": "chromadb — vector database",
       "name": "chromadb",
       "description": "ChromaDB: banco de dados vetorial para IA/RAG, publicado via Traefik v3 com TLS.",
-      "note": "ATENCAO: sem token a API fica aberta. Defina CHROMA_AUTH_TOKEN (e o provider) ou proteja via Traefik.",
+      "note": "ATENCAO: sem token a API fica aberta. Defina CHROMA_AUTH_TOKEN (e o provider) ou proteja via Traefik. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/chromadb/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "database",
@@ -980,14 +1040,15 @@
           "label": "Rede do proxy",
           "default": "web"
         }
-      ]
+      ],
+      "note": "<a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/openspeedtest/README.md\" target=\"_blank\">📖 Documentação da stack</a>"
     },
     {
       "type": 2,
       "title": "joomla — CMS",
       "name": "joomla",
       "description": "Joomla (CMS) com MySQL, publicado via Traefik v3 com TLS.",
-      "note": "Requer a rede `web` e DNS do FQDN apontando para o host.",
+      "note": "Requer a rede `web` e DNS do FQDN apontando para o host. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/joomla/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "cms",
         "Porte: Médio"
@@ -1026,7 +1087,7 @@
       "title": "moodle — LMS",
       "name": "moodle",
       "description": "Moodle (ambiente de ensino a distancia) com MariaDB, imagens Bitnami, publicado via Traefik v3 com TLS.",
-      "note": "Requer a rede `web` e DNS do FQDN. O primeiro boot pode demorar (instalacao do Moodle).",
+      "note": "Requer a rede `web` e DNS do FQDN. O primeiro boot pode demorar (instalacao do Moodle). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/moodle/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "education",
         "cms",
@@ -1103,14 +1164,15 @@
           "label": "Rede do proxy",
           "default": "web"
         }
-      ]
+      ],
+      "note": "<a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/excalidraw/README.md\" target=\"_blank\">📖 Documentação da stack</a>"
     },
     {
       "type": 2,
       "title": "mariadb — banco MariaDB",
       "name": "mariadb",
       "description": "Banco de dados MariaDB compartilhado (sem proxy). Entra na rede overlay `data` para outras stacks conectarem por `mariadb:3306`.",
-      "note": "PRE-REQUISITO: crie a rede compartilhada: `docker network create --driver overlay --attachable data`. Para acesso externo, descomente o bloco ports no compose.",
+      "note": "PRE-REQUISITO: crie a rede compartilhada: `docker network create --driver overlay --attachable data`. Para acesso externo, descomente o bloco ports no compose. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/mariadb/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "database",
         "Porte: Médio"
@@ -1154,7 +1216,7 @@
       "title": "postgres-pgvector — PostgreSQL + pgvector",
       "name": "postgres-pgvector",
       "description": "PostgreSQL com a extensao pgvector nativa (imagem oficial pgvector/pgvector), para IA/RAG (embeddings). Entra na rede overlay `data` para outras stacks conectarem por `postgres:5432`.",
-      "note": "PRE-REQUISITO: crie a rede `data` (docker network create --driver overlay --attachable data). A extensao e por banco: rode CREATE EXTENSION IF NOT EXISTS vector; em cada banco que usar vetores (ver README).",
+      "note": "PRE-REQUISITO: crie a rede `data` (docker network create --driver overlay --attachable data). A extensao e por banco: rode CREATE EXTENSION IF NOT EXISTS vector; em cada banco que usar vetores (ver README). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/postgres-pgvector/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "database",
         "ai",
@@ -1199,7 +1261,7 @@
       "title": "redis — cache compartilhado",
       "name": "redis",
       "description": "Redis como cache/memoria compartilhado (sem proxy). Entra na rede overlay `data` para outras stacks conectarem por `redis:6379`.",
-      "note": "PRE-REQUISITO: crie a rede `data` (docker network create --driver overlay --attachable data). Defina REDIS_PASSWORD para proteger o cache.",
+      "note": "PRE-REQUISITO: crie a rede `data` (docker network create --driver overlay --attachable data). Defina REDIS_PASSWORD para proteger o cache. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/redis/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "database",
         "cache",
@@ -1230,7 +1292,18 @@
         {
           "name": "REDIS_APPENDONLY",
           "label": "Persistencia AOF",
-          "default": "yes"
+          "default": "yes",
+          "select": [
+            {
+              "text": "Sim — persistência AOF",
+              "value": "yes",
+              "default": true
+            },
+            {
+              "text": "Não",
+              "value": "no"
+            }
+          ]
         },
         {
           "name": "DATA_NET",
@@ -1244,7 +1317,7 @@
       "title": "evolution-api — WhatsApp API",
       "name": "evolution-api",
       "description": "Evolution API (gateway de WhatsApp) via Traefik v3. Usa o PostgreSQL (stack postgres-pgvector) e o Redis (stack redis) compartilhados na rede `data`.",
-      "note": "PRE-REQUISITO: redes `web` e `data`; stacks postgres-pgvector e redis na `data`; e o banco `evolution` criado no PostgreSQL (CREATE DATABASE evolution).",
+      "note": "PRE-REQUISITO: redes `web` e `data`; stacks postgres-pgvector e redis na `data`; e o banco `evolution` criado no PostgreSQL (CREATE DATABASE evolution). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/evolution-api/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "communication",
         "api",
@@ -1305,7 +1378,7 @@
       "title": "wordpress — CMS/blog",
       "name": "wordpress",
       "description": "WordPress via Traefik v3 com TLS, com MariaDB embarcado (banco proprio da stack, na rede `data` so para ferramentas de admin).",
-      "note": "PRE-REQUISITO: redes `web` e `data`. O banco sobe junto (nao precisa da stack mariadb). Veja o README.",
+      "note": "PRE-REQUISITO: redes `web` e `data`. O banco sobe junto (nao precisa da stack mariadb). Veja o README. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/wordpress/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "cms",
         "Porte: Médio"
@@ -1364,7 +1437,7 @@
       "title": "wikijs — wiki em Markdown",
       "name": "wikijs",
       "description": "Wiki.js: wiki moderno baseado em Markdown (busca, versionamento, ACL). Via Traefik v3, com PostgreSQL embarcado (banco proprio da stack).",
-      "note": "PRE-REQUISITO: redes `web` e `data`. O banco sobe junto (nao precisa da stack postgres-pgvector). Veja o README.",
+      "note": "PRE-REQUISITO: redes `web` e `data`. O banco sobe junto (nao precisa da stack postgres-pgvector). Veja o README. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/wikijs/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "documentation",
         "wiki",
@@ -1419,7 +1492,7 @@
       "title": "supabase — backend self-hosted",
       "name": "supabase",
       "description": "Supabase self-hosted (Postgres + Studio + Kong/API + Auth + REST + Realtime + Storage + Functions...) adaptado para Docker Swarm. Studio e API expostos via Traefik v3.",
-      "note": "Adaptacao best-effort p/ Swarm. Gere as chaves (JWT_SECRET, ANON_KEY, SERVICE_ROLE_KEY etc.) conforme a doc da Supabase antes do deploy. Veja o README.",
+      "note": "Adaptacao best-effort p/ Swarm. Gere as chaves (JWT_SECRET, ANON_KEY, SERVICE_ROLE_KEY etc.) conforme a doc da Supabase antes do deploy. Veja o README. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/supabase/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "database",
         "ai",
@@ -1500,7 +1573,7 @@
       "title": "mailtester — MailCatcher",
       "name": "mailtester",
       "description": "Servidor SMTP de captura para dev/homologacao: os apps enviam e-mail, nada sai de verdade e tudo cai numa UI web. Apps na rede `web` usam o host mailtester_mailcatcher:1025.",
-      "note": "Sink efemero (sem persistencia). Os apps que enviam e-mail precisam estar na rede `web`. SMTP sem TLS e sem autenticacao.",
+      "note": "Sink efemero (sem persistencia). Os apps que enviam e-mail precisam estar na rede `web`. SMTP sem TLS e sem autenticacao. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/mailtester/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "mail",
         "development",
@@ -1530,7 +1603,7 @@
       "title": "ligerosmart — help desk / ITSM",
       "name": "ligerosmart",
       "description": "LigeroSmart (central de serviços / help desk, base OTRS) com MariaDB, Elasticsearch e Grafana. Adaptado do projeto público LigeroSmart/ligerosmart-stack para Traefik v3.",
-      "note": "Requer a rede `web`. Primeiro boot demora (instala o banco). Grafana sob /grafana; atalho /atendente.",
+      "note": "Requer a rede `web`. Primeiro boot demora (instala o banco). Grafana sob /grafana; atalho /atendente. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/ligerosmart/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "helpdesk",
         "itsm",
@@ -1561,7 +1634,22 @@
         {
           "name": "LIGEROSMART_LANGUAGE",
           "label": "Idioma",
-          "default": "pt_BR"
+          "default": "pt_BR",
+          "select": [
+            {
+              "text": "Português (pt_BR)",
+              "value": "pt_BR",
+              "default": true
+            },
+            {
+              "text": "English (en_US)",
+              "value": "en_US"
+            },
+            {
+              "text": "Español (es_ES)",
+              "value": "es_ES"
+            }
+          ]
         },
         {
           "name": "ES_JAVA_OPTS",
@@ -1600,7 +1688,7 @@
       "title": "docker-service-update — webhook de deploy Swarm",
       "name": "docker-service-update",
       "description": "Webhook HTTP que recebe o nome de uma imagem e forca o re-deploy (service update --force) dos servicos Swarm que a usam. Para chamar de pipelines de CI/CD apos publicar a imagem. Publicado via Traefik v3 com TLS e protegido por basicauth.",
-      "note": "Roda no MANAGER (acessa /var/run/docker.sock). Requer a rede `web` (stack balancer). O endpoint forca re-deploy de qualquer servico: UPDATE_AUTH_BASIC obrigatorio, formato usuario:hash (htpasswd -nbB).",
+      "note": "Roda no MANAGER (acessa /var/run/docker.sock). Requer a rede `web` (stack balancer). O endpoint forca re-deploy de qualquer servico: UPDATE_AUTH_BASIC obrigatorio, formato usuario:hash (htpasswd -nbB). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/docker-service-update/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ci-cd",
         "tools",
@@ -1640,7 +1728,7 @@
       "title": "espocrm — CRM",
       "name": "espocrm",
       "description": "EspoCRM (CRM open source: contas, contatos, oportunidades, funil, e-mail, automacoes). Publicado via Traefik v3 com TLS e reaproveita o MariaDB compartilhado (stack mariadb) na rede data. Inclui o daemon de jobs agendados.",
-      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `mariadb` com um banco/usuario para o EspoCRM. DNS do FQDN apontando para o host.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `mariadb` com um banco/usuario para o EspoCRM. DNS do FQDN apontando para o host. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/espocrm/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "crm",
         "productivity",
@@ -1701,7 +1789,7 @@
       "title": "twenty — CRM",
       "name": "twenty",
       "description": "Twenty (CRM open source moderno, UI estilo Notion/Airtable: contatos, empresas, oportunidades, workflows). Publicado via Traefik v3 com TLS e reaproveita PostgreSQL (stack postgres-pgvector) e Redis (stack redis) na rede data. Inclui worker de jobs assincronos.",
-      "note": "Requer a rede `web` (stack balancer), a rede `data`, a stack `postgres-pgvector` com um banco e a stack `redis`. DNS do FQDN apontando para o host. Recomenda-se fixar TWENTY_IMAGE_TAG em producao.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data`, a stack `postgres-pgvector` com um banco e a stack `redis`. DNS do FQDN apontando para o host. Recomenda-se fixar TWENTY_IMAGE_TAG em producao. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/twenty/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "crm",
         "productivity",
@@ -1762,7 +1850,7 @@
       "title": "chatwoot — atendimento omnichannel",
       "name": "chatwoot",
       "description": "Chatwoot (atendimento ao cliente / CRM de conversas: caixa de entrada compartilhada, WhatsApp, e-mail, chat de site). Publicado via Traefik v3 com TLS e reaproveita PostgreSQL (stack postgres-pgvector) e Redis (stack redis) na rede data. Integra com a stack evolution-api como canal de WhatsApp.",
-      "note": "Requer a rede `web` (stack balancer), a rede `data`, a stack `postgres-pgvector` (com a extensao vector) e a stack `redis`. Na PRIMEIRA execucao rode `rails db:chatwoot_prepare` (ver README). DNS do FQDN apontando para o host.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data`, a stack `postgres-pgvector` (com a extensao vector) e a stack `redis`. Na PRIMEIRA execucao rode `rails db:chatwoot_prepare` (ver README). DNS do FQDN apontando para o host. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/chatwoot/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "crm",
         "support",
@@ -1815,7 +1903,18 @@
         {
           "name": "CHATWOOT_ENABLE_SIGNUP",
           "label": "Permitir auto-cadastro",
-          "default": "false"
+          "default": "false",
+          "select": [
+            {
+              "text": "Não",
+              "value": "false",
+              "default": true
+            },
+            {
+              "text": "Sim",
+              "value": "true"
+            }
+          ]
         }
       ]
     },
@@ -1824,7 +1923,7 @@
       "title": "typebot — construtor de chatbots",
       "name": "typebot",
       "description": "Typebot (builder visual de chatbots/fluxos conversacionais) com builder e viewer. Publicado via Traefik v3 com TLS e reaproveita o PostgreSQL compartilhado (stack postgres-pgvector) na rede data. Os fluxos publicados podem ser entregues no WhatsApp via stack evolution-api.",
-      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `postgres-pgvector` com um banco. Use DOIS FQDNs (builder e viewer) com DNS apontando para o host. Armazenamento de midia via MinIO e opcional.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `postgres-pgvector` com um banco. Use DOIS FQDNs (builder e viewer) com DNS apontando para o host. Armazenamento de midia via MinIO e opcional. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/typebot/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "chatbot",
         "automation",
@@ -1885,7 +1984,7 @@
       "title": "flowise — agentes de IA (LLM)",
       "name": "flowise",
       "description": "Flowise (construtor visual de chatbots/agentes LLM, RAG e fluxos). Publicado via Traefik v3 com TLS, persiste em SQLite no volume local e protege o acesso por usuario/senha. Consome LLMs das stacks litellm/ollama e pode entregar respostas no WhatsApp via stack evolution-api.",
-      "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. LLMs (litellm/ollama) e WhatsApp (evolution-api) sao opcionais.",
+      "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. LLMs (litellm/ollama) e WhatsApp (evolution-api) sao opcionais. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/flowise/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "chatbot",
@@ -1926,7 +2025,7 @@
       "title": "mongodb — banco NoSQL compartilhado",
       "name": "mongodb",
       "description": "MongoDB como banco NoSQL interno/compartilhado do cluster. NAO usa Traefik nem a rede web: fica na rede overlay `data` e outras stacks conectam pelo host mongodb:27017. Admin via web pela stack mongo-express.",
-      "note": "Banco interno. Requer a rede `data`: docker network create --driver overlay --attachable data. Nao exponha 27017 na internet.",
+      "note": "Banco interno. Requer a rede `data`: docker network create --driver overlay --attachable data. Nao exponha 27017 na internet. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/mongodb/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "database",
         "Porte: Médio"
@@ -1965,7 +2064,7 @@
       "title": "mongo-express — admin do MongoDB",
       "name": "mongo-express",
       "description": "Mongo Express: interface web de administracao do MongoDB. Publicado via Traefik v3 com TLS, conecta no MongoDB compartilhado (stack mongodb) na rede data. Protegido por basicauth proprio.",
-      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `mongodb`. DNS do FQDN apontando para o host.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `mongodb`. DNS do FQDN apontando para o host. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/mongo-express/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "database",
         "tools",
@@ -2015,7 +2114,7 @@
       "title": "redisinsight — GUI do Redis",
       "name": "redisinsight",
       "description": "RedisInsight: interface grafica de administracao do Redis. Publicado via Traefik v3 com TLS, conecta no Redis compartilhado (stack redis) na rede data. Como nao tem login proprio, e protegido por basicauth do Traefik.",
-      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `redis`. REDISINSIGHT_AUTH_BASIC no formato usuario:hash (htpasswd -nbB). DNS do FQDN apontando para o host.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `redis`. REDISINSIGHT_AUTH_BASIC no formato usuario:hash (htpasswd -nbB). DNS do FQDN apontando para o host. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/redisinsight/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "database",
         "tools",
@@ -2050,7 +2149,7 @@
       "title": "zabbix — monitoramento",
       "name": "zabbix",
       "description": "Zabbix (monitoramento de infraestrutura/servicos): server + web + agent. Publicado via Traefik v3 com TLS e reaproveita o PostgreSQL compartilhado (stack postgres-pgvector) na rede data. O server importa o schema automaticamente num banco vazio.",
-      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `postgres-pgvector` com um banco `zabbix`. Login inicial padrao Admin/zabbix (troque na hora). DNS do FQDN apontando para o host.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `postgres-pgvector` com um banco `zabbix`. Login inicial padrao Admin/zabbix (troque na hora). DNS do FQDN apontando para o host. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/zabbix/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "monitoring",
         "Porte: Médio"
@@ -2105,7 +2204,7 @@
       "title": "elasticsearch — busca/indice",
       "name": "elasticsearch",
       "description": "Elasticsearch single-node como backend interno de busca/indice. NAO usa Traefik nem a rede web: fica na rede overlay data e outras stacks conectam pelo host elasticsearch:9200.",
-      "note": "Backend interno. Requer a rede `data` e `vm.max_map_count=262144` no host (ver README). Nao exponha 9200 na internet.",
+      "note": "Backend interno. Requer a rede `data` e `vm.max_map_count=262144` no host (ver README). Nao exponha 9200 na internet. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/elasticsearch/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "database",
         "search",
@@ -2131,7 +2230,18 @@
         {
           "name": "ELASTIC_SECURITY",
           "label": "xpack security",
-          "default": "true"
+          "default": "true",
+          "select": [
+            {
+              "text": "Sim",
+              "value": "true",
+              "default": true
+            },
+            {
+              "text": "Não",
+              "value": "false"
+            }
+          ]
         },
         {
           "name": "ELASTIC_IMAGE_TAG",
@@ -2145,7 +2255,7 @@
       "title": "protonmail-bridge — SMTP/IMAP ProtonMail",
       "name": "protonmail-bridge",
       "description": "ProtonMail Bridge: expoe a conta ProtonMail como SMTP/IMAP interno para outras stacks enviarem/lerem e-mail. UI web (porta 3000) publicada via Traefik v3 com TLS e protegida pelo WEBUI_AUTH_TOKEN.",
-      "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. Apos o deploy, faca login na conta Proton pela UI. Relay interno em protonmail-bridge_smtp:25 (SMTP) e :143 (IMAP).",
+      "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. Apos o deploy, faca login na conta Proton pela UI. Relay interno em protonmail-bridge_smtp:25 (SMTP) e :143 (IMAP). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/protonmail-bridge/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "mail",
         "Porte: Leve"
@@ -2179,7 +2289,7 @@
       "title": "ssh-server — OpenSSH/SFTP",
       "name": "ssh-server",
       "description": "Servidor OpenSSH (imagem linuxserver) para acesso SSH/SFTP ao cluster. NAO usa Traefik (SSH e TCP): publica a porta no no. Recomenda-se autenticacao por chave publica.",
-      "note": "Publica a porta SSH_PORT no no (libere no firewall). Prefira SSH_PUBLIC_KEY; senha so com SSH_PASSWORD_ACCESS=true.",
+      "note": "Publica a porta SSH_PORT no no (libere no firewall). Prefira SSH_PUBLIC_KEY; senha so com SSH_PASSWORD_ACCESS=true. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/ssh-server/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "tools",
         "networking",
@@ -2210,12 +2320,34 @@
         {
           "name": "SSH_PASSWORD_ACCESS",
           "label": "Permitir senha",
-          "default": "false"
+          "default": "false",
+          "select": [
+            {
+              "text": "Não",
+              "value": "false",
+              "default": true
+            },
+            {
+              "text": "Sim",
+              "value": "true"
+            }
+          ]
         },
         {
           "name": "SSH_SUDO_ACCESS",
           "label": "Conceder sudo",
-          "default": "false"
+          "default": "false",
+          "select": [
+            {
+              "text": "Não",
+              "value": "false",
+              "default": true
+            },
+            {
+              "text": "Sim",
+              "value": "true"
+            }
+          ]
         }
       ]
     },
@@ -2224,7 +2356,7 @@
       "title": "socat — relay TCP",
       "name": "socat",
       "description": "socat encaminha uma porta publicada no no para um destino alcancavel pelo container. Util para expor de forma controlada um servico interno (ex.: um banco na rede data) para fora do cluster.",
-      "note": "Anexa as redes data e web. SOCAT_TARGET no formato host:porta (ex.: mariadb:3306). NAO autentica nem cifra: proteja a porta no firewall.",
+      "note": "Anexa as redes data e web. SOCAT_TARGET no formato host:porta (ex.: mariadb:3306). NAO autentica nem cifra: proteja a porta no firewall. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/socat/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "networking",
         "tools",
@@ -2259,7 +2391,7 @@
       "title": "redirect — hub de redirects HTTP",
       "name": "redirect",
       "description": "Redirecionador HTTP: dominio -> destino (301/302) via morbz/docker-web-redirect, publicado pelo Traefik v3 com TLS. O formulario configura 1 redirect; para varios na mesma stack, duplique o bloco de servico no compose.",
-      "note": "Requer a rede `web` (stack balancer) e DNS de cada dominio de origem apontando para o host. REDIRECT_TYPE: redirect (302) ou 'redirect permanent' (301). Para varios redirects, duplique o bloco de servico no docker-compose.yml.",
+      "note": "Requer a rede `web` (stack balancer) e DNS de cada dominio de origem apontando para o host. REDIRECT_TYPE: redirect (302) ou 'redirect permanent' (301). Para varios redirects, duplique o bloco de servico no docker-compose.yml. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/redirect/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "networking",
         "tools",
@@ -2285,7 +2417,18 @@
         {
           "name": "REDIRECT_TYPE",
           "label": "Tipo",
-          "default": "redirect"
+          "default": "redirect",
+          "select": [
+            {
+              "text": "Temporário (302)",
+              "value": "redirect",
+              "default": true
+            },
+            {
+              "text": "Permanente (301)",
+              "value": "redirect permanent"
+            }
+          ]
         }
       ]
     },
@@ -2294,7 +2437,7 @@
       "title": "botpress — plataforma de chatbots",
       "name": "botpress",
       "description": "Botpress (plataforma open source para criar chatbots/assistentes). Publicado via Traefik v3 com TLS e reaproveita o PostgreSQL compartilhado (stack postgres-pgvector) na rede data. Pode entregar respostas no WhatsApp via stack evolution-api.",
-      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `postgres-pgvector` com um banco `botpress`. DNS do FQDN apontando para o host.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `postgres-pgvector` com um banco `botpress`. DNS do FQDN apontando para o host. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/botpress/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "chatbot",
         "automation",
@@ -2340,7 +2483,7 @@
       "title": "haproxy — load balancer TCP/HTTP",
       "name": "haproxy",
       "description": "HAProxy para balanceamento/proxy TCP ou HTTP de servicos internos. A pagina de stats (porta 8404) e publicada via Traefik v3 com TLS e protegida por basicauth. Configuracao via Docker config externo.",
-      "note": "Requer a rede `web` (stack balancer) e a rede `data`. Crie o Docker config: docker config create haproxy_config_v1 haproxy/config/haproxy.cfg. HAPROXY_AUTH_BASIC no formato usuario:hash (htpasswd -nbB).",
+      "note": "Requer a rede `web` (stack balancer) e a rede `data`. Crie o Docker config: docker config create haproxy_config_v1 haproxy/config/haproxy.cfg. HAPROXY_AUTH_BASIC no formato usuario:hash (htpasswd -nbB). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/haproxy/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "proxy",
         "networking",
@@ -2380,7 +2523,7 @@
       "title": "phpnetmap — mapa de rede (SNMP)",
       "name": "phpnetmap",
       "description": "PHPNetMap descobre e mapeia a topologia da rede via SNMP (tabelas FIB/CAM e ARP), exibindo conexoes entre hosts e status das portas. App PHP (Yii) com SQLite embutido, publicado via Traefik v3 com TLS.",
-      "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. O no precisa alcancar os dispositivos via SNMP (UDP/161).",
+      "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. O no precisa alcancar os dispositivos via SNMP (UDP/161). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/phpnetmap/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "monitoring",
         "networking",
@@ -2420,7 +2563,7 @@
       "title": "open-webui — chat de LLMs",
       "name": "open-webui",
       "description": "Open WebUI: interface de chat (estilo ChatGPT) para Ollama e endpoints OpenAI-compatible (stacks ollama/litellm). Publicado via Traefik v3 com TLS; persiste em volume local.",
-      "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. Aponte OPENWEBUI_OLLAMA_URL e/ou OPENWEBUI_OPENAI_BASE_URL. Primeiro usuario cadastrado vira admin.",
+      "note": "Requer a rede `web` (stack balancer) e DNS do FQDN apontando para o host. Aponte OPENWEBUI_OLLAMA_URL e/ou OPENWEBUI_OPENAI_BASE_URL. Primeiro usuario cadastrado vira admin. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/open-webui/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "Porte: Médio"
@@ -2469,7 +2612,7 @@
       "title": "librechat — UI multi-provedor de LLMs",
       "name": "librechat",
       "description": "LibreChat: UI de chat multi-provedor (OpenAI/Anthropic/Ollama/litellm) com busca, RAG e agentes. Publicado via Traefik v3 com TLS. Reaproveita o MongoDB compartilhado (stack mongodb) e sobe um Meilisearch proprio.",
-      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `mongodb`. Gere os segredos CREDS_KEY/CREDS_IV/JWT_*/MEILI_MASTER_KEY (ver README). DNS do FQDN apontando para o host.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `mongodb`. Gere os segredos CREDS_KEY/CREDS_IV/JWT_*/MEILI_MASTER_KEY (ver README). DNS do FQDN apontando para o host. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/librechat/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "Porte: Pesado"
@@ -2524,7 +2667,18 @@
         {
           "name": "LIBRECHAT_ALLOW_REGISTRATION",
           "label": "Permitir registro",
-          "default": "false"
+          "default": "false",
+          "select": [
+            {
+              "text": "Não",
+              "value": "false",
+              "default": true
+            },
+            {
+              "text": "Sim",
+              "value": "true"
+            }
+          ]
         }
       ]
     },
@@ -2533,7 +2687,7 @@
       "title": "dify — LLMOps / RAG",
       "name": "dify",
       "description": "Dify: plataforma para criar apps de LLM (chatbots, agentes, workflows, RAG, datasets). Servicos api/worker/web/sandbox publicados via Traefik v3 com TLS. Reaproveita PostgreSQL, Redis e Qdrant na rede data.",
-      "note": "Requer a rede `web` (stack balancer), a rede `data` e as stacks `postgres-pgvector`, `redis` e `qdrant`. Crie o banco `dify`. Dify evolui rapido: confira as variaveis com a versao. DNS do FQDN apontando para o host.",
+      "note": "Requer a rede `web` (stack balancer), a rede `data` e as stacks `postgres-pgvector`, `redis` e `qdrant`. Crie o banco `dify`. Dify evolui rapido: confira as variaveis com a versao. DNS do FQDN apontando para o host. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/dify/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "Porte: Pesado"
@@ -2592,7 +2746,7 @@
       "title": "qdrant — vector database",
       "name": "qdrant",
       "description": "Qdrant: banco de dados vetorial de alta performance (RAG, busca semantica). Publicado via Traefik v3 com TLS (REST 6333) e disponivel na rede data para outras stacks (ex.: dify) por qdrant:6333.",
-      "note": "Requer a rede `web` (stack balancer) e a rede `data`. Defina QDRANT_API_KEY para nao deixar a API aberta. DNS do FQDN apontando para o host.",
+      "note": "Requer a rede `web` (stack balancer) e a rede `data`. Defina QDRANT_API_KEY para nao deixar a API aberta. DNS do FQDN apontando para o host. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/qdrant/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "database",
@@ -2627,7 +2781,7 @@
       "title": "langfuse — observabilidade de LLM",
       "name": "langfuse",
       "description": "Langfuse (v2): tracing/observabilidade de aplicacoes LLM (traces, prompts, custos, avaliacoes). Publicado via Traefik v3 com TLS e reaproveita o PostgreSQL compartilhado (stack postgres-pgvector).",
-      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `postgres-pgvector` com um banco `langfuse`. DNS do FQDN apontando para o host. (Langfuse v3 exige ClickHouse/Redis/S3.)",
+      "note": "Requer a rede `web` (stack balancer), a rede `data` e a stack `postgres-pgvector` com um banco `langfuse`. DNS do FQDN apontando para o host. (Langfuse v3 exige ClickHouse/Redis/S3.) <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/langfuse/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "monitoring",
@@ -2674,7 +2828,18 @@
         {
           "name": "LANGFUSE_DISABLE_SIGNUP",
           "label": "Desabilitar signup",
-          "default": "true"
+          "default": "true",
+          "select": [
+            {
+              "text": "Sim",
+              "value": "true",
+              "default": true
+            },
+            {
+              "text": "Não",
+              "value": "false"
+            }
+          ]
         },
         {
           "name": "LANGFUSE_IMAGE_TAG",
@@ -2688,7 +2853,7 @@
       "title": "comfyui — geracao de imagem (GPU)",
       "name": "comfyui",
       "description": "ComfyUI: editor por nos para Stable Diffusion / geracao de imagem. Publicado via Traefik v3 com TLS e protegido por basicauth. REQUER GPU NVIDIA no no.",
-      "note": "Requer a rede `web` (stack balancer), GPU NVIDIA (nvidia-container-runtime) e DNS do FQDN apontando para o host. A imagem e o caminho de dados dependem do build (ver README). COMFYUI_AUTH_BASIC: usuario:hash (htpasswd -nbB).",
+      "note": "Requer a rede `web` (stack balancer), GPU NVIDIA (nvidia-container-runtime) e DNS do FQDN apontando para o host. A imagem e o caminho de dados dependem do build (ver README). COMFYUI_AUTH_BASIC: usuario:hash (htpasswd -nbB). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/comfyui/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "Porte: GPU/ML"
@@ -2727,7 +2892,7 @@
       "title": "ragflow — motor de RAG",
       "name": "ragflow",
       "description": "RAGFlow: motor de RAG com parsing avancado de documentos (OCR, tabelas, layout) e busca hibrida. Publicado via Traefik v3 com TLS. Reaproveita MariaDB, Redis, Elasticsearch e MinIO na rede data.",
-      "note": "Pesado e sensivel a versao. Requer a rede `web` (stack balancer), a rede `data` e as stacks `mariadb`, `redis`, `elasticsearch` e `minio`. Crie o banco `rag_flow` e o acesso ao MinIO. DNS do FQDN apontando para o host.",
+      "note": "Pesado e sensivel a versao. Requer a rede `web` (stack balancer), a rede `data` e as stacks `mariadb`, `redis`, `elasticsearch` e `minio`. Crie o banco `rag_flow` e o acesso ao MinIO. DNS do FQDN apontando para o host. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/ragflow/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "Porte: GPU/ML"
@@ -2776,7 +2941,7 @@
       "title": "searxng — meta-busca",
       "name": "searxng",
       "description": "SearXNG: meta-mecanismo de busca (agrega varios buscadores, sem rastreamento). Util como backend de web search para agentes/RAG (flowise, dify). Publicado via Traefik v3 com TLS e disponivel na rede data por searxng:8080.",
-      "note": "Requer a rede `web` (stack balancer) e a rede `data`. Para uso como API, habilite o formato JSON no settings.yml (ver README). DNS do FQDN apontando para o host.",
+      "note": "Requer a rede `web` (stack balancer) e a rede `data`. Para uso como API, habilite o formato JSON no settings.yml (ver README). DNS do FQDN apontando para o host. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/searxng/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "search",
@@ -2816,7 +2981,7 @@
       "title": "anythingllm — RAG tudo-em-um",
       "name": "anythingllm",
       "description": "AnythingLLM: app completo de RAG/chat com documentos e agentes (workspaces, ingestao de arquivos, multiplos provedores de LLM e vector stores). Publicado via Traefik v3 com TLS; LLM/vetor configurados na UI.",
-      "note": "Requer a rede `web` (stack balancer) e a rede `data` (para alcancar qdrant/chromadb). Primeiro acesso faz o onboarding do admin. DNS do FQDN apontando para o host.",
+      "note": "Requer a rede `web` (stack balancer) e a rede `data` (para alcancar qdrant/chromadb). Primeiro acesso faz o onboarding do admin. DNS do FQDN apontando para o host. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/anythingllm/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "Porte: Pesado"
@@ -2850,7 +3015,7 @@
       "title": "cloudflared — Cloudflare Tunnel",
       "name": "cloudflared",
       "description": "Cloudflare Tunnel: publica serviços internos na internet por um túnel de saída, sem abrir portas nem IP público. Modo remote-managed (token); ingress configurado no painel Cloudflare Zero Trust. Complementa o Traefik (balancer).",
-      "note": "Crie o túnel no painel Cloudflare Zero Trust (Networks > Tunnels) e informe CLOUDFLARED_TUNNEL_TOKEN. Configure os Public Hostnames no painel apontando para os serviços internos (ex.: http://balancer:80). Requer a rede externa 'web'.",
+      "note": "Crie o túnel no painel Cloudflare Zero Trust (Networks > Tunnels) e informe CLOUDFLARED_TUNNEL_TOKEN. Configure os Public Hostnames no painel apontando para os serviços internos (ex.: http://balancer:80). Requer a rede externa 'web'. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/cloudflared/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "networking",
         "proxy",
@@ -2880,7 +3045,7 @@
       "title": "onedrive — sync Microsoft OneDrive",
       "name": "onedrive",
       "description": "Cliente de sincronizacao do Microsoft OneDrive (abraunegg/driveone): sincroniza uma pasta (volume) com o OneDrive. Daemon de background, SEM interface web. Autenticacao OAuth interativa na 1a vez.",
-      "note": "Nao e servico web (sem Traefik). Autentique 1x interativamente (docker run -it no volume de conf) ANTES de subir em modo monitor - veja o README. Roda como nao-root (ONEDRIVE_UID/GID).",
+      "note": "Nao e servico web (sem Traefik). Autentique 1x interativamente (docker run -it no volume de conf) ANTES de subir em modo monitor - veja o README. Roda como nao-root (ONEDRIVE_UID/GID). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/onedrive/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "tools",
         "storage",
@@ -2906,7 +3071,22 @@
         {
           "name": "ONEDRIVE_VERBOSE",
           "label": "Verbosidade do log",
-          "default": "1"
+          "default": "1",
+          "select": [
+            {
+              "text": "Normal",
+              "value": "1",
+              "default": true
+            },
+            {
+              "text": "Silencioso",
+              "value": "0"
+            },
+            {
+              "text": "Debug",
+              "value": "2"
+            }
+          ]
         }
       ]
     },
@@ -2915,7 +3095,7 @@
       "title": "claude-code-organizer — Claude Code Organizer",
       "name": "claude-code-organizer",
       "description": "Dashboard para gerenciar a configuração do Claude Code (memories, skills, MCP servers, rules, hooks, settings) entre escopos global e por projeto. A config vive num volume persistente.",
-      "note": "Volume novo nasce vazio — popule cco-data com seu .claude e .claude.json. O CCO não tem autenticação própria: proteja com forward-auth (ex.: Authelia).",
+      "note": "Volume novo nasce vazio — popule cco-data com seu .claude e .claude.json. O CCO não tem autenticação própria: proteja com forward-auth (ex.: Authelia). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/claude-code-organizer/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "tools",
         "ai",
@@ -2945,7 +3125,7 @@
       "title": "zabbix-status-page — página de status",
       "name": "zabbix-status-page",
       "description": "Página de status pública alimentada pela API do Zabbix (>= 6.4): estado geral, detalhamento por host group, incidentes e histórico de uptime de 90 dias. Publicada via Traefik v3 com TLS. Consome um Zabbix externo por token (não sobe um Zabbix).",
-      "note": "Requer a rede `web` (stack balancer) e um Zabbix >= 6.4 acessível com um token de API (usuário read-only). DNS do FQDN apontando para o host.",
+      "note": "Requer a rede `web` (stack balancer) e um Zabbix >= 6.4 acessível com um token de API (usuário read-only). DNS do FQDN apontando para o host. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/zabbix-status-page/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "monitoring",
         "Porte: Leve"
@@ -3010,7 +3190,34 @@
         {
           "name": "ZABBIX_MIN_SEVERITY",
           "label": "Severidade mínima (0-5)",
-          "default": "0"
+          "default": "0",
+          "select": [
+            {
+              "text": "Não classificada",
+              "value": "0",
+              "default": true
+            },
+            {
+              "text": "Informação",
+              "value": "1"
+            },
+            {
+              "text": "Advertência",
+              "value": "2"
+            },
+            {
+              "text": "Média",
+              "value": "3"
+            },
+            {
+              "text": "Alta",
+              "value": "4"
+            },
+            {
+              "text": "Desastre",
+              "value": "5"
+            }
+          ]
         },
         {
           "name": "ZABBIX_TLS_INSECURE",
@@ -3035,7 +3242,7 @@
       "title": "deep-research — AI Deep Research Agent",
       "name": "deep-research",
       "description": "Assistente de pesquisa profunda: planeja, busca na web via Tavily, escreve num filesystem virtual e sintetiza um relatório — renderizando cada passo como card ao vivo. Front Next.js + agente LangGraph/CopilotKit numa imagem combinada, publicada via Traefik v3 com TLS.",
-      "note": "Requer a rede `web` (stack balancer) e chaves OpenAI + Tavily. Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy.",
+      "note": "Requer a rede `web` (stack balancer) e chaves OpenAI + Tavily. Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/deep-research/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "search",
@@ -3075,7 +3282,7 @@
       "title": "financial-coach — AI Financial Coach Agent",
       "name": "financial-coach",
       "description": "Coach financeiro multi-agente: analisa o orçamento, planeja poupança e monta estratégias de quitação de dívidas (avalanche/snowball) — renderizando cada resultado como card interativo num painel de relatório. Front Next.js + agente Google ADK (Gemini) numa imagem combinada, exposta via Traefik v3 com TLS.",
-      "note": "Requer a rede `web` (stack balancer) e uma chave Google/Gemini. Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy.",
+      "note": "Requer a rede `web` (stack balancer) e uma chave Google/Gemini. Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/financial-coach/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "Porte: Leve"
@@ -3104,7 +3311,7 @@
       "title": "mcp-apps-showcase — MCP Apps Generative UI Showcase",
       "name": "mcp-apps-showcase",
       "description": "Apps interativos (voos, hotéis, portfólio, kanban) renderizados dentro do chat via MCP Apps (SEP-1865): o servidor MCP registra ferramentas ligadas a apps HTML montados como iframes sandbox. Front Next.js + CopilotKit e servidor MCP Node numa imagem combinada, exposta via Traefik v3 com TLS.",
-      "note": "Requer a rede `web` (stack balancer) e uma chave OpenAI. Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy.",
+      "note": "Requer a rede `web` (stack balancer) e uma chave OpenAI. Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/mcp-apps-showcase/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "chatbot",
@@ -3134,7 +3341,7 @@
       "title": "gen-ui-starter — Generative UI Starter",
       "name": "gen-ui-starter",
       "description": "Starter de UI generativa dirigida por agente: o assistente monta e atualiza componentes na tela (kanban de tarefas, cards de voo, dashboards com métricas/gráficos) além do chat — template para novos projetos. Front Next.js + CopilotKit e agente LangGraph (OpenAI) numa imagem combinada, exposta via Traefik v3 com TLS.",
-      "note": "Requer a rede `web` (stack balancer) e uma chave OpenAI. Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy.",
+      "note": "Requer a rede `web` (stack balancer) e uma chave OpenAI. Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/gen-ui-starter/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "Porte: Leve"
@@ -3163,7 +3370,7 @@
       "title": "dashboard-canvas — AI Dashboard Canvas Agent",
       "name": "dashboard-canvas",
       "description": "Agente de UI generativa que monta e edita um painel interativo por conversa: fixa métricas e desenha gráficos (linha/barra/pizza) num canvas, buscando dados na web via um sub-agente de busca do Google. Front Next.js + agente Google ADK (Gemini) numa imagem combinada, exposta via Traefik v3 com TLS.",
-      "note": "Requer a rede `web` (stack balancer) e uma chave Google/Gemini. Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy.",
+      "note": "Requer a rede `web` (stack balancer) e uma chave Google/Gemini. Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/dashboard-canvas/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "Porte: Leve"
@@ -3192,7 +3399,7 @@
       "title": "shadcn-generator — AI shadcn Component Generator",
       "name": "shadcn-generator",
       "description": "Descreva uma UI em linguagem natural e receba um componente shadcn/ui interativo, renderizado ao vivo no chat e exportável como React. UI Vite + React com CopilotKit + AG-UI, runtime Hono/CopilotKit (Node/tsx) e agente Python LangGraph (OpenAI + Tavily) numa imagem combinada, exposta via Traefik v3 com TLS.",
-      "note": "Requer a rede `web` (stack balancer) e chaves OpenAI + Tavily. Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy.",
+      "note": "Requer a rede `web` (stack balancer) e chaves OpenAI + Tavily. Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/shadcn-generator/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "Porte: Leve"
@@ -3226,7 +3433,7 @@
       "title": "mcp-app-builder — AI MCP App Builder",
       "name": "mcp-app-builder",
       "description": "Descreva um app MCP no chat e receba uma instância viva renderizada inline — o agente autora um app MCP novo em runtime (o componente emitido é um app inteiro). Front Next.js + CopilotKit/AG-UI + agente Mastra, exposto via Traefik v3 com TLS. E2B é opcional (desbloqueia sandboxes novos em runtime); sem ele, usa MCP servers pré-conectados (default Excalidraw).",
-      "note": "Requer a rede `web` (stack balancer) e uma chave OpenAI. `E2B_API_KEY` é opcional (sandboxes em runtime). Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy.",
+      "note": "Requer a rede `web` (stack balancer) e uma chave OpenAI. `E2B_API_KEY` é opcional (sandboxes em runtime). Sem login próprio: proteja com forward-auth (stack authelia). DNS do FQDN apontando para o proxy. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/mcp-app-builder/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "ai",
         "development",
@@ -3262,7 +3469,7 @@
       "title": "grafana — dashboards e observabilidade",
       "name": "grafana",
       "description": "Grafana: dashboards e visualizacao de metricas/logs/traces. Sobe vazio e voce conecta os datasources (Prometheus, PostgreSQL, Loki, InfluxDB...) na UI — inclusive os deste cluster pela rede data. Publicado via Traefik v3 com TLS.",
-      "note": "Requer a rede web (balancer) e a rede data (para alcancar datasources internos pelo nome). Defina GRAFANA_ADMIN_PASSWORD. Diferente do swarmprom (que ja vem com Prometheus+Grafana): esta stack e SO o Grafana.",
+      "note": "Requer a rede web (balancer) e a rede data (para alcancar datasources internos pelo nome). Defina GRAFANA_ADMIN_PASSWORD. Diferente do swarmprom (que ja vem com Prometheus+Grafana): esta stack e SO o Grafana. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/grafana/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "monitoring",
         "tools",
