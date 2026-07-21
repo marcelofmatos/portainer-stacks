@@ -3509,6 +3509,117 @@
           "default": "latest"
         }
       ]
+    },
+    {
+      "type": 2,
+      "title": "orquestrator4proxmox — Painel de VMs Proxmox",
+      "name": "orquestrator4proxmox",
+      "description": "Painel web para operadores N1 gerenciarem VMs de cliente no Proxmox VE: listar por tag, criar por clone de template, ciclo de vida e console noVNC embutido. Autentica no LLDAP.",
+      "note": "Requer um API token de serviço no Proxmox e a rede externa `ldap` (stack lldap). Gere JWT_SECRET com <code>openssl rand -hex 32</code>. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/orquestrator4proxmox/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
+      "categories": [
+        "Virtualization",
+        "Infrastructure",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/proxmox.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "orquestrator4proxmox/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "APP_FQDN",
+          "label": "Domínio (FQDN)",
+          "description": "Ex.: painel.exemplo.com"
+        },
+        {
+          "name": "PROXMOX_URL",
+          "label": "URL do Proxmox",
+          "description": "Ex.: https://proxmox.exemplo.com:8006/"
+        },
+        {
+          "name": "PROXMOX_TOKEN_ID",
+          "label": "Proxmox token ID",
+          "description": "Formato user@realm!nome"
+        },
+        {
+          "name": "PROXMOX_TOKEN_SECRET",
+          "label": "Proxmox token secret",
+          "description": "Segredo do API token de serviço"
+        },
+        {
+          "name": "LDAP_BIND_PASSWORD",
+          "label": "Senha de bind LDAP",
+          "description": "Senha do admin do lldap"
+        },
+        {
+          "name": "JWT_SECRET",
+          "label": "JWT secret",
+          "description": "openssl rand -hex 32"
+        },
+        {
+          "name": "APP_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "latest"
+        },
+        {
+          "name": "PROXMOX_TLS_INSECURE",
+          "label": "Ignorar TLS do Proxmox",
+          "default": "false",
+          "select": [
+            {
+              "text": "Não (certificado válido)",
+              "value": "false",
+              "default": true
+            },
+            {
+              "text": "Sim (self-signed / dev)",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "name": "PROXMOX_CLIENT_TAG",
+          "label": "Tag de cliente",
+          "default": "cliente"
+        },
+        {
+          "name": "PROXMOX_HIDDEN_TAGS",
+          "label": "Tags ocultas",
+          "default": "mgmt,infra"
+        },
+        {
+          "name": "PROXMOX_TARGET_STORAGE",
+          "label": "Storage do clone",
+          "default": "local-zfs"
+        },
+        {
+          "name": "LDAP_URL",
+          "label": "Endpoint LDAP",
+          "default": "ldap://lldap_server:3890"
+        },
+        {
+          "name": "LDAP_BASE_DN",
+          "label": "Base DN",
+          "default": "dc=example,dc=com"
+        },
+        {
+          "name": "LDAP_BIND_DN",
+          "label": "Bind DN",
+          "default": "uid=admin,ou=people,dc=example,dc=com"
+        },
+        {
+          "name": "LDAP_REQUIRED_GROUP",
+          "label": "Grupo exigido (opcional)",
+          "default": ""
+        },
+        {
+          "name": "SESSION_TTL",
+          "label": "Duração da sessão",
+          "default": "8h"
+        }
+      ]
     }
   ]
 }

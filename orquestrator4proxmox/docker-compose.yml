@@ -1,0 +1,57 @@
+# Stack "orquestrator4proxmox" — painel web de VMs Proxmox para operadores N1 (Docker Swarm)
+# Proxy: Traefik v3 na rede externa `web` (TLS Let's Encrypt, certresolver=letsencryptresolver).
+# Autentica no LLDAP pela rede externa `ldap` (host lldap_server:3890). Fala com a API do Proxmox VE por HTTPS.
+#
+# Toda customização é feita por variáveis de ambiente (ver README e bloco abaixo).
+# Obrigatórias: APP_FQDN, PROXMOX_URL, PROXMOX_TOKEN_ID, PROXMOX_TOKEN_SECRET, LDAP_BIND_PASSWORD, JWT_SECRET.
+# Stateless (sem volumes) — o estado vive no Proxmox e no LLDAP.
+# Porte: Leve (128 MB → 256 MB RAM)
+# Hardware (1 réplica): mínimo 0.25 vCPU · 128 MB RAM · ideal 0.5 vCPU · 256 MB RAM
+
+services:
+
+  app:
+    image: ghcr.io/marcelofmatos/orquestrator4proxmox:${APP_IMAGE_TAG:-latest}
+    environment:
+      - PORT=8080
+      - PROXMOX_URL=${PROXMOX_URL}
+      - PROXMOX_TOKEN_ID=${PROXMOX_TOKEN_ID}
+      - PROXMOX_TOKEN_SECRET=${PROXMOX_TOKEN_SECRET}
+      - PROXMOX_TLS_INSECURE=${PROXMOX_TLS_INSECURE:-false}
+      - PROXMOX_CLIENT_TAG=${PROXMOX_CLIENT_TAG:-cliente}
+      - PROXMOX_HIDDEN_TAGS=${PROXMOX_HIDDEN_TAGS:-mgmt,infra}
+      - PROXMOX_TARGET_STORAGE=${PROXMOX_TARGET_STORAGE:-local-zfs}
+      - LDAP_URL=${LDAP_URL:-ldap://lldap_server:3890}
+      - LDAP_BASE_DN=${LDAP_BASE_DN:-dc=example,dc=com}
+      - LDAP_BIND_DN=${LDAP_BIND_DN:-uid=admin,ou=people,dc=example,dc=com}
+      - LDAP_BIND_PASSWORD=${LDAP_BIND_PASSWORD}
+      - LDAP_REQUIRED_GROUP=${LDAP_REQUIRED_GROUP:-}
+      - JWT_SECRET=${JWT_SECRET}
+      - SESSION_TTL=${SESSION_TTL:-8h}
+    networks:
+      - default
+      - web
+      - ldap
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.o4p.rule=Host(`${APP_FQDN}`)
+        - traefik.http.routers.o4p.entrypoints=websecure
+        - traefik.http.routers.o4p.tls=true
+        - traefik.http.routers.o4p.tls.certresolver=letsencryptresolver
+        - traefik.http.services.o4p.loadbalancer.server.port=8080
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  ldap:
+    external: true
+    name: ${LDAP_NET:-ldap}
+  default:
+    driver: overlay
