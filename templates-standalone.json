@@ -3534,6 +3534,11 @@
           "default": "orquestrator4proxmox"
         },
         {
+          "name": "HOST_DOMAIN",
+          "label": "Domínio das VMs (SSH)",
+          "default": ""
+        },
+        {
           "name": "PROXMOX_TLS_INSECURE",
           "label": "Ignorar TLS do Proxmox",
           "default": "false",

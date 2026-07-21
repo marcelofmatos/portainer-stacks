@@ -39,6 +39,7 @@ para ser publicado pelo Traefik. A API do Proxmox é alcançada por HTTPS (rede 
 | `JWT_SECRET` | sim | — | Segredo das sessões (`openssl rand -hex 32`) |
 | `APP_IMAGE_TAG` | não | `latest` | Tag da imagem |
 | `APP_BRAND` | não | `orquestrator4proxmox` | Marca no topo do painel (personalizável) |
+| `HOST_DOMAIN` | não | (vazio) | Sufixo de domínio das VMs p/ a instrução SSH (`ssh <user>@<vm>.<HOST_DOMAIN>`) |
 | `PROXMOX_TLS_INSECURE` | não | `false` | `true` só p/ cert self-signed (dev) |
 | `PROXMOX_CLIENT_TAG` | não | `cliente` | Tag que revela VMs de cliente |
 | `PROXMOX_HIDDEN_TAGS` | não | `mgmt,infra` | Tags que ocultam VMs |
