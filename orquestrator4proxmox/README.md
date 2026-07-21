@@ -38,11 +38,12 @@ para ser publicado pelo Traefik. A API do Proxmox é alcançada por HTTPS (rede 
 | `LDAP_BIND_PASSWORD` | sim | — | Senha da conta de bind (admin do lldap) |
 | `JWT_SECRET` | sim | — | Segredo das sessões (`openssl rand -hex 32`) |
 | `APP_IMAGE_TAG` | não | `latest` | Tag da imagem |
+| `APP_BRAND` | não | `orquestrator4proxmox` | Marca no topo do painel (personalizável) |
 | `PROXMOX_TLS_INSECURE` | não | `false` | `true` só p/ cert self-signed (dev) |
 | `PROXMOX_CLIENT_TAG` | não | `cliente` | Tag que revela VMs de cliente |
 | `PROXMOX_HIDDEN_TAGS` | não | `mgmt,infra` | Tags que ocultam VMs |
 | `PROXMOX_TARGET_STORAGE` | não | `local-zfs` | Storage de destino do clone |
-| `LDAP_URL` | não | `ldap://lldap_server:3890` | Endpoint LDAP |
+| `LDAP_URL` | não | `ldap://lldap-server-1:3890` | Endpoint LDAP (standalone; em Swarm use `lldap_server`) |
 | `LDAP_BASE_DN` | não | `dc=example,dc=com` | Base DN |
 | `LDAP_BIND_DN` | não | `uid=admin,ou=people,dc=example,dc=com` | Conta de bind |
 | `LDAP_REQUIRED_GROUP` | não | (vazio) | Restringe login a um grupo |
@@ -70,7 +71,7 @@ para ser publicado pelo Traefik. A API do Proxmox é alcançada por HTTPS (rede 
 | Sintoma | Causa | Ação |
 |---|---|---|
 | Login falha (bind) | conta/base LDAP erradas | conferir `LDAP_BIND_DN`/`LDAP_BASE_DN`; senha em `LDAP_BIND_PASSWORD` |
-| App não acha o LDAP | fora da rede `ldap` | anexar à rede externa `ldap`; host = `lldap_server:3890` |
+| App não acha o LDAP | fora da rede `ldap` | anexar à rede externa `ldap`; host = `lldap-server-1:3890` (standalone) ou `lldap_server` (Swarm) |
 | 404/sem TLS na UI | fora da rede `web` ou DNS | conferir labels/rede e o DNS de `APP_FQDN` |
 | Erro TLS ao falar com o Proxmox | cert self-signed | `PROXMOX_TLS_INSECURE=true` (dev) ou usar cert válido |
 | Nenhuma VM aparece | tags divergentes | as VMs de cliente precisam da tag `PROXMOX_CLIENT_TAG` (default `cliente`) |

@@ -13,6 +13,7 @@ services:
       - ldap
     environment:
       - PORT=8080
+      - APP_BRAND=${APP_BRAND:-orquestrator4proxmox}
       - PROXMOX_URL=${PROXMOX_URL}
       - PROXMOX_TOKEN_ID=${PROXMOX_TOKEN_ID}
       - PROXMOX_TOKEN_SECRET=${PROXMOX_TOKEN_SECRET}
@@ -20,7 +21,9 @@ services:
       - PROXMOX_CLIENT_TAG=${PROXMOX_CLIENT_TAG:-cliente}
       - PROXMOX_HIDDEN_TAGS=${PROXMOX_HIDDEN_TAGS:-mgmt,infra}
       - PROXMOX_TARGET_STORAGE=${PROXMOX_TARGET_STORAGE:-local-zfs}
-      - LDAP_URL=${LDAP_URL:-ldap://lldap_server:3890}
+      # standalone: o lldap é alcançado pelo nome do container (<stack>-server-1) ou pelo alias
+      # do serviço `server`. Em Swarm o host é `lldap_server` (ver docker-compose.yml).
+      - LDAP_URL=${LDAP_URL:-ldap://lldap-server-1:3890}
       - LDAP_BASE_DN=${LDAP_BASE_DN:-dc=example,dc=com}
       - LDAP_BIND_DN=${LDAP_BIND_DN:-uid=admin,ou=people,dc=example,dc=com}
       - LDAP_BIND_PASSWORD=${LDAP_BIND_PASSWORD}

@@ -3529,6 +3529,11 @@
           "default": "latest"
         },
         {
+          "name": "APP_BRAND",
+          "label": "Marca (topo)",
+          "default": "orquestrator4proxmox"
+        },
+        {
           "name": "PROXMOX_TLS_INSECURE",
           "label": "Ignorar TLS do Proxmox",
           "default": "false",
