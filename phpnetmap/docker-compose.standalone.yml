@@ -1,7 +1,7 @@
 # Stack "phpnetmap" — variante Docker Compose (host standalone). Variáveis, portas e uso no README.
 # Pré-requisito: crie as redes externas usadas pela stack (ex.: docker network create web; e data/ldap se aplicável).
 services:
-  phpnetmap:
+  app:
     restart: unless-stopped
     image: ghcr.io/marcelofmatos/phpnetmap:${PHPNETMAP_IMAGE_TAG:-latest}
     networks:

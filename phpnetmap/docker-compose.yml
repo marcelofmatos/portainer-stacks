@@ -9,7 +9,7 @@
 # Porte: Leve (64 MB → 512 MB RAM)
 # Hardware (1 réplica): mínimo 0.5 vCPU · 256 MB RAM · 5 GB disco · ideal 1 vCPU · 512 MB RAM · 10 GB disco
 services:
-  phpnetmap:
+  app:
     image: ghcr.io/marcelofmatos/phpnetmap:${PHPNETMAP_IMAGE_TAG:-latest}
     networks:
       - default
