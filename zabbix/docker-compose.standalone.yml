@@ -50,7 +50,7 @@ services:
     image: postgres:${ZABBIX_DB_IMAGE_TAG:-16-alpine}
     networks:
     - default
-    - data
+    #- data
     environment:
     - POSTGRES_DB=${ZABBIX_DB_NAME:-zabbix}
     - POSTGRES_USER=${ZABBIX_DB_USER:-postgres}

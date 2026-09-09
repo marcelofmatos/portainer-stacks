@@ -11,7 +11,7 @@ services:
     networks:
       - default
       - web
-      - data
+      #- data
     volumes:
       # haproxy.cfg via arquivo local do host:
       - ${HAPROXY_CONFIG_FILE:-./config/haproxy.cfg}:/usr/local/etc/haproxy/haproxy.cfg:ro

@@ -85,12 +85,18 @@ services:
     image: mariadb:${ESPOCRM_DB_IMAGE_TAG:-11}
     networks:
       - default # acesso do app
-      - data # SÓ para ferramentas de admin (phpmyadmin) via host `espocrm_db`
+      #- data # SÓ para ferramentas de admin (phpmyadmin) via host `espocrm_db`
     environment:
       - MARIADB_DATABASE=${ESPOCRM_DB_NAME:-espocrm}
       - MARIADB_USER=${ESPOCRM_DB_USER:-espocrm}
       - MARIADB_PASSWORD=${ESPOCRM_DB_PASSWORD} # OBRIGATÓRIA
       - MARIADB_ROOT_PASSWORD=${ESPOCRM_DB_ROOT_PASSWORD} # OBRIGATÓRIA (senha root do MariaDB)
+    # Acesso externo opcional (modo host publica 3306 no nó). Descomente se precisar
+    # conectar de fora do cluster. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 3306
+    #     published: ${ESPOCRM_DB_EXTERNAL_PORT:-3307}
+    #     mode: host
     volumes:
       - db-data:/var/lib/mysql # ← copie este volume para migrar de host
     deploy:

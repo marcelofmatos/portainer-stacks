@@ -59,11 +59,17 @@ services:
     image: postgres:${EVOLUTION_DB_IMAGE_TAG:-16-alpine}
     networks:
       - default # acesso do app
-      - data # SÓ para ferramentas de admin (pgadmin4) via host `evolution-api_db`
+      #- data # SÓ para ferramentas de admin (pgadmin4) via host `evolution-api_db`
     environment:
       - POSTGRES_DB=${EVOLUTION_DB_NAME:-evolution}
       - POSTGRES_USER=${EVOLUTION_DB_USER:-postgres}
       - POSTGRES_PASSWORD=${EVOLUTION_DB_PASSWORD} # OBRIGATÓRIA
+    # Acesso externo opcional (modo host publica 5432 no nó). Descomente se precisar
+    # conectar de fora do cluster. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 5432
+    #     published: ${EVOLUTION_DB_EXTERNAL_PORT:-5435}
+    #     mode: host
     volumes:
       - db-data:/var/lib/postgresql/data # ← copie este volume para migrar de host
     deploy:
@@ -79,7 +85,11 @@ services:
     command: redis-server --save 60 1
     networks:
       - default # acesso do app
-      - data # SÓ para ferramentas de admin (redisinsight) via host `evolution-api_redis`
+      #- data # SÓ para ferramentas de admin (redisinsight) via host `evolution-api_redis`
+    # ports:                       # acesso externo opcional (cuidado: exponha só com senha)
+    #   - target: 6379
+    #     published: ${EVOLUTION_REDIS_EXTERNAL_PORT:-6380}
+    #     mode: host
     volumes:
       - redis-data:/data # ← copie este volume para migrar de host
     deploy:

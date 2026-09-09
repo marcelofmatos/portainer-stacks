@@ -49,7 +49,7 @@ services:
     image: postgres:${TWENTY_DB_IMAGE_TAG:-16-alpine}
     networks:
     - default
-    - data
+    #- data
     environment:
     - POSTGRES_DB=${TWENTY_DB_NAME:-twenty}
     - POSTGRES_USER=${TWENTY_DB_USER:-postgres}
@@ -62,7 +62,7 @@ services:
     command: redis-server --save 60 1
     networks:
     - default
-    - data
+    #- data
     volumes:
     - redis-data:/data
 networks:

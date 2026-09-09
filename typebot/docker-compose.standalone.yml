@@ -62,7 +62,7 @@ services:
     image: postgres:${TYPEBOT_DB_IMAGE_TAG:-16-alpine}
     networks:
     - default
-    - data
+    #- data
     environment:
     - POSTGRES_DB=${TYPEBOT_DB_NAME:-typebot}
     - POSTGRES_USER=${TYPEBOT_DB_USER:-postgres}

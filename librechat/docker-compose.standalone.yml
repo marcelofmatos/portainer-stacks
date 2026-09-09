@@ -49,7 +49,7 @@ services:
     image: mongo:${LIBRECHAT_MONGO_IMAGE_TAG:-7}
     networks:
     - default
-    - data
+    #- data
     environment:
     - MONGO_INITDB_ROOT_USERNAME=${LIBRECHAT_MONGO_USER:-root}
     - MONGO_INITDB_ROOT_PASSWORD=${LIBRECHAT_MONGO_PASSWORD}

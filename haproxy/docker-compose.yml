@@ -21,7 +21,7 @@ services:
     networks:
       - default
       - web
-      - data
+      #- data
     configs:
       - source: haproxy_config
         target: /usr/local/etc/haproxy/haproxy.cfg

@@ -99,11 +99,17 @@ services:
     image: postgres:${CHATWOOT_DB_IMAGE_TAG:-16-alpine}
     networks:
       - default # acesso dos apps
-      - data # SÓ para ferramentas de admin (pgadmin4) via host `chatwoot_db`
+      #- data # SÓ para ferramentas de admin (pgadmin4) via host `chatwoot_db`
     environment:
       - POSTGRES_DB=${CHATWOOT_DB_NAME:-chatwoot}
       - POSTGRES_USER=${CHATWOOT_DB_USER:-postgres}
       - POSTGRES_PASSWORD=${CHATWOOT_DB_PASSWORD} # OBRIGATÓRIA
+    # Acesso externo opcional (modo host publica 5432 no nó). Descomente se precisar
+    # conectar de fora do cluster. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 5432
+    #     published: ${CHATWOOT_DB_EXTERNAL_PORT:-5434}
+    #     mode: host
     volumes:
       - db-data:/var/lib/postgresql/data # ← copie este volume para migrar de host
     deploy:
@@ -119,7 +125,11 @@ services:
     command: redis-server --save 60 1
     networks:
       - default # acesso dos apps
-      - data # SÓ para ferramentas de admin (redisinsight) via host `chatwoot_redis`
+      #- data # SÓ para ferramentas de admin (redisinsight) via host `chatwoot_redis`
+    # ports:                       # acesso externo opcional (cuidado: exponha só com senha)
+    #   - target: 6379
+    #     published: ${CHATWOOT_REDIS_EXTERNAL_PORT:-6381}
+    #     mode: host
     volumes:
       - redis-data:/data # ← copie este volume para migrar de host
     deploy:

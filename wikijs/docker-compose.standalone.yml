@@ -29,7 +29,7 @@ services:
     image: postgres:${WIKIJS_DB_IMAGE_TAG:-16-alpine}
     networks:
     - default
-    - data
+    #- data
     environment:
     - POSTGRES_DB=${WIKIJS_DB_NAME:-wikijs}
     - POSTGRES_USER=${WIKIJS_DB_USER:-wikijs}

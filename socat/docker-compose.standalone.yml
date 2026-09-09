@@ -7,7 +7,7 @@ services:
     command: TCP-LISTEN:${SOCAT_LISTEN_PORT},fork,reuseaddr TCP:${SOCAT_TARGET}
     networks:
     - default
-    - data
+    #- data
     - web
     ports:
     - target: ${SOCAT_LISTEN_PORT}

@@ -14,7 +14,7 @@ services:
     networks:
       - default
       - web
-      - data
+      #- data
     volumes:
       - redisinsight-data:/data
     deploy:

@@ -74,7 +74,7 @@ services:
     image: postgres:${CHATWOOT_DB_IMAGE_TAG:-16-alpine}
     networks:
     - default
-    - data
+    #- data
     environment:
     - POSTGRES_DB=${CHATWOOT_DB_NAME:-chatwoot}
     - POSTGRES_USER=${CHATWOOT_DB_USER:-postgres}
@@ -87,7 +87,7 @@ services:
     command: redis-server --save 60 1
     networks:
     - default
-    - data
+    #- data
     volumes:
     - redis-data:/data
 networks:

@@ -15,7 +15,7 @@ services:
     networks:
       - default
       - web
-      - data
+      #- data
     environment:
       - QDRANT__SERVICE__API_KEY=${QDRANT_API_KEY:?QDRANT_API_KEY e obrigatoria}
     volumes:

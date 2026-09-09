@@ -37,7 +37,10 @@ x-shared-env: &shared-env
 services:
   api:
     image: langgenius/dify-api:${DIFY_IMAGE_TAG:-latest}
-    networks: [default, web, data]
+    networks:
+      - default
+      - web
+      #- data
     environment:
       <<: *shared-env
       MODE: api
@@ -62,7 +65,9 @@ services:
 
   worker:
     image: langgenius/dify-api:${DIFY_IMAGE_TAG:-latest}
-    networks: [default, data]
+    networks:
+      - default
+      #- data
     environment:
       <<: *shared-env
       MODE: worker

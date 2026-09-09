@@ -7,7 +7,7 @@ services:
     networks:
     - default
     - web
-    - data
+    #- data
     environment:
     - ME_CONFIG_MONGODB_URL=mongodb://${MONGOEXPRESS_MONGO_USER:-root}:${MONGOEXPRESS_MONGO_PASSWORD}@${MONGOEXPRESS_MONGO_HOST:-mongodb}:${MONGOEXPRESS_MONGO_PORT:-27017}/?authSource=admin
     - ME_CONFIG_MONGODB_ENABLE_ADMIN=true

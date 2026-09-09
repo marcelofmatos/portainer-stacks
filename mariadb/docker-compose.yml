@@ -20,7 +20,8 @@ services:
     image: mariadb:${MARIADB_IMAGE_TAG:-11}
     hostname: mariadb
     networks:
-      - data
+      - default
+      #- data
     # Acesso externo opcional (modo host publica 3306 no nó). Descomente se precisar
     # conectar de fora do cluster. Veja a nota no README sobre segurança.
     # ports:

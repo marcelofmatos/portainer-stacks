@@ -15,7 +15,8 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_IMAGE_TAG:-8.15.3}
     hostname: elasticsearch
     networks:
-      - data
+      - default
+      #- data
     # Acesso externo opcional (modo host publica 9200 no nó). Descomente só se precisar.
     # ports:
     #   - target: 9200

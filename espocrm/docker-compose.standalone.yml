@@ -49,7 +49,7 @@ services:
     image: mariadb:${ESPOCRM_DB_IMAGE_TAG:-11}
     networks:
     - default
-    - data
+    #- data
     environment:
     - MARIADB_DATABASE=${ESPOCRM_DB_NAME:-espocrm}
     - MARIADB_USER=${ESPOCRM_DB_USER:-espocrm}

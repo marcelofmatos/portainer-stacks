@@ -8,7 +8,7 @@ services:
     restart: unless-stopped
     networks:
       - web # exposto pelo Traefik
-      - data # alcança datasources internos pelo nome (prometheus, postgres...)
+      #- data # alcança datasources internos pelo nome (prometheus, postgres...)
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD} # OBRIGATÓRIA (segredo)

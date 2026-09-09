@@ -55,11 +55,17 @@ services:
     image: postgres:${WIKIJS_DB_IMAGE_TAG:-16-alpine}
     networks:
       - default # acesso do app
-      - data # SÓ para ferramentas de admin (pgadmin4) via host `wikijs_db`
+      #- data # SÓ para ferramentas de admin (pgadmin4) via host `wikijs_db`
     environment:
       - POSTGRES_DB=${WIKIJS_DB_NAME:-wikijs}
       - POSTGRES_USER=${WIKIJS_DB_USER:-wikijs}
       - POSTGRES_PASSWORD=${WIKIJS_DB_PASSWORD} # OBRIGATÓRIA
+    # Acesso externo opcional (modo host publica 5432 no nó). Descomente se precisar
+    # conectar de fora do cluster. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 5432
+    #     published: ${WIKIJS_DB_EXTERNAL_PORT:-5439}
+    #     mode: host
     volumes:
       - db-data:/var/lib/postgresql/data # ← copie este volume para migrar de host
     deploy:

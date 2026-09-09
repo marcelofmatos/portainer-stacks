@@ -83,11 +83,17 @@ services:
     image: postgres:${TYPEBOT_DB_IMAGE_TAG:-16-alpine}
     networks:
       - default # acesso dos apps
-      - data # SÓ para ferramentas de admin (pgadmin4) via host `typebot_db`
+      #- data # SÓ para ferramentas de admin (pgadmin4) via host `typebot_db`
     environment:
       - POSTGRES_DB=${TYPEBOT_DB_NAME:-typebot}
       - POSTGRES_USER=${TYPEBOT_DB_USER:-postgres}
       - POSTGRES_PASSWORD=${TYPEBOT_DB_PASSWORD} # OBRIGATÓRIA
+    # Acesso externo opcional (modo host publica 5432 no nó). Descomente se precisar
+    # conectar de fora do cluster. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 5432
+    #     published: ${TYPEBOT_DB_EXTERNAL_PORT:-5438}
+    #     mode: host
     volumes:
       - db-data:/var/lib/postgresql/data # ← copie este volume para migrar de host
     deploy:

@@ -57,11 +57,17 @@ services:
     image: postgres:${LANGFUSE_DB_IMAGE_TAG:-16-alpine}
     networks:
       - default # acesso do app
-      - data # SÓ para ferramentas de admin (pgadmin4) via host `langfuse_db`
+      #- data # SÓ para ferramentas de admin (pgadmin4) via host `langfuse_db`
     environment:
       - POSTGRES_DB=${LANGFUSE_DB_NAME:-langfuse}
       - POSTGRES_USER=${LANGFUSE_DB_USER:-postgres}
       - POSTGRES_PASSWORD=${LANGFUSE_DB_PASSWORD} # OBRIGATÓRIA
+    # Acesso externo opcional (modo host publica 5432 no nó). Descomente se precisar
+    # conectar de fora do cluster. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 5432
+    #     published: ${LANGFUSE_DB_EXTERNAL_PORT:-5436}
+    #     mode: host
     volumes:
       - db-data:/var/lib/postgresql/data # ← copie este volume para migrar de host
     deploy:

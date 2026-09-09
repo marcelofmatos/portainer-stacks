@@ -81,11 +81,17 @@ services:
     image: postgres:${ZABBIX_DB_IMAGE_TAG:-16-alpine}
     networks:
       - default # acesso do server e do web
-      - data # SÓ para ferramentas de admin (pgadmin4) via host `zabbix_db`
+      #- data # SÓ para ferramentas de admin (pgadmin4) via host `zabbix_db`
     environment:
       - POSTGRES_DB=${ZABBIX_DB_NAME:-zabbix}
       - POSTGRES_USER=${ZABBIX_DB_USER:-postgres}
       - POSTGRES_PASSWORD=${ZABBIX_DB_PASSWORD} # OBRIGATÓRIA
+    # Acesso externo opcional (modo host publica 5432 no nó). Descomente se precisar
+    # conectar de fora do cluster. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 5432
+    #     published: ${ZABBIX_DB_EXTERNAL_PORT:-5440}
+    #     mode: host
     volumes:
       - db-data:/var/lib/postgresql/data # ← copie este volume para migrar de host
     deploy:

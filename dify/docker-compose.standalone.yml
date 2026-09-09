@@ -33,7 +33,7 @@ services:
     networks:
     - default
     - web
-    - data
+    #- data
     environment:
       LOG_LEVEL: INFO
       SECRET_KEY: ${DIFY_SECRET_KEY}
@@ -78,7 +78,7 @@ services:
     image: langgenius/dify-api:${DIFY_IMAGE_TAG:-latest}
     networks:
     - default
-    - data
+    #- data
     environment:
       LOG_LEVEL: INFO
       SECRET_KEY: ${DIFY_SECRET_KEY}

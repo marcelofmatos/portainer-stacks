@@ -29,7 +29,7 @@ services:
     image: postgres:${LANGFUSE_DB_IMAGE_TAG:-16-alpine}
     networks:
     - default
-    - data
+    #- data
     environment:
     - POSTGRES_DB=${LANGFUSE_DB_NAME:-langfuse}
     - POSTGRES_USER=${LANGFUSE_DB_USER:-postgres}

@@ -56,11 +56,17 @@ services:
     image: postgres:${BOTPRESS_DB_IMAGE_TAG:-16-alpine}
     networks:
       - default # acesso do app
-      - data # SÓ para ferramentas de admin (pgadmin4) via host `botpress_db`
+      #- data # SÓ para ferramentas de admin (pgadmin4) via host `botpress_db`
     environment:
       - POSTGRES_DB=${BOTPRESS_DB_NAME:-botpress}
       - POSTGRES_USER=${BOTPRESS_DB_USER:-postgres}
       - POSTGRES_PASSWORD=${BOTPRESS_DB_PASSWORD} # OBRIGATÓRIA
+    # Acesso externo opcional (modo host publica 5432 no nó). Descomente se precisar
+    # conectar de fora do cluster. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 5432
+    #     published: ${BOTPRESS_DB_EXTERNAL_PORT:-5433}
+    #     mode: host
     volumes:
       - db-data:/var/lib/postgresql/data # ← copie este volume para migrar de host
     deploy:

@@ -6,7 +6,8 @@ services:
     image: mariadb:${MARIADB_IMAGE_TAG:-11}
     hostname: mariadb
     networks:
-    - data
+    - default
+    #- data
     environment:
     - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
     - MARIADB_DATABASE=${MARIADB_DATABASE:-appdb}

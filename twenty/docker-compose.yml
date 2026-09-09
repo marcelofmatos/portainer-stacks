@@ -85,11 +85,17 @@ services:
     image: postgres:${TWENTY_DB_IMAGE_TAG:-16-alpine}
     networks:
       - default # acesso do app
-      - data # SÓ para ferramentas de admin (pgadmin4) via host `twenty_db`
+      #- data # SÓ para ferramentas de admin (pgadmin4) via host `twenty_db`
     environment:
       - POSTGRES_DB=${TWENTY_DB_NAME:-twenty}
       - POSTGRES_USER=${TWENTY_DB_USER:-postgres}
       - POSTGRES_PASSWORD=${TWENTY_DB_PASSWORD} # OBRIGATÓRIA
+    # Acesso externo opcional (modo host publica 5432 no nó). Descomente se precisar
+    # conectar de fora do cluster. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 5432
+    #     published: ${TWENTY_DB_EXTERNAL_PORT:-5437}
+    #     mode: host
     volumes:
       - db-data:/var/lib/postgresql/data # ← copie este volume para migrar de host
     deploy:
@@ -105,7 +111,11 @@ services:
     command: redis-server --save 60 1 # persistência leve em disco
     networks:
       - default # acesso do app
-      - data # SÓ para ferramentas de admin (redisinsight) via host `twenty_redis`
+      #- data # SÓ para ferramentas de admin (redisinsight) via host `twenty_redis`
+    # ports:                       # acesso externo opcional (cuidado: exponha só com senha)
+    #   - target: 6379
+    #     published: ${TWENTY_REDIS_EXTERNAL_PORT:-6382}
+    #     mode: host
     volumes:
       - redis-data:/data # ← copie este volume para migrar de host
     deploy:

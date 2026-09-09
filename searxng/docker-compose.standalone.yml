@@ -7,7 +7,7 @@ services:
     networks:
     - default
     - web
-    - data
+    #- data
     environment:
     - SEARXNG_BASE_URL=https://${SEARXNG_FQDN}/
     - SEARXNG_SECRET=${SEARXNG_SECRET}

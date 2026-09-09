@@ -18,7 +18,7 @@ services:
     image: grafana/grafana:${GRAFANA_IMAGE_TAG:-latest}
     networks:
       - web # exposto pelo Traefik
-      - data # alcança datasources internos do cluster pelo nome (prometheus, postgres...)
+      #- data # alcança datasources internos do cluster pelo nome (prometheus, postgres...)
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD} # OBRIGATÓRIA (segredo)

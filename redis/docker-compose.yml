@@ -22,7 +22,8 @@ services:
     volumes:
       - redis-data:/data
     networks:
-      - data
+      - default
+      #- data
     # ports:                       # acesso externo opcional (cuidado: exponha só com senha)
     #   - target: 6379
     #     published: ${REDIS_PORT:-6379}

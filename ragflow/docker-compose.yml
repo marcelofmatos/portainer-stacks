@@ -15,7 +15,7 @@ services:
     networks:
       - default
       - web
-      - data
+      #- data
     environment:
       - DOC_ENGINE=elasticsearch
       - MYSQL_HOST=${RAGFLOW_MYSQL_HOST:-mariadb}

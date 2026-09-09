@@ -6,7 +6,8 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_IMAGE_TAG:-8.15.3}
     hostname: elasticsearch
     networks:
-    - data
+    - default
+    #- data
     environment:
     - discovery.type=single-node
     - cluster.name=${ELASTIC_CLUSTER_NAME:-portainer-stacks}

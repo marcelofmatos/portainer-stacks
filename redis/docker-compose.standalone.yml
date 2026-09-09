@@ -17,7 +17,8 @@ services:
     volumes:
     - redis-data:/data
     networks:
-    - data
+    - default
+    #- data
 networks:
   data:
     external: true

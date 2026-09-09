@@ -31,7 +31,7 @@ services:
     image: mariadb:${WORDPRESS_DB_IMAGE_TAG:-11}
     networks:
     - default
-    - data
+    #- data
     environment:
     - MARIADB_DATABASE=${WORDPRESS_DB_NAME:-wordpress}
     - MARIADB_USER=${WORDPRESS_DB_USER:-wordpress}

@@ -70,10 +70,16 @@ services:
     image: mongo:${LIBRECHAT_MONGO_IMAGE_TAG:-7}
     networks:
       - default # acesso do app
-      - data # SÓ para ferramentas de admin (mongo-express) via host `librechat_db`
+      #- data # SÓ para ferramentas de admin (mongo-express) via host `librechat_db`
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${LIBRECHAT_MONGO_USER:-root}
       - MONGO_INITDB_ROOT_PASSWORD=${LIBRECHAT_MONGO_PASSWORD} # OBRIGATÓRIA
+    # Acesso externo opcional (modo host publica 27017 no nó). Descomente se precisar
+    # conectar de fora do cluster. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 27017
+    #     published: ${LIBRECHAT_DB_EXTERNAL_PORT:-27018}
+    #     mode: host
     volumes:
       - db-data:/data/db # ← copie este volume para migrar de host
     deploy:
