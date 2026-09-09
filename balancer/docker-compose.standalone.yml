@@ -15,6 +15,14 @@ services:
       - "--providers.docker.endpoint=unix:///var/run/docker.sock"
       - "--providers.docker.exposedByDefault=false"
       - "--providers.docker.network=${PROXY_NET:-web}"
+      # --- Provider de arquivos (rotas dinamicas) ---
+      # Descomente estas 2 linhas + o volume /etc/traefik/dynamic abaixo para o
+      # Traefik ler routers/services de arquivos YAML num diretorio observado
+      # (hot-reload, sem recriar o container). Util para rotear para alvos que nao
+      # sao containers locais (ex.: hosts ou IPs externos), 1 arquivo por alvo.
+      # Exemplo de arquivo: ./dynamic/exemplo-servico.yml
+      #- "--providers.file.directory=/etc/traefik/dynamic"
+      #- "--providers.file.watch=true"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
@@ -48,6 +56,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - certificates:/etc/traefik/letsencrypt
+      # diretorio de rotas dinamicas (descomente junto das flags --providers.file acima):
+      #- /etc/traefik/dynamic:/etc/traefik/dynamic:ro
       - logs:/logs
     networks:
       - web

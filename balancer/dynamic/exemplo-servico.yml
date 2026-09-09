@@ -1,0 +1,36 @@
+# Exemplo de arquivo dinamico do Traefik (file provider).
+#
+# Coloque um arquivo YAML como este por alvo em /etc/traefik/dynamic/. Com
+# `--providers.file.directory=/etc/traefik/dynamic` e `--providers.file.watch=true`
+# (ver comentarios no docker-compose), o Traefik carrega/recarrega estes routers e
+# services automaticamente, sem recriar o container.
+#
+# Serve para rotear um Host para um backend que NAO e um container local — por
+# exemplo um host ou IP externo alcancavel pela rede. Cada backend costuma expor
+# varias portas (um router+service por porta/subdominio).
+#
+# Ajuste: os Host(...), as URLs dos servers e o certResolver (aqui o mesmo do
+# entrypoint websecure). O TLS Let's Encrypt e emitido por Host normalmente.
+
+http:
+  routers:
+    exemplo-app:
+      rule: "Host(`app.exemplo.com`)"
+      entryPoints: [websecure]
+      service: exemplo-app
+      tls: { certResolver: letsencryptresolver }
+    exemplo-api:
+      rule: "Host(`api.exemplo.com`)"
+      entryPoints: [websecure]
+      service: exemplo-api
+      tls: { certResolver: letsencryptresolver }
+
+  services:
+    exemplo-app:
+      loadBalancer:
+        servers:
+          - url: "http://backend.interno.example:8080"
+    exemplo-api:
+      loadBalancer:
+        servers:
+          - url: "http://backend.interno.example:9000"
