@@ -21,6 +21,12 @@ services:
       - LLDAP_LDAP_BASE_DN=${LLDAP_BASE_DN:-dc=example,dc=com}
       - LLDAP_LDAP_USER_DN=${LLDAP_ADMIN_USERNAME:-admin}
       - LLDAP_LDAP_USER_PASS=${LLDAP_ADMIN_PASSWORD}
+    # Acesso direto opcional (modo host publica 17170 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 17170
+    #     published: ${LLDAP_EXTERNAL_PORT:-8133}
+    #     mode: host
     volumes:
       - lldap-data:/data
     networks:

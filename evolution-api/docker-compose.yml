@@ -35,6 +35,12 @@ services:
       - CACHE_REDIS_PREFIX_KEY=evolution
       - CACHE_REDIS_SAVE_INSTANCES=false
       - CACHE_LOCAL_ENABLED=false
+    # Acesso direto opcional (modo host publica 8080 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 8080
+    #     published: ${EVOLUTION_EXTERNAL_PORT:-8118}
+    #     mode: host
     volumes:
       - evolution-instances:/evolution/instances
     deploy:

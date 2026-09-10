@@ -20,6 +20,12 @@ services:
       - REDIRECT_TARGET=${REDIRECT_TARGET}
       # REDIRECT_TYPE: "redirect" (302 temporário) ou "redirect permanent" (301)
       - REDIRECT_TYPE=${REDIRECT_TYPE:-redirect}
+    # Acesso direto opcional (modo host publica 80 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 80
+    #     published: ${REDIRECT_EXTERNAL_PORT:-8150}
+    #     mode: host
     deploy:
       mode: replicated
       replicas: 1 # 0 = desabilita este redirect sem remover o bloco

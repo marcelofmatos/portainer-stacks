@@ -33,6 +33,12 @@ services:
       - REDIS_PASSWORD=${RAGFLOW_REDIS_PASSWORD:-}
       - SVR_HTTP_PORT=9380
       - TIMEZONE=${RAGFLOW_TIMEZONE:-America/Sao_Paulo}
+    # Acesso direto opcional (modo host publica 80 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 80
+    #     published: ${RAGFLOW_EXTERNAL_PORT:-8149}
+    #     mode: host
     volumes:
       - ragflow-data:/root/.ragflow
     deploy:

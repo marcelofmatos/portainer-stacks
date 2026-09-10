@@ -56,6 +56,12 @@ services:
       - SYNAPSE_DB_USER=${SYNAPSE_DB_USER:-synapse}
       - SYNAPSE_DB_PASSWORD=${MATRIX_DB_PASSWORD} # OBRIGATÓRIA (mesma senha do serviço db)
       - SYNAPSE_ENABLE_REGISTRATION=${SYNAPSE_ENABLE_REGISTRATION:-false} # registro aberto na web (cuidado)
+    # Acesso direto opcional (modo host publica 8008 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 8008
+    #     published: ${MATRIX_EXTERNAL_PORT:-8115}
+    #     mode: host
     volumes:
       - synapse-data:/data # homeserver.yaml, signing key, mídia
     deploy:
@@ -92,6 +98,12 @@ services:
       - "ELEMENT_TAGLINE=${ELEMENT_TAGLINE-Converse em tempo real com sua equipe e seus clientes num chat <strong>seguro</strong> e <strong>criptografado</strong>, direto do navegador.}"
     networks:
       - web # exposto pelo Traefik (o cliente fala com o homeserver pelo navegador, não pela rede interna)
+    # Acesso direto opcional (modo host publica 8080 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 8080
+    #     published: ${ELEMENT_EXTERNAL_PORT:-8116}
+    #     mode: host
     deploy:
       mode: replicated
       replicas: 1

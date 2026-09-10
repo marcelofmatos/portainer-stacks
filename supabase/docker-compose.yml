@@ -48,6 +48,12 @@ services:
     networks:
       - default
       - web
+    # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 3000
+    #     published: ${SUPABASE_STUDIO_EXTERNAL_PORT:-8156}
+    #     mode: host
     deploy:
       <<: *deploy-worker
       labels:
@@ -75,6 +81,12 @@ services:
       SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
       DASHBOARD_USERNAME: ${DASHBOARD_USERNAME}
       DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD}
+    # Acesso direto opcional (modo host publica 8000 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 8000
+    #     published: ${SUPABASE_API_EXTERNAL_PORT:-8157}
+    #     mode: host
     volumes:
       - ./config/kong.yml:/home/kong/temp.yml:ro
     networks:

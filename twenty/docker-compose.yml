@@ -35,6 +35,12 @@ services:
       - REDIS_URL=${TWENTY_REDIS_URL:-redis://redis:6379}
       - APP_SECRET=${TWENTY_APP_SECRET}
       - STORAGE_TYPE=local
+    # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 3000
+    #     published: ${TWENTY_EXTERNAL_PORT:-8159}
+    #     mode: host
     volumes:
       - twenty-data:/app/packages/twenty-server/.local-storage
     deploy:

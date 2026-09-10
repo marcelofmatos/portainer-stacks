@@ -16,6 +16,12 @@ services:
     environment:
       - OLLAMA_HOST=0.0.0.0:11434
       - OLLAMA_KEEP_ALIVE=${OLLAMA_KEEP_ALIVE:-5m}
+    # Acesso direto opcional (modo host publica 11434 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 11434
+    #     published: ${OLLAMA_EXTERNAL_PORT:-8140}
+    #     mode: host
     volumes:
       - ollama-data:/root/.ollama
     networks:

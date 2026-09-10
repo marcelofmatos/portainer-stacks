@@ -32,6 +32,12 @@ services:
       - DATABASE_URL=postgres://${BOTPRESS_DB_USER:-postgres}:${BOTPRESS_DB_PASSWORD}@${BOTPRESS_DB_HOST:-db}:${BOTPRESS_DB_PORT:-5432}/${BOTPRESS_DB_NAME:-botpress}
       - BP_PRODUCTION=true
       - PORT=3000
+    # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 3000
+    #     published: ${BOTPRESS_EXTERNAL_PORT:-8104}
+    #     mode: host
     volumes:
       - botpress-data:/botpress/data
     deploy:

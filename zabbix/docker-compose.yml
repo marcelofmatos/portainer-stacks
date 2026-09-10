@@ -46,6 +46,12 @@ services:
       - POSTGRES_PASSWORD=${ZABBIX_DB_PASSWORD}
       - POSTGRES_DB=${ZABBIX_DB_NAME:-zabbix}
       - PHP_TZ=${ZABBIX_TIMEZONE:-America/Sao_Paulo}
+    # Acesso direto opcional (modo host publica 8080 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 8080
+    #     published: ${ZABBIX_EXTERNAL_PORT:-8166}
+    #     mode: host
     deploy:
       mode: replicated
       replicas: 1

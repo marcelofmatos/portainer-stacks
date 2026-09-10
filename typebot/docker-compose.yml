@@ -30,6 +30,12 @@ services:
       - S3_ENDPOINT=${TYPEBOT_S3_ENDPOINT:-}
       - S3_PORT=${TYPEBOT_S3_PORT:-443}
       - S3_SSL=${TYPEBOT_S3_SSL:-true}
+    # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 3000
+    #     published: ${TYPEBOT_BUILDER_EXTERNAL_PORT:-8160}
+    #     mode: host
     deploy:
       mode: replicated
       replicas: 1
@@ -62,6 +68,12 @@ services:
       - S3_ENDPOINT=${TYPEBOT_S3_ENDPOINT:-}
       - S3_PORT=${TYPEBOT_S3_PORT:-443}
       - S3_SSL=${TYPEBOT_S3_SSL:-true}
+    # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 3000
+    #     published: ${TYPEBOT_VIEWER_EXTERNAL_PORT:-8161}
+    #     mode: host
     deploy:
       mode: replicated
       replicas: 1

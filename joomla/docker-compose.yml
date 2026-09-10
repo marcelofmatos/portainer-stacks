@@ -35,6 +35,12 @@ services:
       - JOOMLA_DB_USER=${JOOMLA_DB_USER:-joomla}
       - JOOMLA_DB_PASSWORD=${JOOMLA_DB_PASSWORD}
       - JOOMLA_DB_NAME=${JOOMLA_DB_NAME:-joomla}
+    # Acesso direto opcional (modo host publica 80 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 80
+    #     published: ${JOOMLA_EXTERNAL_PORT:-8126}
+    #     mode: host
     volumes:
       - joomla:/var/www/html
 

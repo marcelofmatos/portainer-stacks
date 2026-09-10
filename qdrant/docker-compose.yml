@@ -18,6 +18,12 @@ services:
       #- data
     environment:
       - QDRANT__SERVICE__API_KEY=${QDRANT_API_KEY:?QDRANT_API_KEY e obrigatoria}
+    # Acesso direto opcional (modo host publica 6333 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 6333
+    #     published: ${QDRANT_EXTERNAL_PORT:-8148}
+    #     mode: host
     volumes:
       - qdrant-data:/qdrant/storage
     deploy:

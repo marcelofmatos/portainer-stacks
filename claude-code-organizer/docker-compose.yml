@@ -21,6 +21,13 @@ services:
     environment:
       - HOME=/data
       - CCO_PORT=3847
+    # Acesso direto opcional (modo host publica 3847 no nó, sem passar pelo Traefik).
+    # CUIDADO: esta stack não tem login próprio — a autenticação é feita pelo Traefik
+    # (basicauth/forward-auth). Publicar direto pula essa proteção. Descomente com cautela.
+    # ports:
+    #   - target: 3847
+    #     published: ${CCO_EXTERNAL_PORT:-8107}
+    #     mode: host
     volumes:
       - cco-data:/data
     deploy:

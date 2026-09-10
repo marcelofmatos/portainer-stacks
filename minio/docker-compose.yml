@@ -20,6 +20,12 @@ services:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
       - MINIO_BROWSER_REDIRECT_URL=https://${MINIO_CONSOLE_FQDN}
+    # Acesso direto opcional (modo host publica 9000 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 9000
+    #     published: ${MINIO_S3_EXTERNAL_PORT:-8137}
+    #     mode: host
     volumes:
       - minio-data:/data
     networks:

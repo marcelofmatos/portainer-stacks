@@ -33,6 +33,12 @@ services:
       - web # exposto pelo Traefik
     environment:
       - TZ=${TZ:-America/Sao_Paulo}
+    # Acesso direto opcional (modo host publica 8123 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 8123
+    #     published: ${HOMEASSISTANT_EXTERNAL_PORT:-8125}
+    #     mode: host
     volumes:
       - homeassistant-config:/config
     deploy:

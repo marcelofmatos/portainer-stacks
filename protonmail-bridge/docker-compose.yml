@@ -26,6 +26,10 @@ services:
     #   - target: 143
     #     published: ${PROTONMAIL_IMAP_PORT:-1143}
     #     mode: host
+    # Acesso direto opcional à UI web (modo host, sem passar pelo Traefik):
+    #   - target: 3000
+    #     published: ${PROTONMAIL_EXTERNAL_PORT:-8147}
+    #     mode: host
     volumes:
       - protonmail-bridge-data:/root
     deploy:

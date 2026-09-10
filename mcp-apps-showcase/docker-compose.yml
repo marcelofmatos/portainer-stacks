@@ -15,6 +15,13 @@ services:
       - web
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY:?OPENAI_API_KEY e obrigatorio}
+    # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
+    # CUIDADO: esta stack não tem login próprio — a autenticação é feita pelo Traefik
+    # (basicauth/forward-auth). Publicar direto pula essa proteção. Descomente com cautela.
+    # ports:
+    #   - target: 3000
+    #     published: ${MCPAPPS_EXTERNAL_PORT:-8136}
+    #     mode: host
     deploy:
       mode: replicated
       replicas: 1

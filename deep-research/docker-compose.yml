@@ -16,6 +16,13 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY:?OPENAI_API_KEY e obrigatorio}
       - TAVILY_API_KEY=${TAVILY_API_KEY:?TAVILY_API_KEY e obrigatorio}
       - OPENAI_MODEL=${OPENAI_MODEL:-gpt-5.2}
+    # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
+    # CUIDADO: esta stack não tem login próprio — a autenticação é feita pelo Traefik
+    # (basicauth/forward-auth). Publicar direto pula essa proteção. Descomente com cautela.
+    # ports:
+    #   - target: 3000
+    #     published: ${DEEPRESEARCH_EXTERNAL_PORT:-8110}
+    #     mode: host
     deploy:
       mode: replicated
       replicas: 1

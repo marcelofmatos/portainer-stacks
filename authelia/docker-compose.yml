@@ -34,6 +34,12 @@ services:
     networks:
       - default
       - web
+    # Acesso direto opcional (modo host publica 9091 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 9091
+    #     published: ${AUTHELIA_EXTERNAL_PORT:-8103}
+    #     mode: host
     deploy:
       mode: replicated
       replicas: 1

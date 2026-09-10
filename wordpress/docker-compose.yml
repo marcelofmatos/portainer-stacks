@@ -34,6 +34,12 @@ services:
       - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_PASSWORD} # OBRIGATÓRIA (mesma senha do serviço db)
       - WORDPRESS_TABLE_PREFIX=${WORDPRESS_TABLE_PREFIX:-wp_}
       - WORDPRESS_CONFIG_EXTRA=${WORDPRESS_CONFIG_EXTRA:-} # HTTPS atrás do proxy (veja README)
+    # Acesso direto opcional (modo host publica 80 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 80
+    #     published: ${WORDPRESS_EXTERNAL_PORT:-8163}
+    #     mode: host
     volumes:
       - wordpress-data:/var/www/html # wp-content, uploads, plugins, temas
     deploy:

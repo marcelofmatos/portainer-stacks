@@ -51,6 +51,12 @@ services:
       - OWNCLOUD_REDIS_HOST=redis
       - OWNCLOUD_DEFAULT_LANGUAGE=${OWNCLOUD_DEFAULT_LANGUAGE:-pt_BR}
       - OWNCLOUD_MAX_UPLOAD=${OWNCLOUD_MAX_UPLOAD:-100G}
+    # Acesso direto opcional (modo host publica 8080 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 8080
+    #     published: ${DRIVE_EXTERNAL_PORT:-8114}
+    #     mode: host
     volumes:
       - files:/mnt/data
       - tmp:/tmp

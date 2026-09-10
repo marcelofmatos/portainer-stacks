@@ -22,6 +22,12 @@ services:
       - CHROMA_SERVER_AUTHN_CREDENTIALS=${CHROMA_AUTH_TOKEN:-}
       - CHROMA_SERVER_AUTHN_PROVIDER=${CHROMA_AUTH_PROVIDER:-}
       - ANONYMIZED_TELEMETRY=${CHROMA_ANONYMIZED_TELEMETRY:-FALSE}
+    # Acesso direto opcional (modo host publica 8000 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 8000
+    #     published: ${CHROMA_EXTERNAL_PORT:-8106}
+    #     mode: host
     volumes:
       - chroma-data:/data
     networks:

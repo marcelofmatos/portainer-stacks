@@ -10,6 +10,13 @@ services:
     image: ghcr.io/marcelofmatos/docker-service-update:${APP_IMAGE_TAG:-latest}
     networks:
       - web
+    # Acesso direto opcional (modo host publica 80 no nó, sem passar pelo Traefik).
+    # CUIDADO: esta stack não tem login próprio — a autenticação é feita pelo Traefik
+    # (basicauth/forward-auth). Publicar direto pula essa proteção. Descomente com cautela.
+    # ports:
+    #   - target: 80
+    #     published: ${UPDATE_EXTERNAL_PORT:-8113}
+    #     mode: host
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     deploy:

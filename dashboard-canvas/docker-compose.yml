@@ -14,6 +14,13 @@ services:
       - web
     environment:
       - GOOGLE_API_KEY=${GOOGLE_API_KEY:?GOOGLE_API_KEY e obrigatorio}
+    # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
+    # CUIDADO: esta stack não tem login próprio — a autenticação é feita pelo Traefik
+    # (basicauth/forward-auth). Publicar direto pula essa proteção. Descomente com cautela.
+    # ports:
+    #   - target: 3000
+    #     published: ${DASHCANVAS_EXTERNAL_PORT:-8109}
+    #     mode: host
     deploy:
       mode: replicated
       replicas: 1

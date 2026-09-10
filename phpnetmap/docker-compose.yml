@@ -17,6 +17,12 @@ services:
     environment:
       - ADMIN_USER=${PHPNETMAP_ADMIN_USER:-admin}
       - ADMIN_PASSWORD=${PHPNETMAP_ADMIN_PASSWORD}
+    # Acesso direto opcional (modo host publica 80 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 80
+    #     published: ${PHPNETMAP_EXTERNAL_PORT:-8146}
+    #     mode: host
     volumes:
       - phpnetmap-data:/app/protected/data
     deploy:

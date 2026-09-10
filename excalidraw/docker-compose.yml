@@ -13,6 +13,12 @@ services:
     networks:
       - default
       - web
+    # Acesso direto opcional (modo host publica 80 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 80
+    #     published: ${EXCALIDRAW_EXTERNAL_PORT:-8119}
+    #     mode: host
     deploy:
       mode: replicated
       replicas: ${EXCALIDRAW_REPLICAS:-1}

@@ -16,6 +16,12 @@ services:
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
       - PGADMIN_LISTEN_PORT=80
+    # Acesso direto opcional (modo host publica 80 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 80
+    #     published: ${PGADMIN_EXTERNAL_PORT:-8144}
+    #     mode: host
     volumes:
       - pgadmin:/var/lib/pgadmin
     networks:

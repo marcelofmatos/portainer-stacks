@@ -29,6 +29,12 @@ services:
     image: ghcr.io/ldapaccountmanager/lam:${LAM_IMAGE_TAG:-9.5}
     environment:
       LAM_SKIP_PRECONFIGURE: 'true'
+    # Acesso direto opcional (modo host publica 80 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 80
+    #     published: ${LAM_EXTERNAL_PORT:-8100}
+    #     mode: host
     volumes:
       - lam-etc:/etc/ldap-account-manager/
       - lam-lib:/var/lib/ldap-account-manager/
@@ -86,6 +92,12 @@ services:
     networks:
       - default
       - web
+    # Acesso direto opcional (modo host publica 80 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 80
+    #     published: ${SSP_EXTERNAL_PORT:-8101}
+    #     mode: host
     volumes:
       - user-cache:/var/www/cache
       - user-conf:/var/www/conf

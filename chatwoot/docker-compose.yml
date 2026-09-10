@@ -47,6 +47,12 @@ services:
       - POSTGRES_DATABASE=${CHATWOOT_DB_NAME:-chatwoot}
       - REDIS_URL=${CHATWOOT_REDIS_URL:-redis://redis:6379}
       - ENABLE_ACCOUNT_SIGNUP=${CHATWOOT_ENABLE_SIGNUP:-false}
+    # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 3000
+    #     published: ${CHATWOOT_EXTERNAL_PORT:-8105}
+    #     mode: host
     volumes:
       - chatwoot-storage:/app/storage
     deploy:

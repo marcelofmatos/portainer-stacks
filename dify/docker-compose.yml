@@ -45,6 +45,12 @@ services:
       <<: *shared-env
       MODE: api
       MIGRATION_ENABLED: "true"
+    # Acesso direto opcional (modo host publica 5001 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 5001
+    #     published: ${DIFY_API_EXTERNAL_PORT:-8111}
+    #     mode: host
     volumes:
       - dify-storage:/app/api/storage
     deploy:
@@ -87,6 +93,12 @@ services:
     environment:
       CONSOLE_API_URL: https://${DIFY_FQDN}
       APP_API_URL: https://${DIFY_FQDN}
+    # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 3000
+    #     published: ${DIFY_WEB_EXTERNAL_PORT:-8112}
+    #     mode: host
     deploy:
       mode: replicated
       replicas: 1

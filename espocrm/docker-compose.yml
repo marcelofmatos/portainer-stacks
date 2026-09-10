@@ -38,6 +38,12 @@ services:
       - ESPOCRM_ADMIN_USERNAME=${ESPOCRM_ADMIN_USERNAME:-admin}
       - ESPOCRM_ADMIN_PASSWORD=${ESPOCRM_ADMIN_PASSWORD}
       - ESPOCRM_SITE_URL=https://${ESPOCRM_FQDN}
+    # Acesso direto opcional (modo host publica 80 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 80
+    #     published: ${ESPOCRM_EXTERNAL_PORT:-8117}
+    #     mode: host
     volumes:
       - espocrm-data:/var/www/html
     deploy:

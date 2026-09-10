@@ -19,6 +19,12 @@ services:
       - STORAGE_DIR=/app/server/storage
       - JWT_SECRET=${ANYTHINGLLM_JWT_SECRET:?ANYTHINGLLM_JWT_SECRET e obrigatorio}
       - DISABLE_TELEMETRY=${ANYTHINGLLM_DISABLE_TELEMETRY:-true}
+    # Acesso direto opcional (modo host publica 3001 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 3001
+    #     published: ${ANYTHINGLLM_EXTERNAL_PORT:-8102}
+    #     mode: host
     volumes:
       - anythingllm-data:/app/server/storage
     deploy:

@@ -30,6 +30,12 @@ services:
     #   - target: 3306
     #     published: 3306
     #     mode: host
+    # Acesso direto opcional à página de stats (modo host, sem passar pelo Traefik).
+    # CUIDADO: essa stack não tem login próprio na página de stats — a autenticação é feita
+    # pelo basicauth do Traefik. Publicar direto pula essa proteção.
+    #   - target: 8404
+    #     published: ${HAPROXY_EXTERNAL_PORT:-8124}
+    #     mode: host
     deploy:
       mode: replicated
       replicas: 1

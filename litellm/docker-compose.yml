@@ -33,6 +33,12 @@ services:
     networks:
       - default
       - web
+    # Acesso direto opcional (modo host publica 4000 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 4000
+    #     published: ${LITELLM_EXTERNAL_PORT:-8132}
+    #     mode: host
     deploy:
       mode: replicated
       replicas: 1

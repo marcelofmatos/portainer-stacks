@@ -29,6 +29,12 @@ services:
       - TZ=${TZ:-UTC}
       - POLL_INTERVAL_SECONDS=${POLL_INTERVAL_SECONDS:-60}
       - HISTORY_DAYS=${HISTORY_DAYS:-90}
+    # Acesso direto opcional (modo host publica 8080 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 8080
+    #     published: ${STATUS_EXTERNAL_PORT:-8165}
+    #     mode: host
     volumes:
       - status-data:/data
     deploy:

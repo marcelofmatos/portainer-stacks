@@ -23,6 +23,12 @@ services:
       - SECRETKEY_PATH=/root/.flowise
       - LOG_PATH=/root/.flowise/logs
       - BLOB_STORAGE_PATH=/root/.flowise/storage
+    # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 3000
+    #     published: ${FLOWISE_EXTERNAL_PORT:-8121}
+    #     mode: host
     volumes:
       - flowise-data:/root/.flowise
     deploy:
