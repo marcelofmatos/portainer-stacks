@@ -1,0 +1,110 @@
+# ┌──────────────────────────────────────────────────────────────────────────┐
+# │ Stack "omniroute" — OmniRoute (gateway de IA multi-provedor) + Redis (Swarm)│
+# └──────────────────────────────────────────────────────────────────────────┘
+# Pré-requisitos de deploy:
+#   1. Crie as redes externas (uma vez por cluster):
+#        docker network create --driver overlay --attachable web
+#        docker network create --driver overlay --attachable data
+#   2. Tenha a stack `balancer` (Traefik) rodando e o DNS de OMNIROUTE_FQDN apontando p/ o host.
+#   3. Defina as variáveis OBRIGATÓRIAS no deploy: OMNIROUTE_FQDN, OMNIROUTE_JWT_SECRET,
+#      OMNIROUTE_API_KEY_SECRET, OMNIROUTE_INITIAL_PASSWORD.
+#
+# COMO FUNCIONA:
+#   - `app` = dashboard + API OpenAI-compatible (porta 20128, modo single-port: dashboard e API na
+#     mesma porta), publicado pelo Traefik na rede `web`. Fala com o Redis pela rede `default`.
+#   - `redis` é o cache/rate-limiter PRÓPRIO desta stack (rate limiting distribuído entre réplicas):
+#     fica na `default` (o app o acessa como `redis`) e TAMBÉM na `data`, só para ferramentas de
+#     admin (redisinsight) o alcançarem como `omniroute_redis`. Sem Redis o app cai para rate
+#     limiting em memória (funciona, mas por processo) — manter o Redis embarcado é o padrão
+#     preferido desta stack.
+#   - Imagem publicada só nos flavors `base`/`web` do Docker Hub (esta stack não builda do source):
+#     `latest` é a imagem enxuta (sem Chromium) e cobre a maioria dos provedores. Provedores
+#     "web-cookie" (gemini-web, claude-web, claude-turnstile) exigem o flavor `latest-web`
+#     (+Playwright/Chromium, ~300 MB maior) — troque via OMNIROUTE_IMAGE_TAG. O sidecar
+#     `chatgpt-web-codex-browser` do compose upstream (Chromium dedicado ao provider ChatGPT
+#     Web/Codex) não tem imagem publicada — só builda do source do repositório — por isso NÃO
+#     está nesta stack; esse provider específico não funciona aqui.
+#   - REQUIRE_API_KEY vem TRUE por padrão (diferente do default upstream): esta stack publica o
+#     app no FQDN público via Traefik, então deixar o proxy /v1/* sem exigir API key exporia seus
+#     provedores configurados a qualquer um que ache o domínio.
+#
+# Volumes dedicados (`omniroute-data`, `redis-data`): para migrar de host, copie-os.
+# Porte: Médio (512 MB → 2 GB RAM)
+# Hardware (1 réplica): mínimo 1 vCPU · 1 GB RAM · 5 GB disco · ideal 2 vCPU · 2 GB RAM · 15 GB disco
+services:
+  app:
+    image: diegosouzapw/omniroute:${OMNIROUTE_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+    environment:
+      - NODE_ENV=production
+      - CONTAINER_HOST=docker
+      - PORT=20128
+      - DATA_DIR=/app/data
+      - JWT_SECRET=${OMNIROUTE_JWT_SECRET}
+      - API_KEY_SECRET=${OMNIROUTE_API_KEY_SECRET}
+      - INITIAL_PASSWORD=${OMNIROUTE_INITIAL_PASSWORD}
+      - STORAGE_ENCRYPTION_KEY=${OMNIROUTE_STORAGE_ENCRYPTION_KEY:-}
+      - REQUIRE_API_KEY=${OMNIROUTE_REQUIRE_API_KEY:-true}
+      - AUTH_COOKIE_SECURE=true
+      - NEXT_PUBLIC_BASE_URL=https://${OMNIROUTE_FQDN}
+      - REDIS_URL=${OMNIROUTE_REDIS_URL:-redis://redis:6379}
+    # Acesso direto opcional (modo host publica 20128 no nó, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 20128
+    #     published: ${OMNIROUTE_EXTERNAL_PORT:-8135}
+    #     mode: host
+    volumes:
+      - omniroute-data:/app/data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}   # fixe em cluster multi-worker (volume local ao nó)
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.omniroute.rule=Host(`${OMNIROUTE_FQDN}`)
+        - traefik.http.routers.omniroute.entrypoints=websecure
+        - traefik.http.routers.omniroute.tls=true
+        - traefik.http.routers.omniroute.tls.certresolver=letsencryptresolver
+        - traefik.http.services.omniroute.loadbalancer.server.port=20128
+
+  # Cache/rate-limiter PRÓPRIO da stack (não compartilhe com outras stacks).
+  redis:
+    image: redis:${OMNIROUTE_REDIS_IMAGE_TAG:-8-alpine}
+    command: redis-server --save 60 1 --loglevel warning
+    networks:
+      - default # acesso do app
+      #- data # SÓ para ferramentas de admin (redisinsight) via host `omniroute_redis`
+    # ports:                       # acesso externo opcional (cuidado: exponha só com senha)
+    #   - target: 6379
+    #     published: ${OMNIROUTE_REDIS_EXTERNAL_PORT:-6382}
+    #     mode: host
+    volumes:
+      - redis-data:/data # ← copie este volume para migrar de host
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # fixe o redis no nó em cluster multi-worker:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+networks:
+  web: # externa: criada pela stack balancer (Traefik)
+    external: true
+    name: ${PROXY_NET:-web}
+  data: # externa: liga o redis às ferramentas de admin (redisinsight)
+    external: true
+    name: ${DATA_NET:-data}
+  default: # interna desta stack: app <-> redis
+    driver: overlay
+
+volumes:
+  omniroute-data:
+    driver: local
+  redis-data:
+    driver: local

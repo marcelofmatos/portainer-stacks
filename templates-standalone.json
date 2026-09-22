@@ -3605,6 +3605,72 @@
           "default": "ldap"
         }
       ]
+    },
+    {
+      "type": 3,
+      "title": "omniroute — gateway de IA multi-provedor",
+      "name": "omniroute",
+      "description": "OmniRoute: gateway OpenAI-compativel para dezenas de provedores de LLM (com foco em tiers gratuitos), com dashboard de gerenciamento e roteamento/fallback entre provedores. Publicado via Traefik v3 com TLS, com Redis embarcado (rate limiter).",
+      "note": "REQUIRE_API_KEY vem TRUE por padrao (FQDN publico) — gere a API key no dashboard apos o primeiro login. Provedores web-cookie (gemini-web/claude-web/claude-turnstile) exigem a imagem OMNIROUTE_IMAGE_TAG=latest-web. O provider \"ChatGPT Web (Codex)\" nao funciona nesta stack (sidecar sem imagem publicada). Veja o README. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/omniroute/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
+      "categories": [
+        "ai",
+        "Porte: Médio"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/selfhst/icons/png/omniroute.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "omniroute/docker-compose.standalone.yml"
+      },
+      "env": [
+        {
+          "name": "OMNIROUTE_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: omniroute.exemplo.com"
+        },
+        {
+          "name": "OMNIROUTE_JWT_SECRET",
+          "label": "JWT secret",
+          "description": "Chave de sessao do dashboard (openssl rand -base64 48)"
+        },
+        {
+          "name": "OMNIROUTE_API_KEY_SECRET",
+          "label": "API key secret",
+          "description": "Criptografa as API keys dos provedores no SQLite (openssl rand -hex 32)"
+        },
+        {
+          "name": "OMNIROUTE_INITIAL_PASSWORD",
+          "label": "Senha inicial do admin",
+          "description": "Troque no primeiro login (Dashboard > Settings > Security)"
+        },
+        {
+          "name": "OMNIROUTE_STORAGE_ENCRYPTION_KEY",
+          "label": "Chave de criptografia do banco (opcional)",
+          "description": "openssl rand -hex 32; vazio = sem criptografia extra do SQLite",
+          "default": ""
+        },
+        {
+          "name": "OMNIROUTE_REQUIRE_API_KEY",
+          "label": "Exigir API key em /v1/*",
+          "default": "true",
+          "select": [
+            {
+              "text": "Sim (recomendado)",
+              "value": "true",
+              "default": true
+            },
+            {
+              "text": "Não",
+              "value": "false"
+            }
+          ]
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
+      ]
     }
   ]
 }

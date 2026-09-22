@@ -1,0 +1,55 @@
+# Stack "omniroute" — variante Docker Compose (host standalone). Variáveis, portas e uso no README.
+# Pré-requisito: crie as redes externas usadas pela stack (docker network create web; e data se aplicável).
+services:
+  app:
+    restart: unless-stopped
+    image: diegosouzapw/omniroute:${OMNIROUTE_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+    environment:
+      - NODE_ENV=production
+      - CONTAINER_HOST=docker
+      - PORT=20128
+      - DATA_DIR=/app/data
+      - JWT_SECRET=${OMNIROUTE_JWT_SECRET}
+      - API_KEY_SECRET=${OMNIROUTE_API_KEY_SECRET}
+      - INITIAL_PASSWORD=${OMNIROUTE_INITIAL_PASSWORD}
+      - STORAGE_ENCRYPTION_KEY=${OMNIROUTE_STORAGE_ENCRYPTION_KEY:-}
+      - REQUIRE_API_KEY=${OMNIROUTE_REQUIRE_API_KEY:-true}
+      - AUTH_COOKIE_SECURE=true
+      - NEXT_PUBLIC_BASE_URL=https://${OMNIROUTE_FQDN}
+      - REDIS_URL=${OMNIROUTE_REDIS_URL:-redis://redis:6379}
+    volumes:
+      - omniroute-data:/app/data
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.omniroute.rule=Host(`${OMNIROUTE_FQDN}`)
+      - traefik.http.routers.omniroute.entrypoints=websecure
+      - traefik.http.routers.omniroute.tls=true
+      - traefik.http.routers.omniroute.tls.certresolver=letsencryptresolver
+      - traefik.http.services.omniroute.loadbalancer.server.port=20128
+      - traefik.docker.network=${PROXY_NET:-web}
+  redis:
+    restart: unless-stopped
+    image: redis:${OMNIROUTE_REDIS_IMAGE_TAG:-8-alpine}
+    command: redis-server --save 60 1 --loglevel warning
+    networks:
+      - default
+      #- data
+    volumes:
+      - redis-data:/data
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+  default:
+    driver: bridge
+volumes:
+  omniroute-data:
+    driver: local
+  redis-data:
+    driver: local
