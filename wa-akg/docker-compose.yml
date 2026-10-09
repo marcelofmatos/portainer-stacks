@@ -1,0 +1,119 @@
+# ┌──────────────────────────────────────────────────────────────────────────┐
+# │ Stack "wa-akg" — WA-AKG (WhatsApp Gateway & Dashboard) + MySQL (Swarm)     │
+# └──────────────────────────────────────────────────────────────────────────┘
+# Pré-requisitos de deploy:
+#   1. Crie as redes externas (uma vez por cluster):
+#        docker network create --driver overlay --attachable web
+#        docker network create --driver overlay --attachable data
+#   2. Tenha a stack `balancer` (Traefik) rodando e o DNS de WA_AKG_FQDN apontando p/ o host.
+#   3. Defina as variáveis OBRIGATÓRIAS no deploy: WA_AKG_FQDN, WA_AKG_AUTH_SECRET,
+#      WA_AKG_DB_ROOT_PASSWORD, WA_AKG_ADMIN_EMAIL, WA_AKG_ADMIN_PASSWORD.
+#
+# COMO FUNCIONA:
+#   - `app` (Next.js + engine Baileys) é publicado pelo Traefik na rede `web`; fala com o MySQL
+#     pela rede interna `default`. No primeiro boot roda `prisma db push` e cria o usuário admin
+#     a partir de WA_AKG_ADMIN_EMAIL/WA_AKG_ADMIN_PASSWORD.
+#   - `db` (MySQL) é o banco PRÓPRIO desta stack: fica na `default` (o app o acessa como `db`,
+#     autenticando como `root` — é como a imagem espera) e opcionalmente na `data` (comentado)
+#     só para ferramentas de admin (phpmyadmin) o alcançarem como `wa-akg_db`.
+#   - Sessões do WhatsApp (QR code/credenciais Baileys) e mídia enviada/recebida ficam em volumes
+#     dedicados (`app-data`, `uploads-data`): para migrar de host, copie-os junto do `db-data`.
+#
+# VOLUME EM SWARM: volumes são locais ao nó. Em cluster com +1 worker, fixe os serviços no nó
+# definindo WORKER_HOSTNAME e descomentando o constraint `node.hostname` abaixo.
+# Porte: Médio (512 MB → 2 GB RAM)
+# Hardware (1 réplica): mínimo 1 vCPU · 1 GB RAM · 10 GB disco · ideal 2 vCPU · 2 GB RAM · 20 GB disco
+services:
+  app:
+    image: ghcr.io/marcelofmatos/wa-akg:${WA_AKG_IMAGE_TAG:-latest}
+    networks:
+      - default # conversa com o banco `db` internamente
+      - web # exposto pelo Traefik
+    environment:
+      - DATABASE_URL=mysql://root:${WA_AKG_DB_ROOT_PASSWORD}@db:3306/${WA_AKG_DB_NAME:-wa_akg}
+      - AUTH_SECRET=${WA_AKG_AUTH_SECRET}
+      - BASE_URL=https://${WA_AKG_FQDN}
+      - NEXTAUTH_URL=https://${WA_AKG_FQDN}
+      - NEXT_PUBLIC_APP_URL=https://${WA_AKG_FQDN}
+      - NEXT_PUBLIC_API_URL=https://${WA_AKG_FQDN}/api
+      - BAILEYS_LOG_LEVEL=${WA_AKG_LOG_LEVEL:-error}
+      - NEXT_PUBLIC_SWAGGER_ENABLED=${WA_AKG_SWAGGER_ENABLED:-false}
+      - NEXT_PUBLIC_SWAGGER_USERNAME=${WA_AKG_SWAGGER_USERNAME:-admin}
+      - NEXT_PUBLIC_SWAGGER_PASSWORD=${WA_AKG_SWAGGER_PASSWORD:-}
+      - TZ=${WA_AKG_TZ:-America/Sao_Paulo}
+      - LOCALE=${WA_AKG_LOCALE:-pt-BR}
+      - ADMIN_EMAIL=${WA_AKG_ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${WA_AKG_ADMIN_PASSWORD}
+    # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik). Porta HOST
+    # livre — modo host vale pro nó inteiro, não repita a de outra stack (confira as em uso:
+    # grep -ohE 'EXTERNAL_PORT:-[0-9]+' */docker-compose.yml | sort -u).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 3000
+    #     published: ${WA_AKG_EXTERNAL_PORT:-8167}
+    #     mode: host
+    volumes:
+      - app-data:/app/data
+      - uploads-data:/app/uploads
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}   # fixe em cluster multi-worker (volume local ao nó)
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.wa-akg.rule=Host(`${WA_AKG_FQDN}`)
+        - traefik.http.routers.wa-akg.entrypoints=websecure
+        - traefik.http.routers.wa-akg.tls=true
+        - traefik.http.routers.wa-akg.tls.certresolver=letsencryptresolver
+        - traefik.http.services.wa-akg.loadbalancer.server.port=3000
+
+  # Banco de dados PRÓPRIO da stack (não compartilhe com outras stacks).
+  db:
+    image: mysql:${WA_AKG_DB_IMAGE_TAG:-8.0}
+    networks:
+      - default # acesso do app
+      #- data # SÓ para ferramentas de admin (phpmyadmin) via host `wa-akg_db`
+    environment:
+      - MYSQL_ROOT_PASSWORD=${WA_AKG_DB_ROOT_PASSWORD} # OBRIGATÓRIA
+      - MYSQL_DATABASE=${WA_AKG_DB_NAME:-wa_akg}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # Acesso externo opcional (modo host publica 3306 no nó). Porta HOST livre — não repita a de
+    # outra stack (confira as em uso: grep -ohE 'EXTERNAL_PORT:-[0-9]+' */docker-compose.yml | sort -u).
+    # Descomente se precisar conectar de fora do cluster. Veja a nota no README sobre segurança.
+    # ports:
+    #   - target: 3306
+    #     published: ${WA_AKG_DB_EXTERNAL_PORT:-3309}
+    #     mode: host
+    volumes:
+      - db-data:/var/lib/mysql # ← copie este volume para migrar de host
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # fixe junto do app no mesmo nó:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+networks:
+  web: # externa: criada pela stack balancer (Traefik)
+    external: true
+    name: ${PROXY_NET:-web}
+  data: # externa: liga o banco às ferramentas de admin (phpmyadmin etc.)
+    external: true
+    name: ${DATA_NET:-data}
+  default: # interna desta stack: app <-> db
+    driver: overlay
+
+volumes:
+  app-data:
+    driver: local
+  uploads-data:
+    driver: local
+  db-data:
+    driver: local

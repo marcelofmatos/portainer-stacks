@@ -3671,6 +3671,72 @@
           "default": "web"
         }
       ]
+    },
+    {
+      "type": 3,
+      "title": "wa-akg — WA-AKG (WhatsApp Gateway & Dashboard)",
+      "name": "wa-akg",
+      "description": "WA-AKG: gateway e dashboard self-hosted de WhatsApp (Next.js + engine Baileys). Contas multi-sessao, agendamento de mensagens, auto-resposta e integracao via webhooks. Publicado via Traefik v3 com TLS, com MySQL embarcado.",
+      "note": "Gere WA_AKG_AUTH_SECRET com openssl rand -base64 32 antes do deploy. O usuario admin (WA_AKG_ADMIN_EMAIL/WA_AKG_ADMIN_PASSWORD) so e criado no primeiro boot — mudar essas variaveis depois nao recria o admin. Veja o README. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/wa-akg/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
+      "categories": [
+        "communication",
+        "dashboard",
+        "Porte: Médio"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/whatsapp.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "wa-akg/docker-compose.standalone.yml"
+      },
+      "env": [
+        {
+          "name": "WA_AKG_FQDN",
+          "label": "Dominio (FQDN)",
+          "description": "Ex.: wa.exemplo.com"
+        },
+        {
+          "name": "WA_AKG_AUTH_SECRET",
+          "label": "Chave de sessao",
+          "description": "NextAuth — openssl rand -base64 32"
+        },
+        {
+          "name": "WA_AKG_DB_ROOT_PASSWORD",
+          "label": "Senha root do banco",
+          "description": "MySQL embarcado (usada tambem pelo app)"
+        },
+        {
+          "name": "WA_AKG_ADMIN_EMAIL",
+          "label": "E-mail do admin",
+          "description": "Criado no primeiro boot"
+        },
+        {
+          "name": "WA_AKG_ADMIN_PASSWORD",
+          "label": "Senha do admin",
+          "description": "Criado no primeiro boot"
+        },
+        {
+          "name": "WA_AKG_SWAGGER_ENABLED",
+          "label": "Habilitar Swagger (/docs)",
+          "default": "false",
+          "select": [
+            {
+              "text": "Não (recomendado)",
+              "value": "false",
+              "default": true
+            },
+            {
+              "text": "Sim",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
+      ]
     }
   ]
 }

@@ -35,7 +35,9 @@ services:
       - CACHE_REDIS_PREFIX_KEY=evolution
       - CACHE_REDIS_SAVE_INSTANCES=false
       - CACHE_LOCAL_ENABLED=false
-    # Acesso direto opcional (modo host publica 8080 no nó, sem passar pelo Traefik).
+    # Acesso direto opcional (modo host publica 8080 no nó, sem passar pelo Traefik). Porta HOST
+    # livre — modo host vale pro nó inteiro, não repita a de outra stack (confira as em uso:
+    # grep -ohE 'EXTERNAL_PORT:-[0-9]+' */docker-compose.yml | sort -u).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
     # ports:
     #   - target: 8080
@@ -70,8 +72,9 @@ services:
       - POSTGRES_DB=${EVOLUTION_DB_NAME:-evolution}
       - POSTGRES_USER=${EVOLUTION_DB_USER:-postgres}
       - POSTGRES_PASSWORD=${EVOLUTION_DB_PASSWORD} # OBRIGATÓRIA
-    # Acesso externo opcional (modo host publica 5432 no nó). Descomente se precisar
-    # conectar de fora do cluster. Veja a nota no README sobre segurança.
+    # Acesso externo opcional (modo host publica 5432 no nó). Porta HOST livre — não repita a de
+    # outra stack (confira as em uso: grep -ohE 'EXTERNAL_PORT:-[0-9]+' */docker-compose.yml | sort -u).
+    # Descomente se precisar conectar de fora do cluster. Veja a nota no README sobre segurança.
     # ports:
     #   - target: 5432
     #     published: ${EVOLUTION_DB_EXTERNAL_PORT:-5435}
@@ -92,7 +95,9 @@ services:
     networks:
       - default # acesso do app
       #- data # SÓ para ferramentas de admin (redisinsight) via host `evolution-api_redis`
-    # ports:                       # acesso externo opcional (cuidado: exponha só com senha)
+    # Acesso externo opcional (cuidado: exponha só com senha). Porta HOST livre — não repita a de
+    # outra stack (confira as em uso: grep -ohE 'EXTERNAL_PORT:-[0-9]+' */docker-compose.yml | sort -u).
+    # ports:
     #   - target: 6379
     #     published: ${EVOLUTION_REDIS_EXTERNAL_PORT:-6380}
     #     mode: host

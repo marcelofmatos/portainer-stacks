@@ -53,7 +53,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 | Porte | RAM (mín → ideal) | Stacks |
 |---|---|---|
 | **Leve** | 64 MB → 512 MB | `error-pages`, `cloudflared`, `caddy`, `socat`, `redirect`, `onedrive`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis`, `grafana`, `claude-code-organizer`, `zabbix-status-page`, `deep-research`, `financial-coach`, `mcp-apps-showcase`, `gen-ui-starter`, `dashboard-canvas`, `shadcn-generator`, `mcp-app-builder`, `orquestrator4proxmox` |
-| **Médio** | 512 MB → 2 GB | `account`, `keycloak`, `zabbix`, `mariadb`, `postgres-pgvector`, `mongodb`, `chromadb`, `qdrant`, `minio`, `workflows`, `evolution-api`, `joomla`, `wordpress`, `wikijs`, `espocrm`, `typebot`, `stirlingpdf`, `flowise`, `litellm`, `omniroute`, `open-webui`, `element`, `home-assistant` |
+| **Médio** | 512 MB → 2 GB | `account`, `keycloak`, `zabbix`, `mariadb`, `postgres-pgvector`, `mongodb`, `chromadb`, `qdrant`, `minio`, `workflows`, `evolution-api`, `wa-akg`, `joomla`, `wordpress`, `wikijs`, `espocrm`, `typebot`, `stirlingpdf`, `flowise`, `litellm`, `omniroute`, `open-webui`, `element`, `home-assistant` |
 | **Pesado** | 2 GB → 4–8 GB | `swarmprom`, `elasticsearch`, `drive`, `rocketchat`, `moodle`, `twenty`, `botpress`, `langfuse`, `librechat`, `anythingllm`, `chatwoot`, `ligerosmart`, `dify`, `supabase` |
 | **GPU / ML** | 8 GB+ (GPU recomendada) | `ollama`, `comfyui`, `ragflow` |
 
@@ -100,6 +100,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 | [`workflows`](workflows/) | n8n (automação) + PostgreSQL | [README](workflows/README.md) |
 | [`home-assistant`](home-assistant/) | Automação residencial (Home Assistant Container) | [README](home-assistant/README.md) |
 | [`evolution-api`](evolution-api/) | API de WhatsApp (usa `postgres-pgvector` + `redis`) | [README](evolution-api/README.md) |
+| [`wa-akg`](wa-akg/) | Dashboard de WhatsApp (multi-sessão, agendamento, auto-resposta, webhooks) + MySQL — imagem própria no GHCR | [README](wa-akg/README.md) |
 | [`rocketchat`](rocketchat/) | Chat de equipe + MongoDB | [README](rocketchat/README.md) |
 | [`element`](element/) | Matrix self-hosted (Synapse + Element Web) + PostgreSQL | [README](element/README.md) |
 | [`joomla`](joomla/) | CMS Joomla + MySQL | [README](joomla/README.md) |
