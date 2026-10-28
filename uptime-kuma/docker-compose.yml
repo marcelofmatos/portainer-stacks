@@ -1,0 +1,50 @@
+# Stack "uptime-kuma" — Uptime Kuma (monitor de disponibilidade + status pages) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Monitora HTTP(s), TCP, ping, DNS, keyword, Docker, etc. e publica status pages. Banco embutido
+# (SQLite ou MariaDB interno, escolhido no 1º acesso) — tudo no volume `kuma-data`.
+#
+# Obrigatória: KUMA_FQDN. O usuário admin é criado no PRIMEIRO acesso à UI — faça isso logo após o
+# deploy (quem chegar primeiro cria a conta).
+#
+# NOTA (volume em Swarm): `kuma-data` é local ao nó. Em cluster multi-worker, fixe o serviço definindo
+# WORKER_HOSTNAME e descomentando o constraint de hostname.
+# Porte: Leve (128 MB → 512 MB RAM)
+# Hardware (1 réplica): mínimo 0.5 vCPU · 256 MB RAM · 1 GB disco · ideal 1 vCPU · 512 MB RAM · 5 GB disco
+services:
+  kuma:
+    image: louislam/uptime-kuma:${KUMA_IMAGE_TAG:-2}
+    networks:
+      - web # exposto pelo Traefik
+      #- data # monitora serviços internos do cluster pelo nome (postgres:5432, redis:6379...)
+    environment:
+      - TZ=${TZ:-America/Sao_Paulo}
+    volumes:
+      - kuma-data:/app/data # tudo do Kuma (banco, config, uploads) — caminho fixo da imagem
+    deploy:
+      mode: replicated
+      replicas: 1 # NÃO escale: SQLite/estado local não suporta réplicas
+      placement:
+        constraints:
+          - node.role == worker
+          # descomente em cluster multi-worker p/ fixar o volume no nó:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.kuma.rule=Host(`${KUMA_FQDN}`)
+        - traefik.http.routers.kuma.entrypoints=websecure
+        - traefik.http.routers.kuma.tls=true
+        - traefik.http.routers.kuma.tls.certresolver=letsencryptresolver
+        - traefik.http.services.kuma.loadbalancer.server.port=3001
+        - caddy=${KUMA_FQDN}
+        - caddy.reverse_proxy={{upstreams 3001}}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+
+volumes:
+  kuma-data:

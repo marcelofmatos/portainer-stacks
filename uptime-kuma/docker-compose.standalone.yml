@@ -1,0 +1,36 @@
+# Stack "uptime-kuma" — Uptime Kuma (monitor de disponibilidade + status pages) — variante Docker
+# Compose (host standalone). Variáveis, portas e uso no README.
+# Pré-requisito: crie a rede externa do proxy (docker network create web; e data se for monitorar
+# serviços internos pelo nome).
+services:
+  kuma:
+    image: louislam/uptime-kuma:${KUMA_IMAGE_TAG:-2}
+    restart: unless-stopped
+    networks:
+      - web # exposto pelo Traefik
+      #- data # monitora serviços internos pelo nome (postgres:5432, redis:6379...)
+    environment:
+      - TZ=${TZ:-America/Sao_Paulo}
+    volumes:
+      - kuma-data:/app/data # tudo do Kuma (banco, config, uploads) — caminho fixo da imagem
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.kuma.rule=Host(`${KUMA_FQDN}`)
+      - traefik.http.routers.kuma.entrypoints=websecure
+      - traefik.http.routers.kuma.tls=true
+      - traefik.http.routers.kuma.tls.certresolver=letsencryptresolver
+      - traefik.http.services.kuma.loadbalancer.server.port=3001
+      - traefik.docker.network=${PROXY_NET:-web}
+      - caddy=${KUMA_FQDN}
+      - caddy.reverse_proxy={{upstreams 3001}}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  data:
+    external: true
+    name: ${DATA_NET:-data}
+
+volumes:
+  kuma-data:

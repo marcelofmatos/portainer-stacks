@@ -3762,6 +3762,41 @@
           "default": "web"
         }
       ]
+    },
+    {
+      "type": 2,
+      "title": "uptime-kuma — monitor de disponibilidade e status pages",
+      "name": "uptime-kuma",
+      "description": "Uptime Kuma: monitora HTTP(s), TCP, ping, DNS, keyword e certificados, envia alertas (Telegram, e-mail, webhook, Matrix…) e publica status pages. Um serviço e um volume (/app/data). Publicado via Traefik v3 com TLS.",
+      "note": "Requer a rede web (balancer) e o DNS de KUMA_FQDN apontando para o host. <b>Acesse a UI logo após o deploy</b>: o 1º acesso cria o usuário admin. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/uptime-kuma/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
+      "categories": [
+        "monitoring",
+        "tools",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/uptime-kuma.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "uptime-kuma/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "KUMA_FQDN",
+          "label": "Domínio (FQDN)",
+          "description": "Ex.: status.exemplo.com"
+        },
+        {
+          "name": "TZ",
+          "label": "Fuso horário",
+          "default": "America/Sao_Paulo"
+        },
+        {
+          "name": "KUMA_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "2"
+        }
+      ]
     }
   ]
 }
