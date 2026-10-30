@@ -31,7 +31,7 @@ services:
       LAM_SKIP_PRECONFIGURE: 'true'
     # Acesso direto opcional (modo host publica 80 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8100 -> porta 80 do container
     #   - target: 80
     #     published: ${LAM_EXTERNAL_PORT:-8100}
     #     mode: host
@@ -94,7 +94,7 @@ services:
       - web
     # Acesso direto opcional (modo host publica 80 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8101 -> porta 80 do container
     #   - target: 80
     #     published: ${SSP_EXTERNAL_PORT:-8101}
     #     mode: host

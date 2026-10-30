@@ -38,7 +38,7 @@ services:
       - AUTH_DISABLE_SIGNUP=${LANGFUSE_DISABLE_SIGNUP:-true}
     # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8128 -> porta 3000 do container
     #   - target: 3000
     #     published: ${LANGFUSE_EXTERNAL_PORT:-8128}
     #     mode: host
@@ -70,7 +70,7 @@ services:
       - POSTGRES_PASSWORD=${LANGFUSE_DB_PASSWORD} # OBRIGATÓRIA
     # Acesso externo opcional (modo host publica 5432 no nó). Descomente se precisar
     # conectar de fora do cluster. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 5436 -> porta 5432 do container
     #   - target: 5432
     #     published: ${LANGFUSE_DB_EXTERNAL_PORT:-5436}
     #     mode: host

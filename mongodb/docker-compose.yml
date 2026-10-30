@@ -21,7 +21,7 @@ services:
       #- data
     # Acesso externo opcional (modo host publica 27017 no nó). Descomente se precisar
     # conectar de fora do cluster. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 27017 -> porta 27017 do container
     #   - target: 27017
     #     published: ${MONGO_PORT:-27017}
     #     mode: host

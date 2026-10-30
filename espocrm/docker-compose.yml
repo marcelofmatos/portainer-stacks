@@ -40,7 +40,7 @@ services:
       - ESPOCRM_SITE_URL=https://${ESPOCRM_FQDN}
     # Acesso direto opcional (modo host publica 80 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8117 -> porta 80 do container
     #   - target: 80
     #     published: ${ESPOCRM_EXTERNAL_PORT:-8117}
     #     mode: host
@@ -99,7 +99,7 @@ services:
       - MARIADB_ROOT_PASSWORD=${ESPOCRM_DB_ROOT_PASSWORD} # OBRIGATÓRIA (senha root do MariaDB)
     # Acesso externo opcional (modo host publica 3306 no nó). Descomente se precisar
     # conectar de fora do cluster. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 3307 -> porta 3306 do container
     #   - target: 3306
     #     published: ${ESPOCRM_DB_EXTERNAL_PORT:-3307}
     #     mode: host

@@ -18,7 +18,7 @@ services:
     # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
     # CUIDADO: esta stack não tem login próprio — a autenticação é feita pelo Traefik
     # (basicauth/forward-auth). Publicar direto pula essa proteção. Descomente com cautela.
-    # ports:
+    # ports:                 # sugestão: 8154 -> porta 3000 do container
     #   - target: 3000
     #     published: ${SHADCN_EXTERNAL_PORT:-8154}
     #     mode: host

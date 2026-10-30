@@ -13,7 +13,7 @@ services:
     # Acesso direto opcional (modo host publica 80 no nó, sem passar pelo Traefik).
     # CUIDADO: esta stack não tem login próprio — a autenticação é feita pelo Traefik
     # (basicauth/forward-auth). Publicar direto pula essa proteção. Descomente com cautela.
-    # ports:
+    # ports:                 # sugestão: 8113 -> porta 80 do container
     #   - target: 80
     #     published: ${UPDATE_EXTERNAL_PORT:-8113}
     #     mode: host

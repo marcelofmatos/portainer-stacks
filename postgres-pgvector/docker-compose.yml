@@ -26,7 +26,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
     # Acesso externo opcional (modo host publica 5432 no nó). Descomente se precisar
     # conectar de fora do cluster (ex.: psql/ferramenta de BI). Veja README.
-    # ports:
+    # ports:                 # sugestão: 5432 -> porta 5432 do container
     #   - target: 5432
     #     published: ${POSTGRES_PORT:-5432}
     #     mode: host

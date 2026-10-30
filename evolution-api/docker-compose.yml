@@ -39,7 +39,7 @@ services:
     # livre — modo host vale pro nó inteiro, não repita a de outra stack (confira as em uso:
     # grep -ohE 'EXTERNAL_PORT:-[0-9]+' */docker-compose.yml | sort -u).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8118 -> porta 8080 do container
     #   - target: 8080
     #     published: ${EVOLUTION_EXTERNAL_PORT:-8118}
     #     mode: host
@@ -75,7 +75,7 @@ services:
     # Acesso externo opcional (modo host publica 5432 no nó). Porta HOST livre — não repita a de
     # outra stack (confira as em uso: grep -ohE 'EXTERNAL_PORT:-[0-9]+' */docker-compose.yml | sort -u).
     # Descomente se precisar conectar de fora do cluster. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 5435 -> porta 5432 do container
     #   - target: 5432
     #     published: ${EVOLUTION_DB_EXTERNAL_PORT:-5435}
     #     mode: host
@@ -97,7 +97,7 @@ services:
       #- data # SÓ para ferramentas de admin (redisinsight) via host `evolution-api_redis`
     # Acesso externo opcional (cuidado: exponha só com senha). Porta HOST livre — não repita a de
     # outra stack (confira as em uso: grep -ohE 'EXTERNAL_PORT:-[0-9]+' */docker-compose.yml | sort -u).
-    # ports:
+    # ports:                 # sugestão: 6380 -> porta 6379 do container
     #   - target: 6379
     #     published: ${EVOLUTION_REDIS_EXTERNAL_PORT:-6380}
     #     mode: host

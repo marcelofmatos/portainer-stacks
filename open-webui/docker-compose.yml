@@ -24,7 +24,7 @@ services:
       - ENABLE_SIGNUP=${OPENWEBUI_ENABLE_SIGNUP:-false}
     # Acesso direto opcional (modo host publica 8080 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8141 -> porta 8080 do container
     #   - target: 8080
     #     published: ${OPENWEBUI_EXTERNAL_PORT:-8141}
     #     mode: host

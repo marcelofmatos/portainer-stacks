@@ -36,7 +36,7 @@ services:
       - DB_NAME=${WIKIJS_DB_NAME:-wikijs}
     # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8162 -> porta 3000 do container
     #   - target: 3000
     #     published: ${WIKIJS_EXTERNAL_PORT:-8162}
     #     mode: host
@@ -68,7 +68,7 @@ services:
       - POSTGRES_PASSWORD=${WIKIJS_DB_PASSWORD} # OBRIGATÓRIA
     # Acesso externo opcional (modo host publica 5432 no nó). Descomente se precisar
     # conectar de fora do cluster. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 5439 -> porta 5432 do container
     #   - target: 5432
     #     published: ${WIKIJS_DB_EXTERNAL_PORT:-5439}
     #     mode: host

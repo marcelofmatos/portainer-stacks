@@ -37,7 +37,7 @@ services:
       - STORAGE_TYPE=local
     # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8159 -> porta 3000 do container
     #   - target: 3000
     #     published: ${TWENTY_EXTERNAL_PORT:-8159}
     #     mode: host
@@ -98,7 +98,7 @@ services:
       - POSTGRES_PASSWORD=${TWENTY_DB_PASSWORD} # OBRIGATÓRIA
     # Acesso externo opcional (modo host publica 5432 no nó). Descomente se precisar
     # conectar de fora do cluster. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 5437 -> porta 5432 do container
     #   - target: 5432
     #     published: ${TWENTY_DB_EXTERNAL_PORT:-5437}
     #     mode: host
@@ -118,7 +118,7 @@ services:
     networks:
       - default # acesso do app
       #- data # SÓ para ferramentas de admin (redisinsight) via host `twenty_redis`
-    # ports:                       # acesso externo opcional (cuidado: exponha só com senha)
+    # ports:                 # acesso externo opcional (cuidado: exponha só com senha) · sugestão: 6382 -> porta 6379 do container
     #   - target: 6379
     #     published: ${TWENTY_REDIS_EXTERNAL_PORT:-6382}
     #     mode: host

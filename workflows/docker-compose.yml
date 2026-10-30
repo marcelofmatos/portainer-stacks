@@ -30,7 +30,7 @@ services:
       - DB_POSTGRESDB_PASSWORD=${N8N_DB_PASSWORD}
     # Acesso direto opcional (modo host publica 5678 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8164 -> porta 5678 do container
     #   - target: 5678
     #     published: ${N8N_EXTERNAL_PORT:-8164}
     #     mode: host

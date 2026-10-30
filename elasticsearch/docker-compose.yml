@@ -18,7 +18,7 @@ services:
       - default
       #- data
     # Acesso externo opcional (modo host publica 9200 no nó). Descomente só se precisar.
-    # ports:
+    # ports:                 # sugestão: 9200 -> porta 9200 do container
     #   - target: 9200
     #     published: ${ELASTIC_PORT:-9200}
     #     mode: host

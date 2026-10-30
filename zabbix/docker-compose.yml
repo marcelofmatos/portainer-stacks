@@ -15,7 +15,7 @@ services:
     networks:
       - default # conversa com o banco `db` internamente
     # Agents externos conectam no trapper 10051. Descomente para publicar no nó.
-    # ports:
+    # ports:                 # sugestão: 10051 -> porta 10051 do container
     #   - target: 10051
     #     published: ${ZABBIX_SERVER_PORT:-10051}
     #     mode: host
@@ -48,7 +48,7 @@ services:
       - PHP_TZ=${ZABBIX_TIMEZONE:-America/Sao_Paulo}
     # Acesso direto opcional (modo host publica 8080 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8166 -> porta 8080 do container
     #   - target: 8080
     #     published: ${ZABBIX_EXTERNAL_PORT:-8166}
     #     mode: host
@@ -94,7 +94,7 @@ services:
       - POSTGRES_PASSWORD=${ZABBIX_DB_PASSWORD} # OBRIGATÓRIA
     # Acesso externo opcional (modo host publica 5432 no nó). Descomente se precisar
     # conectar de fora do cluster. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 5440 -> porta 5432 do container
     #   - target: 5432
     #     published: ${ZABBIX_DB_EXTERNAL_PORT:-5440}
     #     mode: host

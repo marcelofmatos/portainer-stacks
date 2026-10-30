@@ -24,7 +24,7 @@ services:
       #- data
     # Acesso externo opcional (modo host publica 3306 no nó). Descomente se precisar
     # conectar de fora do cluster. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 3306 -> porta 3306 do container
     #   - target: 3306
     #     published: ${MARIADB_PORT:-3306}
     #     mode: host

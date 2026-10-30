@@ -29,7 +29,7 @@ services:
       START_SCHEDULER: "1"
     # Acesso direto opcional (modo host publica 80 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8130 -> porta 80 do container
     #   - target: 80
     #     published: ${LIGEROSMART_WEB_EXTERNAL_PORT:-8130}
     #     mode: host
@@ -115,7 +115,7 @@ services:
       - GF_AUTH_BASIC_ENABLED=false
     # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8131 -> porta 3000 do container
     #   - target: 3000
     #     published: ${LIGEROSMART_GRAFANA_EXTERNAL_PORT:-8131}
     #     mode: host

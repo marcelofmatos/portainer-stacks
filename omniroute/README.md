@@ -39,8 +39,8 @@ flowchart LR
 | `PROXY_NET` | não | `web` | rede externa do Traefik |
 | `DATA_NET` | não | `data` | rede externa p/ ferramentas de admin alcançarem o Redis |
 | `WORKER_HOSTNAME` | não | — | fixa os serviços num nó (cluster multi-worker) |
-| `OMNIROUTE_EXTERNAL_PORT` | não | `8135` | porta host p/ acesso direto ao `app` (bypass do Traefik, ver compose) |
-| `OMNIROUTE_REDIS_EXTERNAL_PORT` | não | `6382` | porta host p/ acesso direto ao Redis (bypass do Traefik, ver compose) |
+| `OMNIROUTE_EXTERNAL_PORT` | não | `8168` | porta host p/ acesso direto ao `app` (bypass do Traefik, ver compose) |
+| `OMNIROUTE_REDIS_EXTERNAL_PORT` | não | `6383` | porta host p/ acesso direto ao Redis (bypass do Traefik, ver compose) |
 
 ## Flavors de imagem
 

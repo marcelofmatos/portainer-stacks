@@ -19,7 +19,7 @@ services:
       - web
     # Acesso direto opcional (modo host publica 8080 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8127 -> porta 8080 do container
     #   - target: 8080
     #     published: ${KEYCLOAK_EXTERNAL_PORT:-8127}
     #     mode: host

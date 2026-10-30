@@ -21,7 +21,7 @@ services:
       - SEARXNG_REDIS_URL=${SEARXNG_REDIS_URL:-}
     # Acesso direto opcional (modo host publica 8080 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8153 -> porta 8080 do container
     #   - target: 8080
     #     published: ${SEARXNG_EXTERNAL_PORT:-8153}
     #     mode: host

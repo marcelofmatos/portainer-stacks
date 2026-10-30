@@ -25,7 +25,7 @@ services:
       - BLOB_STORAGE_PATH=/root/.flowise/storage
     # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8121 -> porta 3000 do container
     #   - target: 3000
     #     published: ${FLOWISE_EXTERNAL_PORT:-8121}
     #     mode: host

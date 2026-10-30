@@ -23,7 +23,7 @@ services:
       - LLDAP_LDAP_USER_PASS=${LLDAP_ADMIN_PASSWORD}
     # Acesso direto opcional (modo host publica 17170 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8133 -> porta 17170 do container
     #   - target: 17170
     #     published: ${LLDAP_EXTERNAL_PORT:-8133}
     #     mode: host

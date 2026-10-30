@@ -19,14 +19,14 @@ services:
     environment:
       - WEBUI_AUTH_TOKEN=${PROTONMAIL_WEBUI_AUTH_TOKEN}
     # Acesso externo opcional p/ clientes de e-mail (modo host). Descomente se precisar.
-    # ports:
+    # ports:                 # sugestão: 1025 -> porta 25 (SMTP) · 1143 -> porta 143 (IMAP)
     #   - target: 25
     #     published: ${PROTONMAIL_SMTP_PORT:-1025}
     #     mode: host
     #   - target: 143
     #     published: ${PROTONMAIL_IMAP_PORT:-1143}
     #     mode: host
-    # Acesso direto opcional à UI web (modo host, sem passar pelo Traefik):
+    # Acesso direto opcional à UI web (modo host, sem passar pelo Traefik). · sugestão: 8147 -> porta 3000 do container
     #   - target: 3000
     #     published: ${PROTONMAIL_EXTERNAL_PORT:-8147}
     #     mode: host

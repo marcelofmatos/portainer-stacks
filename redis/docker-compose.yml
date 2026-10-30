@@ -24,7 +24,7 @@ services:
     networks:
       - default
       #- data
-    # ports:                       # acesso externo opcional (cuidado: exponha só com senha)
+    # ports:                 # acesso externo opcional (cuidado: exponha só com senha) · sugestão: 6379 -> porta 6379 do container
     #   - target: 6379
     #     published: ${REDIS_PORT:-6379}
     #     mode: host

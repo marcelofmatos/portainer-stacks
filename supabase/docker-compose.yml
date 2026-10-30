@@ -50,7 +50,7 @@ services:
       - web
     # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8156 -> porta 3000 do container
     #   - target: 3000
     #     published: ${SUPABASE_STUDIO_EXTERNAL_PORT:-8156}
     #     mode: host
@@ -83,7 +83,7 @@ services:
       DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD}
     # Acesso direto opcional (modo host publica 8000 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8157 -> porta 8000 do container
     #   - target: 8000
     #     published: ${SUPABASE_API_EXTERNAL_PORT:-8157}
     #     mode: host

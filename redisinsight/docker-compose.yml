@@ -18,7 +18,7 @@ services:
     # Acesso direto opcional (modo host publica 5540 no nó, sem passar pelo Traefik).
     # CUIDADO: esta stack não tem login próprio — a autenticação é feita pelo Traefik
     # (basicauth/forward-auth). Publicar direto pula essa proteção. Descomente com cautela.
-    # ports:
+    # ports:                 # sugestão: 8151 -> porta 5540 do container
     #   - target: 5540
     #     published: ${REDISINSIGHT_EXTERNAL_PORT:-8151}
     #     mode: host

@@ -49,7 +49,7 @@ services:
       - ENABLE_ACCOUNT_SIGNUP=${CHATWOOT_ENABLE_SIGNUP:-false}
     # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8105 -> porta 3000 do container
     #   - target: 3000
     #     published: ${CHATWOOT_EXTERNAL_PORT:-8105}
     #     mode: host
@@ -112,7 +112,7 @@ services:
       - POSTGRES_PASSWORD=${CHATWOOT_DB_PASSWORD} # OBRIGATÓRIA
     # Acesso externo opcional (modo host publica 5432 no nó). Descomente se precisar
     # conectar de fora do cluster. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 5434 -> porta 5432 do container
     #   - target: 5432
     #     published: ${CHATWOOT_DB_EXTERNAL_PORT:-5434}
     #     mode: host
@@ -132,7 +132,7 @@ services:
     networks:
       - default # acesso dos apps
       #- data # SÓ para ferramentas de admin (redisinsight) via host `chatwoot_redis`
-    # ports:                       # acesso externo opcional (cuidado: exponha só com senha)
+    # ports:                 # acesso externo opcional (cuidado: exponha só com senha) · sugestão: 6381 -> porta 6379 do container
     #   - target: 6379
     #     published: ${CHATWOOT_REDIS_EXTERNAL_PORT:-6381}
     #     mode: host

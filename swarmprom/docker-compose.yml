@@ -66,7 +66,7 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
     # Acesso direto opcional (modo host publica 3000 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8158 -> porta 3000 do container
     #   - target: 3000
     #     published: ${SWARMPROM_GRAFANA_EXTERNAL_PORT:-8158}
     #     mode: host

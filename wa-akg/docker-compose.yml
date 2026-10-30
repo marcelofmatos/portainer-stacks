@@ -48,7 +48,7 @@ services:
     # livre — modo host vale pro nó inteiro, não repita a de outra stack (confira as em uso:
     # grep -ohE 'EXTERNAL_PORT:-[0-9]+' */docker-compose.yml | sort -u).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8167 -> porta 3000 do container
     #   - target: 3000
     #     published: ${WA_AKG_EXTERNAL_PORT:-8167}
     #     mode: host
@@ -87,7 +87,7 @@ services:
     # Acesso externo opcional (modo host publica 3306 no nó). Porta HOST livre — não repita a de
     # outra stack (confira as em uso: grep -ohE 'EXTERNAL_PORT:-[0-9]+' */docker-compose.yml | sort -u).
     # Descomente se precisar conectar de fora do cluster. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 3309 -> porta 3306 do container
     #   - target: 3306
     #     published: ${WA_AKG_DB_EXTERNAL_PORT:-3309}
     #     mode: host

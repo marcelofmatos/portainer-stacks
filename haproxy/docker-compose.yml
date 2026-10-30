@@ -26,13 +26,13 @@ services:
       - source: haproxy_config
         target: /usr/local/etc/haproxy/haproxy.cfg
     # Frontends TCP definidos no haproxy.cfg precisam ser publicados aqui. Ex.:
-    # ports:
+    # ports:                 # exemplo (não é sugestão de porta livre: ajuste target/published conforme seu haproxy.cfg)
     #   - target: 3306
     #     published: 3306
     #     mode: host
-    # Acesso direto opcional à página de stats (modo host, sem passar pelo Traefik).
-    # CUIDADO: essa stack não tem login próprio na página de stats — a autenticação é feita
-    # pelo basicauth do Traefik. Publicar direto pula essa proteção.
+    # Acesso direto opcional à página de stats (modo host, sem passar pelo Traefik). CUIDADO:
+    # essa stack não tem login próprio na página de stats — a autenticação é feita pelo basicauth
+    # do Traefik. Publicar direto pula essa proteção. · sugestão: 8124 -> porta 8404 do container
     #   - target: 8404
     #     published: ${HAPROXY_EXTERNAL_PORT:-8124}
     #     mode: host

@@ -58,7 +58,7 @@ services:
       - SYNAPSE_ENABLE_REGISTRATION=${SYNAPSE_ENABLE_REGISTRATION:-false} # registro aberto na web (cuidado)
     # Acesso direto opcional (modo host publica 8008 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8115 -> porta 8008 do container
     #   - target: 8008
     #     published: ${MATRIX_EXTERNAL_PORT:-8115}
     #     mode: host
@@ -100,7 +100,7 @@ services:
       - web # exposto pelo Traefik (o cliente fala com o homeserver pelo navegador, não pela rede interna)
     # Acesso direto opcional (modo host publica 8080 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8116 -> porta 8080 do container
     #   - target: 8080
     #     published: ${ELEMENT_EXTERNAL_PORT:-8116}
     #     mode: host

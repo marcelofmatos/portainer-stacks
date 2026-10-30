@@ -52,9 +52,9 @@ services:
       - REDIS_URL=${OMNIROUTE_REDIS_URL:-redis://redis:6379}
     # Acesso direto opcional (modo host publica 20128 no nó, sem passar pelo Traefik).
     # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
-    # ports:
+    # ports:                 # sugestão: 8168 -> porta 20128 do container
     #   - target: 20128
-    #     published: ${OMNIROUTE_EXTERNAL_PORT:-8135}
+    #     published: ${OMNIROUTE_EXTERNAL_PORT:-8168}
     #     mode: host
     volumes:
       - omniroute-data:/app/data
@@ -80,9 +80,9 @@ services:
     networks:
       - default # acesso do app
       #- data # SÓ para ferramentas de admin (redisinsight) via host `omniroute_redis`
-    # ports:                       # acesso externo opcional (cuidado: exponha só com senha)
+    # ports:                 # acesso externo opcional (cuidado: exponha só com senha) · sugestão: 6383 -> porta 6379 do container
     #   - target: 6379
-    #     published: ${OMNIROUTE_REDIS_EXTERNAL_PORT:-6382}
+    #     published: ${OMNIROUTE_REDIS_EXTERNAL_PORT:-6383}
     #     mode: host
     volumes:
       - redis-data:/data # ← copie este volume para migrar de host

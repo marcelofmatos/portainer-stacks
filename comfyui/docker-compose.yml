@@ -20,7 +20,7 @@ services:
     # Acesso direto opcional (modo host publica 8188 no nó, sem passar pelo Traefik).
     # CUIDADO: esta stack não tem login próprio — a autenticação é feita pelo Traefik
     # (basicauth/forward-auth). Publicar direto pula essa proteção. Descomente com cautela.
-    # ports:
+    # ports:                 # sugestão: 8108 -> porta 8188 do container
     #   - target: 8188
     #     published: ${COMFYUI_EXTERNAL_PORT:-8108}
     #     mode: host
