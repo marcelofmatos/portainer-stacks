@@ -20,6 +20,10 @@ services:
     - S3_ENDPOINT=${TYPEBOT_S3_ENDPOINT:-}
     - S3_PORT=${TYPEBOT_S3_PORT:-443}
     - S3_SSL=${TYPEBOT_S3_SSL:-true}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8160 -> porta 3000 do container
+    #   - "${TYPEBOT_BUILDER_EXTERNAL_PORT:-8160}:3000"
     labels:
     - traefik.enable=true
     - traefik.http.routers.typebot-builder.rule=Host(`${TYPEBOT_BUILDER_FQDN}`)
@@ -47,6 +51,10 @@ services:
     - S3_ENDPOINT=${TYPEBOT_S3_ENDPOINT:-}
     - S3_PORT=${TYPEBOT_S3_PORT:-443}
     - S3_SSL=${TYPEBOT_S3_SSL:-true}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8161 -> porta 3000 do container
+    #   - "${TYPEBOT_VIEWER_EXTERNAL_PORT:-8161}:3000"
     labels:
     - traefik.enable=true
     - traefik.http.routers.typebot-viewer.rule=Host(`${TYPEBOT_VIEWER_FQDN}`)
@@ -67,6 +75,10 @@ services:
     - POSTGRES_DB=${TYPEBOT_DB_NAME:-typebot}
     - POSTGRES_USER=${TYPEBOT_DB_USER:-postgres}
     - POSTGRES_PASSWORD=${TYPEBOT_DB_PASSWORD}
+    # Acesso externo opcional (publica a porta no host). Descomente se precisar
+    # conectar de fora do host. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 5438 -> porta 5432 do container
+    #   - "${TYPEBOT_DB_EXTERNAL_PORT:-5438}:5432"
     volumes:
     - db-data:/var/lib/postgresql/data
 networks:

@@ -11,6 +11,10 @@ services:
     - web
     environment:
     - OPENAI_API_KEY=${OPENAI_API_KEY:?OPENAI_API_KEY e obrigatorio}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8122 -> porta 3000 do container
+    #   - "${GENUI_EXTERNAL_PORT:-8122}:3000"
     labels:
     - traefik.enable=true
     - traefik.http.routers.genui.rule=Host(`${GENUI_FQDN}`)

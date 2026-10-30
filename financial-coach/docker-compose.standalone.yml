@@ -11,6 +11,10 @@ services:
     - web
     environment:
     - GOOGLE_API_KEY=${GOOGLE_API_KEY:?GOOGLE_API_KEY e obrigatorio}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8120 -> porta 3000 do container
+    #   - "${FINCOACH_EXTERNAL_PORT:-8120}:3000"
     labels:
     - traefik.enable=true
     - traefik.http.routers.fincoach.rule=Host(`${FINCOACH_FQDN}`)

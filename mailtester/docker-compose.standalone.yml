@@ -9,6 +9,10 @@ services:
     - TZ=${TZ:-UTC}
     networks:
     - web
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8134 -> porta 1080 do container
+    #   - "${MAILTESTER_EXTERNAL_PORT:-8134}:1080"
     labels:
     - traefik.enable=true
     - traefik.http.routers.mailtester.rule=Host(`${MAILTESTER_FQDN}`)

@@ -14,6 +14,10 @@ services:
     - MARIADB_USER=${MARIADB_USER:-app}
     - MARIADB_PASSWORD=${MARIADB_PASSWORD}
     - MARIADB_AUTO_UPGRADE=1
+    # Acesso externo opcional (publica a porta no host). Descomente se precisar
+    # conectar de fora do host. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 3306 -> porta 3306 do container
+    #   - "${MARIADB_PORT:-3306}:3306"
     volumes:
     - mariadb-data:/var/lib/mysql
 networks:

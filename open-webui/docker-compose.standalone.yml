@@ -14,6 +14,10 @@ services:
     - OPENAI_API_BASE_URL=${OPENWEBUI_OPENAI_BASE_URL:-}
     - OPENAI_API_KEY=${OPENWEBUI_OPENAI_API_KEY:-}
     - ENABLE_SIGNUP=${OPENWEBUI_ENABLE_SIGNUP:-false}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8141 -> porta 8080 do container
+    #   - "${OPENWEBUI_EXTERNAL_PORT:-8141}:8080"
     volumes:
     - open-webui-data:/app/backend/data
     labels:

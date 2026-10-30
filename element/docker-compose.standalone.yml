@@ -36,6 +36,10 @@ services:
       - SYNAPSE_DB_USER=${SYNAPSE_DB_USER:-synapse}
       - SYNAPSE_DB_PASSWORD=${MATRIX_DB_PASSWORD} # OBRIGATÓRIA (mesma senha do serviço db)
       - SYNAPSE_ENABLE_REGISTRATION=${SYNAPSE_ENABLE_REGISTRATION:-false}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8115 -> porta 8008 do container
+    #   - "${MATRIX_EXTERNAL_PORT:-8115}:8008"
     volumes:
       - synapse-data:/data # homeserver.yaml, signing key, mídia
     labels:
@@ -64,6 +68,10 @@ services:
       - "ELEMENT_TAGLINE=${ELEMENT_TAGLINE-Converse em tempo real com sua equipe e seus clientes num chat <strong>seguro</strong> e <strong>criptografado</strong>, direto do navegador.}"
     networks:
       - web # exposto pelo Traefik (o cliente fala com o homeserver pelo navegador, não pela rede interna)
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8116 -> porta 8080 do container
+    #   - "${ELEMENT_EXTERNAL_PORT:-8116}:8080"
     labels:
       - traefik.enable=true
       - traefik.http.routers.element.rule=Host(`${ELEMENT_FQDN}`)

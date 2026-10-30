@@ -10,6 +10,10 @@ services:
     #- data
     environment:
     - QDRANT__SERVICE__API_KEY=${QDRANT_API_KEY:?QDRANT_API_KEY e obrigatoria}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8148 -> porta 6333 do container
+    #   - "${QDRANT_EXTERNAL_PORT:-8148}:6333"
     volumes:
     - qdrant-data:/qdrant/storage
     labels:

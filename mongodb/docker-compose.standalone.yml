@@ -12,6 +12,10 @@ services:
     - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME:-root}
     - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
     - MONGO_INITDB_DATABASE=${MONGO_DATABASE:-appdb}
+    # Acesso externo opcional (publica a porta no host). Descomente se precisar
+    # conectar de fora do host. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 27017 -> porta 27017 do container
+    #   - "${MONGO_PORT:-27017}:27017"
     volumes:
     - mongodb-data:/data/db
 networks:

@@ -9,6 +9,12 @@ services:
     - web
     environment:
     - WEBUI_AUTH_TOKEN=${PROTONMAIL_WEBUI_AUTH_TOKEN}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 1025 -> porta 25 do container · 1143 -> porta 143 do container · 8147 -> porta 3000 do container
+    #   - "${PROTONMAIL_SMTP_PORT:-1025}:25"
+    #   - "${PROTONMAIL_IMAP_PORT:-1143}:143"
+    #   - "${PROTONMAIL_EXTERNAL_PORT:-8147}:3000"
     volumes:
     - protonmail-bridge-data:/root
     labels:

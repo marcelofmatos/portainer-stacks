@@ -12,6 +12,10 @@ services:
     - JOOMLA_DB_USER=${JOOMLA_DB_USER:-joomla}
     - JOOMLA_DB_PASSWORD=${JOOMLA_DB_PASSWORD}
     - JOOMLA_DB_NAME=${JOOMLA_DB_NAME:-joomla}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8126 -> porta 80 do container
+    #   - "${JOOMLA_EXTERNAL_PORT:-8126}:80"
     volumes:
     - joomla:/var/www/html
     labels:

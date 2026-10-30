@@ -14,6 +14,10 @@ services:
     - DB_USER=${WIKIJS_DB_USER:-wikijs}
     - DB_PASS=${WIKIJS_DB_PASSWORD}
     - DB_NAME=${WIKIJS_DB_NAME:-wikijs}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8162 -> porta 3000 do container
+    #   - "${WIKIJS_EXTERNAL_PORT:-8162}:3000"
     labels:
     - traefik.enable=true
     - traefik.http.routers.wikijs.rule=Host(`${WIKIJS_FQDN}`)
@@ -34,6 +38,10 @@ services:
     - POSTGRES_DB=${WIKIJS_DB_NAME:-wikijs}
     - POSTGRES_USER=${WIKIJS_DB_USER:-wikijs}
     - POSTGRES_PASSWORD=${WIKIJS_DB_PASSWORD}
+    # Acesso externo opcional (publica a porta no host). Descomente se precisar
+    # conectar de fora do host. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 5439 -> porta 5432 do container
+    #   - "${WIKIJS_DB_EXTERNAL_PORT:-5439}:5432"
     volumes:
     - db-data:/var/lib/postgresql/data
 networks:

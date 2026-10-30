@@ -8,6 +8,10 @@ services:
     - CHROMA_SERVER_AUTHN_CREDENTIALS=${CHROMA_AUTH_TOKEN:-}
     - CHROMA_SERVER_AUTHN_PROVIDER=${CHROMA_AUTH_PROVIDER:-}
     - ANONYMIZED_TELEMETRY=${CHROMA_ANONYMIZED_TELEMETRY:-FALSE}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8106 -> porta 8000 do container
+    #   - "${CHROMA_EXTERNAL_PORT:-8106}:8000"
     volumes:
     - chroma-data:/data
     networks:

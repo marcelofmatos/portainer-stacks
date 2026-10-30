@@ -8,6 +8,10 @@ services:
     - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
     - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
     - PGADMIN_LISTEN_PORT=80
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8144 -> porta 80 do container
+    #   - "${PGADMIN_EXTERNAL_PORT:-8144}:80"
     volumes:
     - pgadmin:/var/lib/pgadmin
     networks:

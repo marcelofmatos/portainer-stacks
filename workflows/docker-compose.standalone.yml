@@ -20,6 +20,10 @@ services:
     - DB_POSTGRESDB_DATABASE=${N8N_DB_NAME:-n8n}
     - DB_POSTGRESDB_USER=${N8N_DB_USER:-n8n}
     - DB_POSTGRESDB_PASSWORD=${N8N_DB_PASSWORD}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8164 -> porta 5678 do container
+    #   - "${N8N_EXTERNAL_PORT:-8164}:5678"
     volumes:
     - n8n_data:/home/node/.n8n
     labels:

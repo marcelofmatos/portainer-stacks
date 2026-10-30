@@ -13,6 +13,10 @@ services:
     networks:
     - default
     - web
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8152 -> porta 3000 do container
+    #   - "${ROCKETCHAT_EXTERNAL_PORT:-8152}:3000"
     labels:
     - traefik.enable=true
     - traefik.http.routers.rocketchat.rule=Host(`${ROCKETCHAT_FQDN}`)

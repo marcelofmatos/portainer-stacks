@@ -18,6 +18,10 @@ services:
     - KC_HTTP_ENABLED=true
     - KC_BOOTSTRAP_ADMIN_USERNAME=${KEYCLOAK_ADMIN:-admin}
     - KC_BOOTSTRAP_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8127 -> porta 8080 do container
+    #   - "${KEYCLOAK_EXTERNAL_PORT:-8127}:8080"
     labels:
     - traefik.enable=true
     - traefik.http.routers.keycloak.rule=Host(`${KEYCLOAK_FQDN}`)

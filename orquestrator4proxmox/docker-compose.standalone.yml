@@ -31,6 +31,10 @@ services:
       - LDAP_REQUIRED_GROUP=${LDAP_REQUIRED_GROUP:-}
       - JWT_SECRET=${JWT_SECRET}
       - SESSION_TTL=${SESSION_TTL:-8h}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8143 -> porta 8080 do container
+    #   - "${APP_EXTERNAL_PORT:-8143}:8080"
     labels:
       - traefik.enable=true
       - traefik.docker.network=${PROXY_NET:-web}

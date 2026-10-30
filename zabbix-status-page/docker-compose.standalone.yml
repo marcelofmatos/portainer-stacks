@@ -22,6 +22,10 @@ services:
     - TZ=${TZ:-UTC}
     - POLL_INTERVAL_SECONDS=${POLL_INTERVAL_SECONDS:-60}
     - HISTORY_DAYS=${HISTORY_DAYS:-90}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8165 -> porta 8080 do container
+    #   - "${STATUS_EXTERNAL_PORT:-8165}:8080"
     volumes:
     - status-data:/data
     labels:

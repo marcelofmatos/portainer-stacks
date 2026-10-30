@@ -10,6 +10,10 @@ services:
     environment:
     - ADMIN_USER=${PHPNETMAP_ADMIN_USER:-admin}
     - ADMIN_PASSWORD=${PHPNETMAP_ADMIN_PASSWORD}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8146 -> porta 80 do container
+    #   - "${PHPNETMAP_EXTERNAL_PORT:-8146}:80"
     volumes:
     - phpnetmap-data:/app/protected/data
     labels:

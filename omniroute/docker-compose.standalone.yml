@@ -20,6 +20,10 @@ services:
       - AUTH_COOKIE_SECURE=true
       - NEXT_PUBLIC_BASE_URL=https://${OMNIROUTE_FQDN}
       - REDIS_URL=${OMNIROUTE_REDIS_URL:-redis://redis:6379}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8168 -> porta 20128 do container
+    #   - "${OMNIROUTE_EXTERNAL_PORT:-8168}:20128"
     volumes:
       - omniroute-data:/app/data
     labels:
@@ -37,6 +41,9 @@ services:
     networks:
       - default
       #- data
+    # Acesso externo opcional (publica a porta no host). CUIDADO: exponha só com senha.
+    # ports:                 # sugestão: 6383 -> porta 6379 do container
+    #   - "${OMNIROUTE_REDIS_EXTERNAL_PORT:-6383}:6379"
     volumes:
       - redis-data:/data
 networks:

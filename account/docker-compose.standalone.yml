@@ -12,6 +12,10 @@ services:
     restart: unless-stopped
     environment:
       LAM_SKIP_PRECONFIGURE: 'true'
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8100 -> porta 80 do container
+    #   - "${LAM_EXTERNAL_PORT:-8100}:80"
     volumes:
       - lam-etc:/etc/ldap-account-manager/
       - lam-lib:/var/lib/ldap-account-manager/
@@ -48,6 +52,10 @@ services:
   user:
     image: ltbproject/self-service-password:${SSP_IMAGE_TAG:-latest}
     restart: unless-stopped
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8101 -> porta 80 do container
+    #   - "${SSP_EXTERNAL_PORT:-8101}:80"
     volumes:
       # configuração via arquivo local do host:
       - ${SSP_CONFIG_FILE:-./config/ssp-config.inc.local.php}:/var/www/conf/config.inc.local.php:ro

@@ -7,6 +7,10 @@ services:
     networks:
     - default
     - web
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8142 -> porta 3000 do container
+    #   - "${OPENSPEEDTEST_EXTERNAL_PORT:-8142}:3000"
     labels:
     - traefik.enable=true
     - traefik.http.routers.openspeedtest.rule=Host(`${OPENSPEEDTEST_FQDN}`)

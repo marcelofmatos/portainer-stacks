@@ -31,6 +31,10 @@ services:
     - POSTGRES_DATABASE=${CHATWOOT_DB_NAME:-chatwoot}
     - REDIS_URL=${CHATWOOT_REDIS_URL:-redis://redis:6379}
     - ENABLE_ACCOUNT_SIGNUP=${CHATWOOT_ENABLE_SIGNUP:-false}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8105 -> porta 3000 do container
+    #   - "${CHATWOOT_EXTERNAL_PORT:-8105}:3000"
     volumes:
     - chatwoot-storage:/app/storage
     labels:
@@ -79,6 +83,10 @@ services:
     - POSTGRES_DB=${CHATWOOT_DB_NAME:-chatwoot}
     - POSTGRES_USER=${CHATWOOT_DB_USER:-postgres}
     - POSTGRES_PASSWORD=${CHATWOOT_DB_PASSWORD}
+    # Acesso externo opcional (publica a porta no host). Descomente se precisar
+    # conectar de fora do host. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 5434 -> porta 5432 do container
+    #   - "${CHATWOOT_DB_EXTERNAL_PORT:-5434}:5432"
     volumes:
     - db-data:/var/lib/postgresql/data
   redis:
@@ -88,6 +96,9 @@ services:
     networks:
     - default
     #- data
+    # Acesso externo opcional (publica a porta no host). CUIDADO: exponha só com senha.
+    # ports:                 # sugestão: 6381 -> porta 6379 do container
+    #   - "${CHATWOOT_REDIS_EXTERNAL_PORT:-6381}:6379"
     volumes:
     - redis-data:/data
 networks:

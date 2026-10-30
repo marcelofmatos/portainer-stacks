@@ -11,6 +11,10 @@ services:
     - LLDAP_LDAP_BASE_DN=${LLDAP_BASE_DN:-dc=example,dc=com}
     - LLDAP_LDAP_USER_DN=${LLDAP_ADMIN_USERNAME:-admin}
     - LLDAP_LDAP_USER_PASS=${LLDAP_ADMIN_PASSWORD}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8133 -> porta 17170 do container
+    #   - "${LLDAP_EXTERNAL_PORT:-8133}:17170"
     volumes:
     - lldap-data:/data
     networks:

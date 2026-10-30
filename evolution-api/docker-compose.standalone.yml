@@ -25,6 +25,10 @@ services:
     - CACHE_REDIS_PREFIX_KEY=evolution
     - CACHE_REDIS_SAVE_INSTANCES=false
     - CACHE_LOCAL_ENABLED=false
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8118 -> porta 8080 do container
+    #   - "${EVOLUTION_EXTERNAL_PORT:-8118}:8080"
     volumes:
     - evolution-instances:/evolution/instances
     labels:
@@ -47,6 +51,10 @@ services:
     - POSTGRES_DB=${EVOLUTION_DB_NAME:-evolution}
     - POSTGRES_USER=${EVOLUTION_DB_USER:-postgres}
     - POSTGRES_PASSWORD=${EVOLUTION_DB_PASSWORD}
+    # Acesso externo opcional (publica a porta no host). Descomente se precisar
+    # conectar de fora do host. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 5435 -> porta 5432 do container
+    #   - "${EVOLUTION_DB_EXTERNAL_PORT:-5435}:5432"
     volumes:
     - db-data:/var/lib/postgresql/data
   redis:
@@ -56,6 +64,9 @@ services:
     networks:
     - default
     #- data
+    # Acesso externo opcional (publica a porta no host). CUIDADO: exponha só com senha.
+    # ports:                 # sugestão: 6380 -> porta 6379 do container
+    #   - "${EVOLUTION_REDIS_EXTERNAL_PORT:-6380}:6379"
     volumes:
     - redis-data:/data
 networks:

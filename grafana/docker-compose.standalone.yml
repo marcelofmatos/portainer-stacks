@@ -15,6 +15,10 @@ services:
       - GF_SERVER_ROOT_URL=https://${GRAFANA_FQDN}
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_INSTALL_PLUGINS=${GRAFANA_PLUGINS:-} # lista separada por vírgula (ex.: grafana-piechart-panel)
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8123 -> porta 3000 do container
+    #   - "${GRAFANA_EXTERNAL_PORT:-8123}:3000"
     volumes:
       - grafana-data:/var/lib/grafana # dashboards, plugins, banco interno — copie p/ migrar de host
     labels:

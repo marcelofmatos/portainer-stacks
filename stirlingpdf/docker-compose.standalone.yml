@@ -10,6 +10,10 @@ services:
     networks:
     - default
     - web
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8155 -> porta 8080 do container
+    #   - "${STIRLING_EXTERNAL_PORT:-8155}:8080"
     volumes:
     - configs:/configs
     - fonts:/usr/share/fonts/opentype/custom

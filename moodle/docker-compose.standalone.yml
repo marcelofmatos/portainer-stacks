@@ -19,6 +19,10 @@ services:
     - MOODLE_HOST=${MOODLE_FQDN}
     - MOODLE_REVERSEPROXY=yes
     - MOODLE_SSLPROXY=yes
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8139 -> porta 8080 do container
+    #   - "${MOODLE_EXTERNAL_PORT:-8139}:8080"
     volumes:
     - moodle:/bitnami/moodle
     - moodledata:/bitnami/moodledata

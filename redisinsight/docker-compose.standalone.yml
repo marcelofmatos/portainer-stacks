@@ -8,6 +8,10 @@ services:
     - default
     - web
     #- data
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8151 -> porta 5540 do container
+    #   - "${REDISINSIGHT_EXTERNAL_PORT:-8151}:5540"
     volumes:
     - redisinsight-data:/data
     labels:

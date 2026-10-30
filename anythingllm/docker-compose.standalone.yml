@@ -12,6 +12,10 @@ services:
     - STORAGE_DIR=/app/server/storage
     - JWT_SECRET=${ANYTHINGLLM_JWT_SECRET:?ANYTHINGLLM_JWT_SECRET e obrigatorio}
     - DISABLE_TELEMETRY=${ANYTHINGLLM_DISABLE_TELEMETRY:-true}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8102 -> porta 3001 do container
+    #   - "${ANYTHINGLLM_EXTERNAL_PORT:-8102}:3001"
     volumes:
     - anythingllm-data:/app/server/storage
     labels:

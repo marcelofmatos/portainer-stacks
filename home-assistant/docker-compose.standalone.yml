@@ -8,6 +8,10 @@ services:
     - web
     environment:
     - TZ=${TZ:-America/Sao_Paulo}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8125 -> porta 8123 do container
+    #   - "${HOMEASSISTANT_EXTERNAL_PORT:-8125}:8123"
     volumes:
     - homeassistant-config:/config
     labels:

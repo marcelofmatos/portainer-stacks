@@ -14,6 +14,9 @@ services:
     - ${REDIS_APPENDONLY:-yes}
     - --requirepass
     - ${REDIS_PASSWORD:-}
+    # Acesso externo opcional (publica a porta no host). CUIDADO: exponha só com senha.
+    # ports:                 # sugestão: 6379 -> porta 6379 do container
+    #   - "${REDIS_PORT:-6379}:6379"
     volumes:
     - redis-data:/data
     networks:

@@ -15,6 +15,10 @@ services:
       - DATABASE_URL=${DATABASE_URL:-}
       # Chaves dos provedores referenciadas pelo config.yaml via os.environ/<VAR>:
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8132 -> porta 4000 do container
+    #   - "${LITELLM_EXTERNAL_PORT:-8132}:4000"
     volumes:
       # model_list via arquivo local do host:
       - ${LITELLM_CONFIG_FILE:-./config/config.yaml}:/app/config.yaml:ro

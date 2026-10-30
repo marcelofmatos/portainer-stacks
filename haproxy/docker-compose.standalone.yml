@@ -12,6 +12,10 @@ services:
       - default
       - web
       #- data
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8124 -> porta 8404 do container
+    #   - "${HAPROXY_EXTERNAL_PORT:-8124}:8404"
     volumes:
       # haproxy.cfg via arquivo local do host:
       - ${HAPROXY_CONFIG_FILE:-./config/haproxy.cfg}:/usr/local/etc/haproxy/haproxy.cfg:ro

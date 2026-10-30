@@ -9,6 +9,10 @@ services:
   authelia:
     image: authelia/authelia:${AUTHELIA_IMAGE_TAG:-latest}
     restart: unless-stopped
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8103 -> porta 9091 do container
+    #   - "${AUTHELIA_EXTERNAL_PORT:-8103}:9091"
     volumes:
       # configuração via arquivo local do host (edite este arquivo / aponte para o seu):
       - ${AUTHELIA_CONFIG_FILE:-./config/configuration.yml}:/config/configuration.yml:ro

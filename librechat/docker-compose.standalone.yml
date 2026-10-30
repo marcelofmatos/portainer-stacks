@@ -24,6 +24,10 @@ services:
     - MEILI_MASTER_KEY=${LIBRECHAT_MEILI_MASTER_KEY}
     - OPENAI_API_KEY=${LIBRECHAT_OPENAI_API_KEY:-}
     - OPENAI_REVERSE_PROXY=${LIBRECHAT_OPENAI_REVERSE_PROXY:-}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8129 -> porta 3080 do container
+    #   - "${LIBRECHAT_EXTERNAL_PORT:-8129}:3080"
     labels:
     - traefik.enable=true
     - traefik.http.routers.librechat.rule=Host(`${LIBRECHAT_FQDN}`)
@@ -53,6 +57,10 @@ services:
     environment:
     - MONGO_INITDB_ROOT_USERNAME=${LIBRECHAT_MONGO_USER:-root}
     - MONGO_INITDB_ROOT_PASSWORD=${LIBRECHAT_MONGO_PASSWORD}
+    # Acesso externo opcional (publica a porta no host). Descomente se precisar
+    # conectar de fora do host. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 27018 -> porta 27017 do container
+    #   - "${LIBRECHAT_DB_EXTERNAL_PORT:-27018}:27017"
     volumes:
     - db-data:/data/db
 networks:

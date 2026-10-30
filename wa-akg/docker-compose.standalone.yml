@@ -22,6 +22,10 @@ services:
       - LOCALE=${WA_AKG_LOCALE:-pt-BR}
       - ADMIN_EMAIL=${WA_AKG_ADMIN_EMAIL}
       - ADMIN_PASSWORD=${WA_AKG_ADMIN_PASSWORD}
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8167 -> porta 3000 do container
+    #   - "${WA_AKG_EXTERNAL_PORT:-8167}:3000"
     volumes:
       - app-data:/app/data
       - uploads-data:/app/uploads
@@ -47,6 +51,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    # Acesso externo opcional (publica a porta no host). Descomente se precisar
+    # conectar de fora do host. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 3309 -> porta 3306 do container
+    #   - "${WA_AKG_DB_EXTERNAL_PORT:-3309}:3306"
     volumes:
       - db-data:/var/lib/mysql
 networks:

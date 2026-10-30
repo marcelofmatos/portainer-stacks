@@ -11,6 +11,10 @@ services:
     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     - POSTGRES_DB=${POSTGRES_DB:-vectordb}
     - POSTGRES_USER=${POSTGRES_USER:-postgres}
+    # Acesso externo opcional (publica a porta no host). Descomente se precisar
+    # conectar de fora do host. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 5432 -> porta 5432 do container
+    #   - "${POSTGRES_PORT:-5432}:5432"
     volumes:
     - pg-data:/var/lib/postgresql/data
 networks:

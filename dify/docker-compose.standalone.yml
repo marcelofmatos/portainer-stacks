@@ -62,6 +62,10 @@ services:
       CODE_EXECUTION_API_KEY: ${DIFY_SANDBOX_API_KEY}
       MODE: api
       MIGRATION_ENABLED: 'true'
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8111 -> porta 5001 do container
+    #   - "${DIFY_API_EXTERNAL_PORT:-8111}:5001"
     volumes:
     - dify-storage:/app/api/storage
     labels:
@@ -117,6 +121,10 @@ services:
     environment:
       CONSOLE_API_URL: https://${DIFY_FQDN}
       APP_API_URL: https://${DIFY_FQDN}
+    # Acesso externo opcional (publica a porta no host). Descomente se precisar
+    # conectar de fora do host. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8112 -> porta 3000 do container
+    #   - "${DIFY_WEB_EXTERNAL_PORT:-8112}:3000"
     labels:
     - traefik.enable=true
     - traefik.http.routers.dify-web.rule=Host(`${DIFY_FQDN}`)

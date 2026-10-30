@@ -21,6 +21,10 @@ services:
       TZ: ${TZ:-America/Sao_Paulo}
       START_WEBSERVER: '1'
       START_SCHEDULER: '1'
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8130 -> porta 80 do container
+    #   - "${LIGEROSMART_WEB_EXTERNAL_PORT:-8130}:80"
     volumes:
     - core:/opt/otrs
     labels:
@@ -80,6 +84,10 @@ services:
     environment:
     - GF_SERVER_ROOT_URL=https://${LIGEROSMART_FQDN}/grafana/
     - GF_AUTH_BASIC_ENABLED=false
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8131 -> porta 3000 do container
+    #   - "${LIGEROSMART_GRAFANA_EXTERNAL_PORT:-8131}:3000"
     volumes:
     - grafana-data:/var/lib/grafana
     labels:

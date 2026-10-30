@@ -14,6 +14,10 @@ services:
     - REDIS_URL=${TWENTY_REDIS_URL:-redis://redis:6379}
     - APP_SECRET=${TWENTY_APP_SECRET}
     - STORAGE_TYPE=local
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8159 -> porta 3000 do container
+    #   - "${TWENTY_EXTERNAL_PORT:-8159}:3000"
     volumes:
     - twenty-data:/app/packages/twenty-server/.local-storage
     labels:
@@ -54,6 +58,10 @@ services:
     - POSTGRES_DB=${TWENTY_DB_NAME:-twenty}
     - POSTGRES_USER=${TWENTY_DB_USER:-postgres}
     - POSTGRES_PASSWORD=${TWENTY_DB_PASSWORD}
+    # Acesso externo opcional (publica a porta no host). Descomente se precisar
+    # conectar de fora do host. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 5437 -> porta 5432 do container
+    #   - "${TWENTY_DB_EXTERNAL_PORT:-5437}:5432"
     volumes:
     - db-data:/var/lib/postgresql/data
   redis:
@@ -63,6 +71,9 @@ services:
     networks:
     - default
     #- data
+    # Acesso externo opcional (publica a porta no host). CUIDADO: exponha só com senha.
+    # ports:                 # sugestão: 6382 -> porta 6379 do container
+    #   - "${TWENTY_REDIS_EXTERNAL_PORT:-6382}:6379"
     volumes:
     - redis-data:/data
 networks:
