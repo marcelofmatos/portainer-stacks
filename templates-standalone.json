@@ -224,14 +224,16 @@
           "description": "Senha do cn=admin,dc=..."
         },
         {
-          "name": "SSP_CONFIG_NAME",
-          "label": "Docker config (config.inc.local.php)",
-          "default": "account_ssp_config_v1"
+          "name": "SSP_CONFIG_FILE",
+          "label": "Arquivo de config (bind mount)",
+          "description": "Caminho local pra config.inc.local.php (ver README)",
+          "default": "./config/ssp-config.inc.local.php"
         },
         {
-          "name": "SSP_CSS_NAME",
-          "label": "Docker config (custom.css)",
-          "default": "account_ssp_css_custom_v1"
+          "name": "SSP_CSS_FILE",
+          "label": "Arquivo de CSS custom (bind mount, opcional)",
+          "description": "Caminho local pra custom.css (ver README)",
+          "default": "./config/ssp-custom.css"
         },
         {
           "name": "PROXY_NET",
@@ -674,9 +676,10 @@
           "description": "Chave de storage (min. 20 chars)"
         },
         {
-          "name": "AUTHELIA_CONFIG_NAME",
-          "label": "Docker config",
-          "default": "authelia_config_v1"
+          "name": "AUTHELIA_CONFIG_FILE",
+          "label": "Arquivo de config (bind mount)",
+          "description": "Caminho local pra configuration.yml (ver README)",
+          "default": "./config/configuration.yml"
         },
         {
           "name": "PROXY_NET",
@@ -912,9 +915,10 @@
           "description": "Usada pelo config.yaml"
         },
         {
-          "name": "LITELLM_CONFIG_NAME",
-          "label": "Docker config",
-          "default": "litellm_config_v1"
+          "name": "LITELLM_CONFIG_FILE",
+          "label": "Arquivo de config (bind mount)",
+          "description": "Caminho local pra config.yaml, lista de modelos (ver README)",
+          "default": "./config/config.yaml"
         },
         {
           "name": "PROXY_NET",
@@ -1610,26 +1614,6 @@
           "name": "PROXY_NET",
           "label": "Rede do proxy",
           "default": "web"
-        },
-        {
-          "name": "NODE_HOSTNAME_WEBSERVER",
-          "label": "Nó do webserver (obrigatório)",
-          "description": "Hostname do nó Swarm onde fixar o serviço (veja `docker node ls`)"
-        },
-        {
-          "name": "NODE_HOSTNAME_DATABASE",
-          "label": "Nó do MariaDB (obrigatório)",
-          "description": "Hostname do nó Swarm onde fixar o serviço (veja `docker node ls`)"
-        },
-        {
-          "name": "NODE_HOSTNAME_ELASTICSEARCH",
-          "label": "Nó do Elasticsearch (obrigatório)",
-          "description": "Hostname do nó Swarm onde fixar o serviço (veja `docker node ls`)"
-        },
-        {
-          "name": "NODE_HOSTNAME_GRAFANA",
-          "label": "Nó do Grafana (obrigatório)",
-          "description": "Hostname do nó Swarm onde fixar o serviço (veja `docker node ls`)"
         }
       ]
     },
@@ -2417,9 +2401,10 @@
           "description": "Formato usuario:hash_bcrypt (htpasswd -nbB)"
         },
         {
-          "name": "HAPROXY_CONFIG_NAME",
-          "label": "Nome do Docker config",
-          "default": "haproxy_config_v1"
+          "name": "HAPROXY_CONFIG_FILE",
+          "label": "Arquivo de config (bind mount)",
+          "description": "Caminho local pra haproxy.cfg (ver README)",
+          "default": "./config/haproxy.cfg"
         },
         {
           "name": "HAPROXY_IMAGE_TAG",
