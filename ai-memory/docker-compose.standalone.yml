@@ -1,0 +1,52 @@
+# Stack "ai-memory" — variante Docker Compose (host standalone). Variáveis e uso no README.
+# Pré-requisito: crie a rede externa do proxy (docker network create web).
+#
+# Memória de longo prazo para agentes via MCP + hooks (imagem upstream akitaonrails/ai-memory).
+# Dados (SQLite + wiki markdown/git) no volume ai-memory-data montado em /data.
+# Obrigatórias: AI_MEMORY_FQDN, AI_MEMORY_AUTH_TOKEN (bearer token; também é a senha da UI /web).
+services:
+  app:
+    restart: unless-stopped
+    image: akitaonrails/ai-memory:${AI_MEMORY_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+    environment:
+      - HOME=/data
+      - AI_MEMORY_AUTH_TOKEN=${AI_MEMORY_AUTH_TOKEN:?defina AI_MEMORY_AUTH_TOKEN (sem ele o ai-memory sobe SEM autenticação)}
+      - AI_MEMORY_ALLOWED_HOSTS=${AI_MEMORY_FQDN},localhost,127.0.0.1
+      - AI_MEMORY_AUTH__SECURE_COOKIE=true
+      - AI_MEMORY_LLM_PROVIDER=${AI_MEMORY_LLM_PROVIDER:-}
+      - AI_MEMORY_LLM_MODEL=${AI_MEMORY_LLM_MODEL:-}
+      - AI_MEMORY_LLM_BASE_URL=${AI_MEMORY_LLM_BASE_URL:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - LLM_API_KEY=${LLM_API_KEY:-}
+      - RUST_LOG=${AI_MEMORY_RUST_LOG:-ai_memory=info,ai_memory_store=info,ai_memory_wiki=info,ai_memory_mcp=info,tracing_appender=warn}
+    volumes:
+      - ai-memory-data:/data
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/ai-memory", "status"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.ai-memory.rule=Host(`${AI_MEMORY_FQDN}`)
+      - traefik.http.routers.ai-memory.entrypoints=websecure
+      - traefik.http.routers.ai-memory.tls=true
+      - traefik.http.routers.ai-memory.tls.certresolver=letsencryptresolver
+      - traefik.http.services.ai-memory.loadbalancer.server.port=49374
+      - caddy=${AI_MEMORY_FQDN}
+      - caddy.reverse_proxy={{upstreams 49374}}
+      - traefik.docker.network=${PROXY_NET:-web}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge
+volumes:
+  ai-memory-data:
+    driver: local

@@ -1,0 +1,67 @@
+# Stack "ai-memory" — memória de longo prazo para agentes (Claude Code, Codex, etc.) via MCP + hooks (Docker Swarm).
+# Imagem upstream: akitaonrails/ai-memory. Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt.
+#
+# Endpoints (todos atrás do FQDN): /mcp (MCP Streamable HTTP), /hook (captura dos hooks),
+# /web (UI read-only da wiki), /healthz.
+#
+# Autenticação: bearer token obrigatório (AI_MEMORY_AUTH_TOKEN) — o deploy falha sem ele, pois com token
+# vazio o servidor subiria SEM autenticação. O mesmo token é a senha da UI /web (qualquer usuário).
+# AI_MEMORY_ALLOWED_HOSTS é a proteção contra DNS rebinding: só aceita o FQDN (+ localhost p/ healthcheck).
+#
+# Modo padrão = zero-LLM (captura + busca FTS5 e, após baixar o modelo local de ~87 MB e reiniciar,
+# busca híbrida com embeddings). LLM (consolidação) é opcional: AI_MEMORY_LLM_PROVIDER + a chave.
+#
+# Obrigatórias: AI_MEMORY_FQDN, AI_MEMORY_AUTH_TOKEN.
+# NOTA (volumes em Swarm): volumes são locais ao nó; em cluster multi-worker, fixe
+# WORKER_HOSTNAME e descomente o constraint de hostname.
+services:
+  app:
+    image: akitaonrails/ai-memory:${AI_MEMORY_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+    environment:
+      - HOME=/data
+      - AI_MEMORY_AUTH_TOKEN=${AI_MEMORY_AUTH_TOKEN:?defina AI_MEMORY_AUTH_TOKEN (sem ele o ai-memory sobe SEM autenticação)}
+      - AI_MEMORY_ALLOWED_HOSTS=${AI_MEMORY_FQDN},localhost,127.0.0.1
+      - AI_MEMORY_AUTH__SECURE_COOKIE=true
+      - AI_MEMORY_LLM_PROVIDER=${AI_MEMORY_LLM_PROVIDER:-}
+      - AI_MEMORY_LLM_MODEL=${AI_MEMORY_LLM_MODEL:-}
+      - AI_MEMORY_LLM_BASE_URL=${AI_MEMORY_LLM_BASE_URL:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - LLM_API_KEY=${LLM_API_KEY:-}
+      - RUST_LOG=${AI_MEMORY_RUST_LOG:-ai_memory=info,ai_memory_store=info,ai_memory_wiki=info,ai_memory_mcp=info,tracing_appender=warn}
+    volumes:
+      - ai-memory-data:/data
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/ai-memory", "status"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}   # fixe o nó: volume (SQLite + wiki) é local
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.ai-memory.rule=Host(`${AI_MEMORY_FQDN}`)
+        - traefik.http.routers.ai-memory.entrypoints=websecure
+        - traefik.http.routers.ai-memory.tls=true
+        - traefik.http.routers.ai-memory.tls.certresolver=letsencryptresolver
+        - traefik.http.services.ai-memory.loadbalancer.server.port=49374
+        - caddy=${AI_MEMORY_FQDN}
+        - caddy.reverse_proxy={{upstreams 49374}}
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay
+volumes:
+  ai-memory-data:
+    driver: local

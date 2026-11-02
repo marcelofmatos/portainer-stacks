@@ -3810,6 +3810,100 @@
     },
     {
       "type": 3,
+      "title": "ai-memory — memória de longo prazo para agentes",
+      "name": "ai-memory",
+      "description": "Memória persistente entre sessões para agentes de código (Claude Code, Codex, OpenCode, Gemini CLI…) via MCP + hooks. SQLite + wiki markdown versionada, busca FTS5/híbrida e UI web read-only. Funciona sem LLM; consolidação por LLM é opcional.",
+      "note": "Exige <b>bearer token</b> (<code>AI_MEMORY_AUTH_TOKEN</code>, ex.: <code>openssl rand -hex 32</code>) — sem ele o deploy falha, pois o servidor subiria sem autenticação. Depois aponte cada máquina com <code>AI_MEMORY_SERVER_URL=https://&lt;FQDN&gt;</code> + o token e rode <code>ai-memory install-mcp</code>/<code>install-hooks</code>. UI em <code>/web</code> (senha = token). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/ai-memory/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
+      "categories": [
+        "ai",
+        "tools",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/claude-ai.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "ai-memory/docker-compose.standalone.yml"
+      },
+      "env": [
+        {
+          "name": "AI_MEMORY_FQDN",
+          "label": "Domínio (FQDN)",
+          "description": "Ex.: memory.exemplo.com"
+        },
+        {
+          "name": "AI_MEMORY_AUTH_TOKEN",
+          "label": "Token de acesso (Bearer)",
+          "description": "Longo e aleatório (openssl rand -hex 32). Usado pelos clientes e como senha da UI /web."
+        },
+        {
+          "name": "AI_MEMORY_LLM_PROVIDER",
+          "label": "Provedor de LLM (consolidação)",
+          "default": "",
+          "select": [
+            {
+              "text": "Nenhum (zero-LLM)",
+              "value": "",
+              "default": true
+            },
+            {
+              "text": "Anthropic (API key)",
+              "value": "anthropic"
+            },
+            {
+              "text": "OpenAI (API key)",
+              "value": "openai"
+            },
+            {
+              "text": "Compatível com OpenAI (OpenRouter, Ollama, LiteLLM…)",
+              "value": "openai-compat"
+            }
+          ]
+        },
+        {
+          "name": "ANTHROPIC_API_KEY",
+          "label": "Chave Anthropic",
+          "description": "Só para o provedor anthropic",
+          "default": ""
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "label": "Chave OpenAI",
+          "description": "Só para o provedor openai",
+          "default": ""
+        },
+        {
+          "name": "LLM_API_KEY",
+          "label": "Chave do endpoint compatível",
+          "description": "Só para o provedor openai-compat",
+          "default": ""
+        },
+        {
+          "name": "AI_MEMORY_LLM_BASE_URL",
+          "label": "Base URL do LLM",
+          "description": "openai-compat, ex.: https://openrouter.ai/api/v1",
+          "default": ""
+        },
+        {
+          "name": "AI_MEMORY_LLM_MODEL",
+          "label": "Modelo do LLM",
+          "description": "Vazio = default do provedor",
+          "default": ""
+        },
+        {
+          "name": "AI_MEMORY_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "latest"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
+      ]
+    },
+    {
+      "type": 3,
       "title": "headscale — VPN Tailscale auto-hospedada",
       "name": "headscale",
       "description": "Headscale: servidor de coordenação open source do Tailscale. Os nós usam o cliente oficial do Tailscale apontando para ele (IP fixo 100.64.x.x, MagicDNS, ACLs, pre-auth keys); o tráfego vai direto entre os nós via WireGuard ou por relays DERP. Configuração só por env, SQLite em volume. Publicado via Traefik v3 com TLS.",

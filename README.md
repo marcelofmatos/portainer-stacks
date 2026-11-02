@@ -52,7 +52,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 
 | Porte | RAM (mín → ideal) | Stacks |
 |---|---|---|
-| **Leve** | 64 MB → 512 MB | `error-pages`, `cloudflared`, `caddy`, `socat`, `redirect`, `onedrive`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis`, `grafana`, `claude-code-organizer`, `zabbix-status-page`, `uptime-kuma`, `backrest`, `deep-research`, `financial-coach`, `mcp-apps-showcase`, `gen-ui-starter`, `dashboard-canvas`, `shadcn-generator`, `mcp-app-builder`, `orquestrator4proxmox`, `headscale` |
+| **Leve** | 64 MB → 512 MB | `error-pages`, `cloudflared`, `caddy`, `socat`, `redirect`, `onedrive`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis`, `grafana`, `claude-code-organizer`, `ai-memory`, `zabbix-status-page`, `uptime-kuma`, `backrest`, `deep-research`, `financial-coach`, `mcp-apps-showcase`, `gen-ui-starter`, `dashboard-canvas`, `shadcn-generator`, `mcp-app-builder`, `orquestrator4proxmox`, `headscale` |
 | **Médio** | 512 MB → 2 GB | `account`, `keycloak`, `zabbix`, `mariadb`, `postgres-pgvector`, `mongodb`, `chromadb`, `qdrant`, `minio`, `workflows`, `evolution-api`, `wa-akg`, `joomla`, `wordpress`, `wikijs`, `espocrm`, `typebot`, `stirlingpdf`, `flowise`, `litellm`, `omniroute`, `open-webui`, `element`, `home-assistant` |
 | **Pesado** | 2 GB → 4–8 GB | `swarmprom`, `elasticsearch`, `drive`, `rocketchat`, `moodle`, `twenty`, `botpress`, `langfuse`, `librechat`, `anythingllm`, `chatwoot`, `ligerosmart`, `dify`, `supabase` |
 | **GPU / ML** | 8 GB+ (GPU recomendada) | `ollama`, `comfyui`, `ragflow` |
@@ -119,6 +119,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 | [`botpress`](botpress/) | Plataforma de chatbots — usa `postgres-pgvector` | [README](botpress/README.md) |
 | [`protonmail-bridge`](protonmail-bridge/) | Ponte SMTP/IMAP da conta ProtonMail | [README](protonmail-bridge/README.md) |
 | [`claude-code-organizer`](claude-code-organizer/) | Dashboard p/ gerenciar a config do Claude Code (skills, MCP, memories) — volume `cco-data` | [README](claude-code-organizer/README.md) |
+| [`ai-memory`](ai-memory/) | Memória de longo prazo p/ agentes (Claude Code, Codex…) via MCP + hooks — volume `ai-memory-data` | [README](ai-memory/README.md) |
 
 ### Bancos e cache compartilhados — opção (rede `data`)
 
