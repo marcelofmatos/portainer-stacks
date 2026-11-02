@@ -3,7 +3,10 @@
 [Backrest](https://github.com/garethgeorge/backrest) é uma UI web + agendador para o
 [restic](https://restic.net/): cria planos de backup (origem, agenda, retenção), roda prune/check
 periódicos e gerencia um ou mais repositórios (local, SFTP, S3, Backblaze B2, ou qualquer backend
-via rclone). Publicado via **Traefik v3** com TLS Let's Encrypt.
+via rclone). Publicado via **Traefik v3** com TLS Let's Encrypt e protegido por **basicauth**: o
+Backrest só cria o usuário/senha próprios no *primeiro acesso* à UI, então sem o basicauth na
+frente qualquer um que chegasse no `BACKREST_FQDN` antes de você poderia criar essa conta (e
+assumir a configuração dos seus backups).
 
 Por padrão a stack **não monta nenhuma origem** — ela só traz o serviço com volumes para os próprios
 dados do Backrest (`data`, `config`, `cache`). Você decide o que ele vê adicionando binds no serviço
@@ -13,7 +16,7 @@ dados do Backrest (`data`, `config`, `cache`). Você decide o que ele vê adicio
 
 ```mermaid
 flowchart LR
-    user((Usuário)) -->|HTTPS · web| traefik[Traefik · web]
+    user((Usuário)) -->|HTTPS + basicauth · web| traefik[Traefik · web]
     traefik -->|BACKREST_FQDN · 9898| app[app Backrest + restic]
     app --> vol[(backrest-data<br/>backrest-config<br/>backrest-cache)]
     fontes[Binds de origem<br/>ro, você escolhe] -.->|lê para o backup| app
@@ -45,6 +48,7 @@ sequenceDiagram
 | Variável | Obrigatória | Default | Descrição |
 |---|---|---|---|
 | `BACKREST_FQDN` | sim | — | domínio público (ex.: `backup.exemplo.com`) |
+| `BACKREST_AUTH_BASIC` | sim | — | basicauth do Traefik `usuario:hash_bcrypt` (`htpasswd -nbB`) — protege o 1º acesso |
 | `TZ` | não | `America/Sao_Paulo` | fuso horário dos agendamentos |
 | `BACKREST_HOSTNAME` | não | `backrest` | nome gravado como host nos snapshots do restic |
 | `BACKREST_IMAGE_TAG` | não | `latest` | tag de `garethgeorge/backrest` |
@@ -56,7 +60,10 @@ sequenceDiagram
 1. Rede externa do proxy: `docker network create web` (standalone) ou
    `docker network create --driver overlay --attachable web` (Swarm).
 2. Stack `balancer` (Traefik) rodando e DNS de `BACKREST_FQDN` apontando para o host.
-3. **Binds de origem**: edite o `docker-compose.yml`/`docker-compose.standalone.yml` e descomente
+3. **Basicauth**: gere o usuário/hash com `htpasswd -nbB usuario senha` e informe o resultado
+   (`usuario:hash_bcrypt`) em `BACKREST_AUTH_BASIC`. Sem isso o Traefik responde `401` em qualquer
+   acesso — é intencional, protege o primeiro login até você criar a conta própria do Backrest.
+4. **Binds de origem**: edite o `docker-compose.yml`/`docker-compose.standalone.yml` e descomente
    (ou adicione) em `volumes:` do serviço `app` os caminhos do host que o Backrest deve conseguir
    ver, sempre `:ro` (ele só precisa ler para fazer o backup):
    ```yaml
@@ -65,16 +72,17 @@ sequenceDiagram
      - /var/lib/docker/volumes:/sources/docker-volumes:ro
    ```
    Depois, na UI, aponte o plano para `/sources/...`.
-4. **Repositório** (destino do backup): configurado pela UI, não por env var. Pode ser local
+5. **Repositório** (destino do backup): configurado pela UI, não por env var. Pode ser local
    (monte um bind/volume extra para o disco de destino, ex.: `/mnt/backup:/repos/backup`), ou remoto
    (SFTP, S3, B2) direto na UI, ou via rclone (monte `backrest-rclone-config` em
    `/root/.config/rclone` e rode `rclone config` dentro do container antes de criar o repo na UI).
 
 ## Uso
 
-1. Suba a stack informando `BACKREST_FQDN` (e os binds de origem, se quiser).
-2. **Logo em seguida** acesse `https://BACKREST_FQDN`: o 1º acesso pede para criar o
-   usuário/senha da UI — quem chegar primeiro cria a conta.
+1. Suba a stack informando `BACKREST_FQDN`, `BACKREST_AUTH_BASIC` (e os binds de origem, se quiser).
+2. Acesse `https://BACKREST_FQDN`: o navegador primeiro pede o basicauth do Traefik (usuário/senha
+   que você gerou com `htpasswd`), depois cai na tela de **criar o usuário/senha da própria UI do
+   Backrest** — faça isso na hora, é essa segunda conta que fica valendo depois.
 3. Crie o repositório (Settings → Repos) e um plano (Add Plan): origem (`/sources/...`), agenda
    (cron) e política de retenção.
 4. Acompanhe os backups pela UI; restaure por ali também (Snapshot → Restore).
@@ -88,6 +96,7 @@ são recuperáveis, guarde-a fora deste host.
 
 | Sintoma | Causa | Ação |
 |---|---|---|
+| `401 Unauthorized` ao abrir `BACKREST_FQDN` | basicauth do Traefik (esperado) | informe o usuário/senha gerados com `htpasswd` em `BACKREST_AUTH_BASIC` |
 | Plano falha com caminho não encontrado | origem não montada no serviço `app` | adicione o bind em `volumes:` (veja Pré-requisitos) e redeploy |
 | Backup de volume Docker fica inconsistente (banco) | volume copiado com o serviço rodando | faça um dump do banco antes do backup, ou pare o serviço na janela do backup |
 | 404 / certificado inválido | DNS de `BACKREST_FQDN` não aponta para o host, ou `PROXY_NET` errado | confira DNS e a rede do proxy |

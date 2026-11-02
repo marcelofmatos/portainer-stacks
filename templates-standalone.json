@@ -3766,8 +3766,8 @@
     {
       "title": "backrest — UI e agendador do restic",
       "name": "backrest",
-      "description": "Backrest: UI web + agendador para o restic. Cria planos de backup (origem, agenda, retenção), roda prune/check e gerencia repositórios (local, SFTP, S3, B2 ou rclone). Por padrão nenhuma origem é montada — você escolhe os binds.",
-      "note": "Requer a rede web (balancer) e o DNS de BACKREST_FQDN apontando para o host. <b>Acesse a UI logo após o deploy</b>: o 1º acesso cria o usuário/senha. Edite o compose para montar as origens que quer ver backupeadas (sempre :ro). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/backrest/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
+      "description": "Backrest: UI web + agendador para o restic. Cria planos de backup (origem, agenda, retenção), roda prune/check e gerencia repositórios (local, SFTP, S3, B2 ou rclone). Publicado via Traefik v3 com TLS e basicauth (protege o 1º acesso, antes da UI ter usuário próprio). Por padrão nenhuma origem é montada — você escolhe os binds.",
+      "note": "Requer a rede web (balancer) e o DNS de BACKREST_FQDN apontando para o host. BACKREST_AUTH_BASIC: usuario:hash (htpasswd -nbB) — protege o 1º acesso. <b>Depois do basicauth, crie o usuário/senha da UI</b> (1º acesso ao Backrest). Edite o compose para montar as origens que quer ver backupeadas (sempre :ro). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/backrest/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "backup",
         "storage",
@@ -3785,6 +3785,11 @@
           "name": "BACKREST_FQDN",
           "label": "Domínio (FQDN)",
           "description": "Ex.: backup.exemplo.com"
+        },
+        {
+          "name": "BACKREST_AUTH_BASIC",
+          "label": "Basicauth do Traefik",
+          "description": "Formato usuario:hash_bcrypt (htpasswd -nbB) — protege o 1º acesso"
         },
         {
           "name": "TZ",

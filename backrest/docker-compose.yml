@@ -4,8 +4,9 @@
 # adicione os binds que quiser que o Backrest veja em "Mais binds de origem (opcional)" abaixo.
 # Repositório (destino do backup) e agendamento são configurados pela UI (local, S3, B2, SFTP, rclone).
 #
-# Obrigatória: BACKREST_FQDN. Usuário/senha da UI são criados no PRIMEIRO acesso — quem chegar
-# primeiro cria a conta.
+# Obrigatórias: BACKREST_FQDN, BACKREST_AUTH_BASIC. A UI pede usuário/senha próprios no PRIMEIRO
+# acesso (quem chegar primeiro cria a conta) — para não deixar essa janela aberta a qualquer um que
+# resolva o FQDN antes de você, o basicauth do Traefik já protege a rota desde o deploy.
 #
 # NOTA (volume em Swarm): data/config/cache ficam em volumes locais ao nó. Em cluster multi-worker,
 # fixe o serviço definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
@@ -54,6 +55,8 @@ services:
         - traefik.http.routers.backrest.entrypoints=websecure
         - traefik.http.routers.backrest.tls=true
         - traefik.http.routers.backrest.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.backrest.middlewares=backrest-auth
+        - traefik.http.middlewares.backrest-auth.basicauth.users=${BACKREST_AUTH_BASIC}
         - traefik.http.services.backrest.loadbalancer.server.port=9898
         - caddy=${BACKREST_FQDN}
         - caddy.reverse_proxy={{upstreams 9898}}

@@ -1,6 +1,8 @@
 # Stack "backrest" — Backrest (UI + agendador do restic) — variante Docker Compose (host
 # standalone). Variáveis, portas e uso no README.
 # Pré-requisito: crie a rede externa do proxy (docker network create web).
+# Obrigatórias: BACKREST_FQDN, BACKREST_AUTH_BASIC (basicauth do Traefik — protege o 1º acesso,
+# quando a UI ainda não tem usuário/senha próprios).
 services:
   app:
     image: garethgeorge/backrest:${BACKREST_IMAGE_TAG:-latest}
@@ -37,6 +39,8 @@ services:
       - traefik.http.routers.backrest.entrypoints=websecure
       - traefik.http.routers.backrest.tls=true
       - traefik.http.routers.backrest.tls.certresolver=letsencryptresolver
+      - traefik.http.routers.backrest.middlewares=backrest-auth
+      - traefik.http.middlewares.backrest-auth.basicauth.users=${BACKREST_AUTH_BASIC}
       - traefik.http.services.backrest.loadbalancer.server.port=9898
       - traefik.docker.network=${PROXY_NET:-web}
       - caddy=${BACKREST_FQDN}
