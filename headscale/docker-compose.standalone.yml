@@ -22,7 +22,7 @@ services:
     environment:
       - HEADSCALE_SERVER_URL=https://${HEADSCALE_FQDN}
       - HEADSCALE_LISTEN_ADDR=0.0.0.0:8080
-      - HEADSCALE_METRICS_LISTEN_ADDR=0.0.0.0:9090 # não publicado
+      - HEADSCALE_METRICS_LISTEN_ADDR=127.0.0.1:9090 # métricas + debug só dentro do container (não expor na rede web)
       - HEADSCALE_NOISE_PRIVATE_KEY_PATH=/var/lib/headscale/noise_private.key
       - HEADSCALE_PREFIXES_V4=${HEADSCALE_PREFIX_V4:-100.64.0.0/10}
       - HEADSCALE_PREFIXES_V6=${HEADSCALE_PREFIX_V6:-fd7a:115c:a1e0::/48}
