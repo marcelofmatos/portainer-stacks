@@ -1,0 +1,66 @@
+# Stack "backrest" — Backrest (UI + agendador do restic) — variante Docker Compose (host
+# standalone). Variáveis, portas e uso no README.
+# Pré-requisito: crie a rede externa do proxy (docker network create web).
+services:
+  app:
+    image: garethgeorge/backrest:${BACKREST_IMAGE_TAG:-latest}
+    hostname: ${BACKREST_HOSTNAME:-backrest} # gravado como host nos snapshots do restic
+    restart: unless-stopped
+    networks:
+      - default
+      - web
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8169 -> porta 9898 do container
+    #   - "${BACKREST_EXTERNAL_PORT:-8169}:9898"
+    environment:
+      - BACKREST_DATA=/data
+      - BACKREST_CONFIG=/config/config.json
+      - BACKREST_PORT=0.0.0.0:9898
+      - XDG_CACHE_HOME=/cache
+      - TMPDIR=/tmp
+      - TZ=${TZ:-America/Sao_Paulo}
+    volumes:
+      - backrest-data:/data
+      - backrest-config:/config
+      - backrest-cache:/cache
+      # Repositório remoto via rclone (opcional): descomente para usar um backend rclone
+      # (S3, Drive, etc.) configurado pela UI.
+      # - backrest-rclone-config:/root/.config/rclone
+      # Mais binds de origem (opcional) — monte aqui, sempre :ro, o que o Backrest deve
+      # conseguir ver/backupear. Ex.:
+      # - /home:/sources/home:ro
+      # - /var/lib/docker/volumes:/sources/docker-volumes:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.backrest.rule=Host(`${BACKREST_FQDN}`)
+      - traefik.http.routers.backrest.entrypoints=websecure
+      - traefik.http.routers.backrest.tls=true
+      - traefik.http.routers.backrest.tls.certresolver=letsencryptresolver
+      - traefik.http.services.backrest.loadbalancer.server.port=9898
+      - traefik.docker.network=${PROXY_NET:-web}
+      - caddy=${BACKREST_FQDN}
+      - caddy.reverse_proxy={{upstreams 9898}}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://localhost:9898/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge
+
+volumes:
+  backrest-data:
+    driver: local
+  backrest-config:
+    driver: local
+  backrest-cache:
+    driver: local
+  backrest-rclone-config:
+    driver: local

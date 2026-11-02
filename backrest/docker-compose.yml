@@ -1,0 +1,82 @@
+# Stack "backrest" — Backrest (UI + agendador do restic) — Docker Swarm
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Faz backup via restic do que você montar no serviço `app`. Por padrão NENHUMA origem é montada —
+# adicione os binds que quiser que o Backrest veja em "Mais binds de origem (opcional)" abaixo.
+# Repositório (destino do backup) e agendamento são configurados pela UI (local, S3, B2, SFTP, rclone).
+#
+# Obrigatória: BACKREST_FQDN. Usuário/senha da UI são criados no PRIMEIRO acesso — quem chegar
+# primeiro cria a conta.
+#
+# NOTA (volume em Swarm): data/config/cache ficam em volumes locais ao nó. Em cluster multi-worker,
+# fixe o serviço definindo WORKER_HOSTNAME e descomentando o constraint de hostname.
+# Porte: Leve (128 MB → 512 MB RAM, mais durante backup/check conforme volume de dados)
+services:
+  app:
+    image: garethgeorge/backrest:${BACKREST_IMAGE_TAG:-latest}
+    hostname: ${BACKREST_HOSTNAME:-backrest} # gravado como host nos snapshots do restic
+    networks:
+      - default
+      - web
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # Descomente se precisar bypassar o proxy. Veja a nota no README sobre segurança.
+    # ports:                 # sugestão: 8169 -> porta 9898 do container
+    #   - target: 9898
+    #     published: ${BACKREST_EXTERNAL_PORT:-8169}
+    #     mode: host
+    environment:
+      - BACKREST_DATA=/data
+      - BACKREST_CONFIG=/config/config.json
+      - BACKREST_PORT=0.0.0.0:9898
+      - XDG_CACHE_HOME=/cache
+      - TMPDIR=/tmp
+      - TZ=${TZ:-America/Sao_Paulo}
+    volumes:
+      - backrest-data:/data
+      - backrest-config:/config
+      - backrest-cache:/cache
+      # Repositório remoto via rclone (opcional): descomente para usar um backend rclone
+      # (S3, Drive, etc.) configurado pela UI.
+      # - backrest-rclone-config:/root/.config/rclone
+      # Mais binds de origem (opcional) — monte aqui, sempre :ro, o que o Backrest deve
+      # conseguir ver/backupear. Ex.:
+      # - /home:/sources/home:ro
+      # - /var/lib/docker/volumes:/sources/docker-volumes:ro
+    deploy:
+      mode: replicated
+      replicas: 1 # NÃO escale: estado local (config/cache) não suporta réplicas
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}   # fixe em cluster multi-worker (volumes locais ao nó)
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.backrest.rule=Host(`${BACKREST_FQDN}`)
+        - traefik.http.routers.backrest.entrypoints=websecure
+        - traefik.http.routers.backrest.tls=true
+        - traefik.http.routers.backrest.tls.certresolver=letsencryptresolver
+        - traefik.http.services.backrest.loadbalancer.server.port=9898
+        - caddy=${BACKREST_FQDN}
+        - caddy.reverse_proxy={{upstreams 9898}}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://localhost:9898/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay
+
+volumes:
+  backrest-data:
+    driver: local
+  backrest-config:
+    driver: local
+  backrest-cache:
+    driver: local
+  backrest-rclone-config:
+    driver: local

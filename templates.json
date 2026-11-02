@@ -3797,6 +3797,41 @@
           "default": "2"
         }
       ]
+    },
+    {
+      "title": "backrest — UI e agendador do restic",
+      "name": "backrest",
+      "description": "Backrest: UI web + agendador para o restic. Cria planos de backup (origem, agenda, retenção), roda prune/check e gerencia repositórios (local, SFTP, S3, B2 ou rclone). Por padrão nenhuma origem é montada — você escolhe os binds.",
+      "note": "Requer a rede web (balancer) e o DNS de BACKREST_FQDN apontando para o host. <b>Acesse a UI logo após o deploy</b>: o 1º acesso cria o usuário/senha. Edite o compose para montar as origens que quer ver backupeadas (sempre :ro). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/backrest/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
+      "categories": [
+        "backup",
+        "storage",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/backrest.png",
+      "type": 2,
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "backrest/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "BACKREST_FQDN",
+          "label": "Domínio (FQDN)",
+          "description": "Ex.: backup.exemplo.com"
+        },
+        {
+          "name": "TZ",
+          "label": "Fuso horário",
+          "default": "America/Sao_Paulo"
+        },
+        {
+          "name": "BACKREST_HOSTNAME",
+          "label": "Hostname nos snapshots",
+          "default": "backrest"
+        }
+      ]
     }
   ]
 }
