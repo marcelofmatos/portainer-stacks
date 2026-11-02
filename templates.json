@@ -3837,6 +3837,65 @@
           "default": "backrest"
         }
       ]
+    },
+    {
+      "type": 2,
+      "title": "headscale — VPN Tailscale auto-hospedada",
+      "name": "headscale",
+      "description": "Headscale: servidor de coordenação open source do Tailscale. Os nós usam o cliente oficial do Tailscale apontando para ele (IP fixo 100.64.x.x, MagicDNS, ACLs, pre-auth keys); o tráfego vai direto entre os nós via WireGuard ou por relays DERP. Configuração só por env, SQLite em volume. Publicado via Traefik v3 com TLS.",
+      "note": "Requer a rede web (balancer) e o DNS de HEADSCALE_FQDN apontando para o host, com a porta 443 acessível da internet. Administração por <code>docker exec &lt;container&gt; headscale ...</code>. <b>Faça backup do volume headscale-data</b> (perder a chave noise obriga a recadastrar todos os nós). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/headscale/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
+      "categories": [
+        "networking",
+        "security",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/headscale.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "headscale/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "HEADSCALE_FQDN",
+          "label": "Domínio (FQDN)",
+          "description": "Domínio público do Headscale. Ex.: vpn.exemplo.com"
+        },
+        {
+          "name": "HEADSCALE_BASE_DOMAIN",
+          "label": "Domínio MagicDNS",
+          "description": "Nomes dos nós (<host>.<domínio>). Precisa ser diferente do FQDN.",
+          "default": "vpn.internal"
+        },
+        {
+          "name": "HEADSCALE_DERP_SERVER_ENABLED",
+          "label": "DERP embutido",
+          "description": "Relay próprio + STUN 3478/udp (exige descomentar a porta no compose)",
+          "default": "false",
+          "select": [
+            {
+              "text": "Não (usar relays públicos do Tailscale)",
+              "value": "false",
+              "default": true
+            },
+            {
+              "text": "Sim",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "name": "HEADSCALE_DERP_SERVER_IPV4",
+          "label": "IPv4 público (DERP)",
+          "description": "Só com DERP embutido ligado",
+          "default": ""
+        },
+        {
+          "name": "HEADSCALE_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "0.29"
+        }
+      ]
     }
   ]
 }

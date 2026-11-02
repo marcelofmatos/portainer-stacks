@@ -52,7 +52,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 
 | Porte | RAM (mín → ideal) | Stacks |
 |---|---|---|
-| **Leve** | 64 MB → 512 MB | `error-pages`, `cloudflared`, `caddy`, `socat`, `redirect`, `onedrive`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis`, `grafana`, `claude-code-organizer`, `zabbix-status-page`, `uptime-kuma`, `backrest`, `deep-research`, `financial-coach`, `mcp-apps-showcase`, `gen-ui-starter`, `dashboard-canvas`, `shadcn-generator`, `mcp-app-builder`, `orquestrator4proxmox` |
+| **Leve** | 64 MB → 512 MB | `error-pages`, `cloudflared`, `caddy`, `socat`, `redirect`, `onedrive`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis`, `grafana`, `claude-code-organizer`, `zabbix-status-page`, `uptime-kuma`, `backrest`, `deep-research`, `financial-coach`, `mcp-apps-showcase`, `gen-ui-starter`, `dashboard-canvas`, `shadcn-generator`, `mcp-app-builder`, `orquestrator4proxmox`, `headscale` |
 | **Médio** | 512 MB → 2 GB | `account`, `keycloak`, `zabbix`, `mariadb`, `postgres-pgvector`, `mongodb`, `chromadb`, `qdrant`, `minio`, `workflows`, `evolution-api`, `wa-akg`, `joomla`, `wordpress`, `wikijs`, `espocrm`, `typebot`, `stirlingpdf`, `flowise`, `litellm`, `omniroute`, `open-webui`, `element`, `home-assistant` |
 | **Pesado** | 2 GB → 4–8 GB | `swarmprom`, `elasticsearch`, `drive`, `rocketchat`, `moodle`, `twenty`, `botpress`, `langfuse`, `librechat`, `anythingllm`, `chatwoot`, `ligerosmart`, `dify`, `supabase` |
 | **GPU / ML** | 8 GB+ (GPU recomendada) | `ollama`, `comfyui`, `ragflow` |
@@ -73,6 +73,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 | [`backrest`](backrest/) | Backrest: UI + agendador do restic (backup) — planos, retenção, prune/check | [README](backrest/README.md) |
 | [`phpnetmap`](phpnetmap/) | Mapa/monitoramento de rede via SNMP | [README](phpnetmap/README.md) |
 | [`haproxy`](haproxy/) | Load balancer TCP/HTTP + página de stats | [README](haproxy/README.md) |
+| [`headscale`](headscale/) | VPN Tailscale auto-hospedada (servidor de coordenação; clientes oficiais do Tailscale) | [README](headscale/README.md) |
 | [`cloudflared`](cloudflared/) | Cloudflare Tunnel (expõe serviços sem abrir portas/IP público) | [README](cloudflared/README.md) |
 | [`socat`](socat/) | Relay TCP (expõe serviço interno para fora) | [README](socat/README.md) |
 | [`redirect`](redirect/) | Redirecionador HTTP (301/302) — 1 ou vários domínios numa stack | [README](redirect/README.md) |

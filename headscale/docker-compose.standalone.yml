@@ -1,0 +1,75 @@
+# Stack "headscale" — Headscale (servidor de coordenação Tailscale auto-hospedado) — variante Docker
+# Compose (host standalone). Variáveis, portas e uso no README.
+# Pré-requisito: crie a rede externa do proxy (docker network create web).
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# Os clientes são os apps oficiais do Tailscale apontando para https://HEADSCALE_FQDN
+# (`tailscale up --login-server https://HEADSCALE_FQDN`). O tráfego da VPN NÃO passa por aqui:
+# vai direto entre os nós (WireGuard) ou por relays DERP.
+#
+# Configuração 100% por env (HEADSCALE_<SEÇÃO>_<CHAVE>) — sem arquivo de config. ACLs ficam no
+# banco (policy.mode=database) e são aplicadas com `headscale policy set -f` (ver README).
+#
+# Obrigatória: HEADSCALE_FQDN. HEADSCALE_BASE_DOMAIN (MagicDNS) precisa ser DIFERENTE do FQDN.
+# Porte: Leve (64 MB → 256 MB RAM)
+# Hardware (1 réplica): mínimo 0.25 vCPU · 64 MB RAM · 100 MB disco · ideal 0.5 vCPU · 256 MB RAM · 1 GB disco
+services:
+  headscale:
+    image: headscale/headscale:${HEADSCALE_IMAGE_TAG:-0.29}
+    command: serve
+    restart: unless-stopped
+    networks:
+      - web # exposto pelo Traefik
+    environment:
+      - HEADSCALE_SERVER_URL=https://${HEADSCALE_FQDN}
+      - HEADSCALE_LISTEN_ADDR=0.0.0.0:8080
+      - HEADSCALE_METRICS_LISTEN_ADDR=0.0.0.0:9090 # não publicado
+      - HEADSCALE_NOISE_PRIVATE_KEY_PATH=/var/lib/headscale/noise_private.key
+      - HEADSCALE_PREFIXES_V4=${HEADSCALE_PREFIX_V4:-100.64.0.0/10}
+      - HEADSCALE_PREFIXES_V6=${HEADSCALE_PREFIX_V6:-fd7a:115c:a1e0::/48}
+      - HEADSCALE_PREFIXES_ALLOCATION=sequential
+      - HEADSCALE_DATABASE_TYPE=sqlite
+      - HEADSCALE_DATABASE_SQLITE_PATH=/var/lib/headscale/db.sqlite
+      - HEADSCALE_DATABASE_SQLITE_WRITE_AHEAD_LOG=true
+      # Relays DERP públicos do Tailscale (fallback quando a conexão direta falha)
+      - HEADSCALE_DERP_URLS=https://controlplane.tailscale.com/derpmap/default
+      - HEADSCALE_DERP_AUTO_UPDATE_ENABLED=true
+      - HEADSCALE_DERP_UPDATE_FREQUENCY=3h
+      # DERP embutido (opcional): relay próprio em https://HEADSCALE_FQDN/derp + STUN 3478/udp
+      - HEADSCALE_DERP_SERVER_ENABLED=${HEADSCALE_DERP_SERVER_ENABLED:-false}
+      - HEADSCALE_DERP_SERVER_REGION_ID=999
+      - HEADSCALE_DERP_SERVER_REGION_CODE=headscale
+      - HEADSCALE_DERP_SERVER_REGION_NAME=Headscale Embedded DERP
+      - HEADSCALE_DERP_SERVER_STUN_LISTEN_ADDR=0.0.0.0:3478
+      - HEADSCALE_DERP_SERVER_PRIVATE_KEY_PATH=/var/lib/headscale/derp_server_private.key
+      - HEADSCALE_DERP_SERVER_AUTOMATICALLY_ADD_EMBEDDED_DERP_REGION=true
+      - HEADSCALE_DERP_SERVER_VERIFY_CLIENTS=true
+      - HEADSCALE_DERP_SERVER_IPV4=${HEADSCALE_DERP_SERVER_IPV4:-}
+      # MagicDNS: nós resolvem como <host>.HEADSCALE_BASE_DOMAIN. Não sobrescreve o DNS local dos nós.
+      - HEADSCALE_DNS_MAGIC_DNS=true
+      - HEADSCALE_DNS_BASE_DOMAIN=${HEADSCALE_BASE_DOMAIN:-vpn.internal}
+      - HEADSCALE_DNS_OVERRIDE_LOCAL_DNS=false
+      - HEADSCALE_POLICY_MODE=database
+      - HEADSCALE_UNIX_SOCKET=/var/run/headscale/headscale.sock
+      - HEADSCALE_UNIX_SOCKET_PERMISSION=0770
+      - HEADSCALE_LOG_LEVEL=${HEADSCALE_LOG_LEVEL:-info}
+    volumes:
+      - headscale-data:/var/lib/headscale # banco SQLite, chaves noise/DERP — FAÇA BACKUP
+    # DERP embutido: descomente para publicar o STUN (UDP, direto no host — Traefik não roteia)
+    # ports:
+    #   - "3478:3478/udp"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.headscale.rule=Host(`${HEADSCALE_FQDN}`)
+      - traefik.http.routers.headscale.entrypoints=websecure
+      - traefik.http.routers.headscale.tls=true
+      - traefik.http.routers.headscale.tls.certresolver=letsencryptresolver
+      - traefik.http.services.headscale.loadbalancer.server.port=8080
+      - traefik.docker.network=${PROXY_NET:-web}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+
+volumes:
+  headscale-data:

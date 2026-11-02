@@ -1,0 +1,12 @@
+// Exemplo de política (ACL) do Headscale — aplicar com:
+//   headscale policy set -f policy.hujson
+// Modelo: o usuário "suporte" administra os nós com a tag "tag:servidor" (SSH e uma UI web).
+// Nós com tag não falam entre si (nenhuma regra os libera) — isolamento entre servidores.
+{
+  "tagOwners": {
+    "tag:servidor": ["suporte@"]
+  },
+  "acls": [
+    { "action": "accept", "src": ["suporte@"], "dst": ["tag:servidor:22,9000"] }
+  ]
+}
