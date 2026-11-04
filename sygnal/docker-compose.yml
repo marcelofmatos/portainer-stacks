@@ -27,7 +27,11 @@ services:
   sygnal:
     image: matrixdotorg/sygnal:${SYGNAL_IMAGE_TAG:-v0.17.0}
     environment:
+      # Os 2 arquivos OBRIGATORIOS dentro do volume sygnal-config (ver Uso no README).
+      # SYGNAL_CONF e lido pelo proprio Sygnal; SYGNAL_FCM_CREDENTIAL_FILE e so
+      # informativo aqui (o caminho real vem do service_account_file no sygnal.yaml).
       - SYGNAL_CONF=/sygnal/sygnal.yaml
+      - SYGNAL_FCM_CREDENTIAL_FILE=/sygnal/firebase-service-account.json
     volumes:
       - sygnal-config:/sygnal
     networks:
