@@ -1,0 +1,69 @@
+# Stack "sygnal" — Sygnal (push gateway de referencia do Matrix.org) em Docker Swarm.
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+#
+# Recebe o POST /_matrix/push/v1/notify que QUALQUER homeserver Matrix manda quando um
+# usuario tem uma notificacao pendente, e entrega de fato o push via Firebase Cloud
+# Messaging (Android, e iOS por relay FCM -> APNs) e/ou direto na APNs da Apple.
+# Serve qualquer cliente Matrix que registre um pusher HTTP apontando pra esta stack
+# (ex.: Element, FluffyChat e forks) — nao e especifico de nenhum app.
+#
+# Toda customizacao e feita por variaveis de ambiente (ver README e bloco abaixo).
+# Obrigatoria: SYGNAL_FQDN.
+#
+# PRE-REQUISITO: o servico usa 2 Docker configs EXTERNOS
+# (nomes configuraveis em SYGNAL_CONFIG_NAME / SYGNAL_FCM_CREDENTIAL_NAME):
+#   <SYGNAL_CONFIG_NAME>         -> /sygnal/sygnal.yaml                   (ver config/sygnal.yaml.example)
+#   <SYGNAL_FCM_CREDENTIAL_NAME> -> /sygnal/firebase-service-account.json (ver config/firebase-service-account.json.example)
+# Crie-os antes do deploy (instrucoes no README).
+#
+# NOTA: Sygnal nao guarda estado (sem banco/volume) — sem pin de no necessario.
+# Porte: Leve (64 MB -> 256 MB RAM)
+# Hardware (1 replica): minimo 0.25 vCPU · 128 MB RAM · 1 GB disco
+
+configs:
+  sygnal_config:
+    name: ${SYGNAL_CONFIG_NAME:-sygnal_config_v1}
+    external: true
+  sygnal_fcm_credential:
+    name: ${SYGNAL_FCM_CREDENTIAL_NAME:-sygnal_fcm_credential_v1}
+    external: true
+
+services:
+  sygnal:
+    image: matrixdotorg/sygnal:${SYGNAL_IMAGE_TAG:-v0.17.0}
+    environment:
+      - SYGNAL_CONF=/sygnal/sygnal.yaml
+    configs:
+      - source: sygnal_config
+        target: /sygnal/sygnal.yaml
+      - source: sygnal_fcm_credential
+        target: /sygnal/firebase-service-account.json
+    networks:
+      - default
+      - web
+    # Acesso direto opcional (modo host publica a porta no no, sem passar pelo Traefik).
+    # Util para testar o gateway antes do DNS/TLS estarem prontos. Descomente se precisar.
+    # ports:
+    #   - target: 5000
+    #     published: ${SYGNAL_EXTERNAL_PORT:-8105}
+    #     mode: host
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.sygnal.rule=Host(`${SYGNAL_FQDN}`)
+        - traefik.http.routers.sygnal.entrypoints=websecure
+        - traefik.http.routers.sygnal.tls=true
+        - traefik.http.routers.sygnal.tls.certresolver=letsencryptresolver
+        - traefik.http.services.sygnal.loadbalancer.server.port=5000
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: overlay

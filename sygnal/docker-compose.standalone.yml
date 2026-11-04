@@ -1,0 +1,41 @@
+# Stack "sygnal" — Sygnal (push gateway de referencia do Matrix.org), variante Docker
+# Compose (host standalone).
+#
+# A config e a credencial sao montadas de arquivos locais (bind mount): aponte
+# SYGNAL_CONFIG_FILE e SYGNAL_FCM_CREDENTIAL_FILE pros seus arquivos (defaults
+# ./config/sygnal.yaml e ./config/firebase-service-account.json — copie e preencha
+# a partir dos .example desta pasta).
+# Pre-req: rede externa `web` (docker network create web).
+# Obrigatoria: SYGNAL_FQDN.
+# Porte: Leve (64 MB -> 256 MB RAM)
+
+services:
+  sygnal:
+    image: matrixdotorg/sygnal:${SYGNAL_IMAGE_TAG:-v0.17.0}
+    restart: unless-stopped
+    environment:
+      - SYGNAL_CONF=/sygnal/sygnal.yaml
+    volumes:
+      - ${SYGNAL_CONFIG_FILE:-./config/sygnal.yaml}:/sygnal/sygnal.yaml:ro
+      - ${SYGNAL_FCM_CREDENTIAL_FILE:-./config/firebase-service-account.json}:/sygnal/firebase-service-account.json:ro
+    networks:
+      - default
+      - web
+    # Acesso direto opcional (publica a porta no host, sem passar pelo Traefik).
+    # ports:
+    #   - "${SYGNAL_EXTERNAL_PORT:-8105}:5000"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.sygnal.rule=Host(`${SYGNAL_FQDN}`)
+      - traefik.http.routers.sygnal.entrypoints=websecure
+      - traefik.http.routers.sygnal.tls=true
+      - traefik.http.routers.sygnal.tls.certresolver=letsencryptresolver
+      - traefik.http.services.sygnal.loadbalancer.server.port=5000
+      - traefik.docker.network=${PROXY_NET:-web}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  default:
+    driver: bridge

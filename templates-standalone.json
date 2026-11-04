@@ -3965,6 +3965,53 @@
           "default": "web"
         }
       ]
+    },
+    {
+      "type": 3,
+      "title": "sygnal — push gateway Matrix",
+      "name": "sygnal",
+      "description": "Sygnal, o push gateway de referência do Matrix.org: recebe POST /_matrix/push/v1/notify de qualquer homeserver e entrega via Firebase Cloud Messaging (Android, e iOS por relay FCM -> APNs) e/ou direto na APNs da Apple. Não é específico de nenhum app.",
+      "note": "PRÉ-REQUISITO: config e credencial são montadas de arquivos locais (bind mount) — aponte SYGNAL_CONFIG_FILE e SYGNAL_FCM_CREDENTIAL_FILE pros seus arquivos (ver README). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/sygnal/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
+      "categories": [
+        "communication",
+        "network",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/matrix.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "sygnal/docker-compose.standalone.yml"
+      },
+      "env": [
+        {
+          "name": "SYGNAL_FQDN",
+          "label": "Domínio (FQDN)",
+          "description": "Ex.: push.exemplo.com"
+        },
+        {
+          "name": "SYGNAL_CONFIG_FILE",
+          "label": "Arquivo de config (bind mount)",
+          "description": "Caminho local pro sygnal.yaml (ver README)",
+          "default": "./config/sygnal.yaml"
+        },
+        {
+          "name": "SYGNAL_FCM_CREDENTIAL_FILE",
+          "label": "Arquivo da credencial Firebase (bind mount)",
+          "description": "Caminho local pro service account JSON (ver README)",
+          "default": "./config/firebase-service-account.json"
+        },
+        {
+          "name": "SYGNAL_IMAGE_TAG",
+          "label": "Tag da imagem",
+          "default": "v0.17.0"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,70 @@
+# Template de configuracao do Sygnal — copie, preencha os placeholders com os dados do
+# SEU app/projeto, e crie o Docker config com o nome que voce apontou em
+# SYGNAL_CONFIG_NAME:
+#   docker config create sygnal_config_v1 sygnal.yaml
+# Config e imutavel: para mudar, crie uma nova versao (ex. sygnal_config_v2) e aponte
+# SYGNAL_CONFIG_NAME pra ela antes de redeployar a stack.
+# Na variante standalone, so edite o arquivo apontado por SYGNAL_CONFIG_FILE direto
+# (sem precisar recriar nada — e so reiniciar o container).
+
+log:
+  setup:
+    version: 1
+    formatters:
+      normal:
+        format: "%(asctime)s [%(process)d] %(levelname)-5s %(name)s %(message)s"
+    handlers:
+      stdout:
+        class: logging.StreamHandler
+        formatter: normal
+        stream: ext://sys.stdout
+    loggers:
+      sygnal:
+        handlers: [stdout]
+        level: INFO
+      sygnal.access:
+        handlers: [stdout]
+        level: INFO
+    root:
+      handlers: [stdout]
+      level: INFO
+  access:
+    # true porque esta stack sempre fica atras do Traefik (ele seta X-Forwarded-For).
+    x_forwarded_for: true
+
+http:
+  bind_addresses: ["0.0.0.0"]
+  port: 5000
+
+apps:
+  # A chave abaixo e o app_id que o cliente Matrix manda ao registrar o pusher
+  # (POST /_matrix/client/v3/pushers/set). O Sygnal aceita glob na chave (prefixo
+  # fixo + "*") — util porque varios clientes (ex.: FluffyChat e forks) mandam um
+  # app_id DIFERENTE por dispositivo (prefixo fixo + deviceId). Troque pelo app_id
+  # real do seu app; use só o prefixo fixo + "*" se for esse o caso.
+  substitua.pelo.seu.app.id.*:
+    type: gcm
+    api_version: v1
+    # Project ID do SEU projeto Firebase (Project Settings -> General).
+    project_id: substitua-pelo-project-id
+    service_account_file: /sygnal/firebase-service-account.json
+    # Necessario so se esse app_id tambem tiver usuarios iOS recebendo push via
+    # FCM -> APNs: content-available/mutable-content fazem o iOS acordar o app em
+    # segundo plano (ex.: apps com Notification Service Extension que montam a
+    # notificacao a partir de um push "silencioso"). Remova se o app_id for so Android.
+    fcm_options:
+      apns:
+        payload:
+          aps:
+            content-available: 1
+            mutable-content: 1
+
+  # Alternativa para apps que falam direto com a APNs da Apple, sem passar por FCM
+  # (nesse caso a credencial e o .p8/.p12 da Apple, nao o service_account.json):
+  # outro.app.id.ios.*:
+  #   type: apns
+  #   keyfile: /sygnal/apns-auth-key.p8
+  #   key_id: SUBSTITUA_KEY_ID
+  #   team_id: SUBSTITUA_TEAM_ID
+  #   topic: com.exemplo.seuapp
+  #   platform: production
