@@ -37,6 +37,15 @@ services:
     networks:
       - default
       - web
+    # A imagem oficial define HEALTHCHECK com `curl`, que nao existe nela (container
+    # fica "unhealthy" pra sempre e o Traefik para de rotear). Sobrescreve com um
+    # check via python3 (garantido presente, e' o runtime do proprio Sygnal).
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import socket; socket.create_connection(('localhost', 5000), 2)"]
+      interval: 15s
+      timeout: 5s
+      start_period: 25s
+      retries: 3
     # Acesso direto opcional (modo host publica a porta no no, sem passar pelo Traefik).
     # Util para testar o gateway antes do DNS/TLS estarem prontos. Descomente se precisar.
     # ports:
