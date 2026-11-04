@@ -1,10 +1,9 @@
 # Stack "sygnal" — Sygnal (push gateway de referencia do Matrix.org), variante Docker
 # Compose (host standalone).
 #
-# A config e a credencial sao montadas de arquivos locais (bind mount): aponte
-# SYGNAL_CONFIG_FILE e SYGNAL_FCM_CREDENTIAL_FILE pros seus arquivos (defaults
-# ./config/sygnal.yaml e ./config/firebase-service-account.json — copie e preencha
-# a partir dos .example desta pasta).
+# A config e a credencial sao montadas de um diretorio local (bind mount): aponte
+# SYGNAL_CONFIG_DIR pra uma pasta com sygnal.yaml e firebase-service-account.json
+# (default ./config — copie e preencha os .example desta pasta).
 # Pre-req: rede externa `web` (docker network create web).
 # Obrigatoria: SYGNAL_FQDN.
 # Porte: Leve (64 MB -> 256 MB RAM)
@@ -16,8 +15,7 @@ services:
     environment:
       - SYGNAL_CONF=/sygnal/sygnal.yaml
     volumes:
-      - ${SYGNAL_CONFIG_FILE:-./config/sygnal.yaml}:/sygnal/sygnal.yaml:ro
-      - ${SYGNAL_FCM_CREDENTIAL_FILE:-./config/firebase-service-account.json}:/sygnal/firebase-service-account.json:ro
+      - ${SYGNAL_CONFIG_DIR:-./config}:/sygnal:ro
     networks:
       - default
       - web

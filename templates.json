@@ -3991,7 +3991,7 @@
       "title": "sygnal — push gateway Matrix",
       "name": "sygnal",
       "description": "Sygnal, o push gateway de referência do Matrix.org: recebe POST /_matrix/push/v1/notify de qualquer homeserver e entrega via Firebase Cloud Messaging (Android, e iOS por relay FCM -> APNs) e/ou direto na APNs da Apple. Não é específico de nenhum app.",
-      "note": "PRÉ-REQUISITO: crie os Docker configs <code>sygnal_config_v1</code> e <code>sygnal_fcm_credential_v1</code> a partir dos arquivos em config/ (ver README) antes do deploy. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/sygnal/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
+      "note": "PRÉ-REQUISITO: a config e a credencial do FCM vivem no volume <code>sygnal-config</code> (nasce vazio) — popule-o antes do primeiro uso real (ver README) e reinicie o serviço. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/sygnal/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
       "categories": [
         "communication",
         "network",
@@ -4010,19 +4010,15 @@
           "description": "Ex.: push.exemplo.com"
         },
         {
-          "name": "SYGNAL_CONFIG_NAME",
-          "label": "Docker config (sygnal.yaml)",
-          "default": "sygnal_config_v1"
-        },
-        {
-          "name": "SYGNAL_FCM_CREDENTIAL_NAME",
-          "label": "Docker config (credencial Firebase)",
-          "default": "sygnal_fcm_credential_v1"
-        },
-        {
           "name": "SYGNAL_IMAGE_TAG",
           "label": "Tag da imagem",
           "default": "v0.17.0"
+        },
+        {
+          "name": "WORKER_HOSTNAME",
+          "label": "No fixo (cluster multi-worker)",
+          "description": "Deixe vazio em cluster de 1 worker; o volume e local ao no",
+          "default": ""
         },
         {
           "name": "PROXY_NET",

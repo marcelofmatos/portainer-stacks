@@ -10,34 +10,23 @@
 # Toda customizacao e feita por variaveis de ambiente (ver README e bloco abaixo).
 # Obrigatoria: SYGNAL_FQDN.
 #
-# PRE-REQUISITO: o servico usa 2 Docker configs EXTERNOS
-# (nomes configuraveis em SYGNAL_CONFIG_NAME / SYGNAL_FCM_CREDENTIAL_NAME):
-#   <SYGNAL_CONFIG_NAME>         -> /sygnal/sygnal.yaml                   (ver config/sygnal.yaml.example)
-#   <SYGNAL_FCM_CREDENTIAL_NAME> -> /sygnal/firebase-service-account.json (ver config/firebase-service-account.json.example)
-# Crie-os antes do deploy (instrucoes no README).
+# Autocontido: a config e a credencial do FCM vivem num volume (sygnal-config) montado
+# em /sygnal — dentro dele ficam /sygnal/sygnal.yaml e /sygnal/firebase-service-account.json.
+# Um volume novo nasce VAZIO; popule-o (ver README) com os arquivos do SEU app a partir
+# dos .example em config/.
 #
-# NOTA: Sygnal nao guarda estado (sem banco/volume) — sem pin de no necessario.
+# NOTA (volumes em Swarm): volumes sao locais ao no; em cluster multi-worker, fixe
+# WORKER_HOSTNAME e descomente o constraint de hostname.
 # Porte: Leve (64 MB -> 256 MB RAM)
 # Hardware (1 replica): minimo 0.25 vCPU · 128 MB RAM · 1 GB disco
-
-configs:
-  sygnal_config:
-    name: ${SYGNAL_CONFIG_NAME:-sygnal_config_v1}
-    external: true
-  sygnal_fcm_credential:
-    name: ${SYGNAL_FCM_CREDENTIAL_NAME:-sygnal_fcm_credential_v1}
-    external: true
 
 services:
   sygnal:
     image: matrixdotorg/sygnal:${SYGNAL_IMAGE_TAG:-v0.17.0}
     environment:
       - SYGNAL_CONF=/sygnal/sygnal.yaml
-    configs:
-      - source: sygnal_config
-        target: /sygnal/sygnal.yaml
-      - source: sygnal_fcm_credential
-        target: /sygnal/firebase-service-account.json
+    volumes:
+      - sygnal-config:/sygnal
     networks:
       - default
       - web
@@ -53,6 +42,7 @@ services:
       placement:
         constraints:
           - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}   # fixe o no: volume e local
       labels:
         - traefik.enable=true
         - traefik.http.routers.sygnal.rule=Host(`${SYGNAL_FQDN}`)
@@ -67,3 +57,7 @@ networks:
     name: ${PROXY_NET:-web}
   default:
     driver: overlay
+
+volumes:
+  sygnal-config:
+    driver: local
