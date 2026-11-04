@@ -30,7 +30,6 @@ flowchart LR
 | `SYGNAL_FQDN` | sim | — | domínio público do gateway (ex.: `push.exemplo.com`) |
 | `SYGNAL_IMAGE_TAG` | não | `v0.17.0` | tag da imagem `matrixdotorg/sygnal` |
 | `WORKER_HOSTNAME` | não (Swarm) | — | fixa o nó em cluster multi-worker (o volume é local ao nó) |
-| `SYGNAL_CONFIG_DIR` | não (standalone) | `./config` | pasta local montada em `/sygnal` (bind mount) |
 | `SYGNAL_EXTERNAL_PORT` | não | `8105` | porta no host, só se habilitar o acesso direto (bloco `ports:` comentado) |
 | `PROXY_NET` | não | `web` | rede externa do Traefik |
 
@@ -53,12 +52,11 @@ flowchart LR
 
 ## Uso
 
-### Docker Swarm (`type: 2`)
-1. Deploy pela App Template do Portainer (ou `docker stack deploy`), informando
-   `SYGNAL_FQDN`. O volume `sygnal-config` nasce vazio.
-2. **Popule o volume** a partir do nó onde ele vive (ajuste o nome se o Portainer
-   prefixou com o nome da stack, ex. `<stack>_sygnal-config` — confira com
-   `docker volume ls`):
+1. Deploy pela App Template do Portainer (ou `docker stack deploy` / `docker compose
+   up -d`), informando `SYGNAL_FQDN`. O volume `sygnal-config` nasce **vazio**.
+2. **Popule o volume** (Swarm: a partir do nó onde ele vive; standalone: no próprio
+   host). Ajuste o nome se o Portainer/Compose prefixou com o nome do projeto/stack —
+   confira com `docker volume ls` (ex. `<stack>_sygnal-config`):
    ```bash
    cp config/sygnal.yaml.example sygnal.yaml                                     # edite os placeholders
    cp config/firebase-service-account.json.example firebase-service-account.json  # substitua pelo arquivo REAL baixado do Firebase
@@ -69,26 +67,16 @@ flowchart LR
    rm sygnal.yaml firebase-service-account.json   # não deixe as credenciais soltas no disco
    ```
 3. Reinicie o serviço pra ele ler os arquivos novos (Sygnal só lê a config na
-   inicialização): `docker service update --force <stack>_sygnal`.
-4. Para atualizar depois, repita o passo 2 (sobrescreve os arquivos no volume) e o
-   passo 3 — sem versão imutável, sem recriar Docker config.
-
-### Standalone (`type: 3`)
-```bash
-cp config/sygnal.yaml.example config/sygnal.yaml                                     # edite os placeholders
-cp config/firebase-service-account.json.example config/firebase-service-account.json  # substitua pelo arquivo REAL
-docker network create web   # se ainda não existir
-```
-Aqui `config/` já é o bind mount (`SYGNAL_CONFIG_DIR`): edite os arquivos direto e só
-reinicie o container (`docker compose restart sygnal`) pra aplicar.
-
-### Depois de subir (as duas variantes)
-1. No app Matrix, registre o pusher (`POST /_matrix/client/v3/pushers/set`) com
+   inicialização): `docker service update --force <stack>_sygnal` (Swarm) ou
+   `docker compose restart sygnal` (standalone).
+4. Para atualizar depois, repita os passos 2 e 3 — sobrescreve os arquivos no volume,
+   sem versão imutável de Docker config.
+5. No app Matrix, registre o pusher (`POST /_matrix/client/v3/pushers/set`) com
    `kind: http` e `data.url` = `https://<SYGNAL_FQDN>/_matrix/push/v1/notify`.
-2. Confirme nos logs (`docker service logs <stack>_sygnal` / `docker compose logs -f`)
+6. Confirme nos logs (`docker service logs <stack>_sygnal` / `docker compose logs -f`)
    que a notificação chegou e foi despachada (`dispatch_notification` sem erro de
-   "unknown app ID" nem de credencial do FCM).
-3. Teste ponta a ponta com um evento real antes de liberar para usuários.
+   "unknown app ID" nem de credencial do FCM). Teste ponta a ponta com um evento real
+   antes de liberar para usuários.
 
 ## Troubleshooting
 | Sintoma | Causa | Ação |
