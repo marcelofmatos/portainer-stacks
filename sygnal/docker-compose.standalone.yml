@@ -2,8 +2,12 @@
 # Compose (host standalone).
 #
 # Autocontido: a config e a credencial do FCM vivem no volume sygnal-config montado em
-# /sygnal (/sygnal/sygnal.yaml + /sygnal/firebase-service-account.json). Um volume novo
-# nasce VAZIO — popule-o (ver README) a partir dos .example em config/.
+# /sygnal (/sygnal/sygnal.yaml + /sygnal/firebase-service-account.json).
+#
+# ATENCAO: o Sygnal recusa iniciar sem pelo menos 1 app valido em `apps:` e sem uma
+# credencial de FCM valida (falha JA na inicializacao, nao so ao enviar). Um volume
+# novo nasce VAZIO -> popule-o ANTES do primeiro `docker compose up` (ver README, secao
+# Uso) pra nunca entrar em loop de restart.
 # Pre-req: rede externa `web` (docker network create web).
 # Obrigatoria: SYGNAL_FQDN.
 # Porte: Leve (64 MB -> 256 MB RAM)

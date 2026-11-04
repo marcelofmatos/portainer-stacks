@@ -12,8 +12,11 @@
 #
 # Autocontido: a config e a credencial do FCM vivem num volume (sygnal-config) montado
 # em /sygnal — dentro dele ficam /sygnal/sygnal.yaml e /sygnal/firebase-service-account.json.
-# Um volume novo nasce VAZIO; popule-o (ver README) com os arquivos do SEU app a partir
-# dos .example em config/.
+#
+# ATENCAO: o Sygnal recusa iniciar sem pelo menos 1 app valido em `apps:` e sem uma
+# credencial de FCM valida (falha JA na inicializacao, nao so ao enviar). Um volume
+# novo nasce VAZIO -> popule-o ANTES do primeiro deploy (ver README, secao Uso) pra
+# nunca entrar em loop de restart.
 #
 # NOTA (volumes em Swarm): volumes sao locais ao no; em cluster multi-worker, fixe
 # WORKER_HOSTNAME e descomente o constraint de hostname.
