@@ -13,7 +13,7 @@
 # Porte: Leve (64 MB -> 256 MB RAM)
 
 services:
-  sygnal:
+  push:
     image: matrixdotorg/sygnal:${SYGNAL_IMAGE_TAG:-v0.17.0}
     restart: unless-stopped
     environment:

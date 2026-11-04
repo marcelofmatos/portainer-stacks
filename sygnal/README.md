@@ -22,12 +22,12 @@ restart por falta de config.
 ```mermaid
 flowchart LR
     hs[("Homeserver Matrix<br/>(qualquer)")] -->|POST push/v1/notify| traefik[Traefik · web]
-    traefik -->|SYGNAL_FQDN| sygnal[sygnal]
-    sygnal -->|HOME /sygnal| vol[(sygnal-config)]
-    sygnal -->|FCM HTTP v1 · service_account| fcm[Firebase Cloud Messaging]
+    traefik -->|SYGNAL_FQDN| push[push Sygnal]
+    push -->|/sygnal| vol[(sygnal-config)]
+    push -->|FCM HTTP v1 · service_account| fcm[Firebase Cloud Messaging]
     fcm -.->|relay APNs| ios((iOS))
     fcm -->|entrega direta| android((Android))
-    sygnal -.->|alternativa: direto, sem FCM| apns[APNs da Apple]
+    push -.->|alternativa: direto, sem FCM| apns[APNs da Apple]
 ```
 
 ## Variáveis de ambiente
@@ -80,7 +80,7 @@ flowchart LR
    sobe direto com config válida, sem crashar.
 4. No app Matrix, registre o pusher (`POST /_matrix/client/v3/pushers/set`) com
    `kind: http` e `data.url` = `https://<SYGNAL_FQDN>/_matrix/push/v1/notify`.
-5. Confirme nos logs (`docker service logs <stack>_sygnal` / `docker compose logs -f`)
+5. Confirme nos logs (`docker service logs <stack>_push` / `docker compose logs -f`)
    que a notificação chegou e foi despachada (`dispatch_notification` sem erro de
    "unknown app ID" nem de credencial do FCM). Teste ponta a ponta com um evento real
    antes de liberar para usuários.
@@ -91,8 +91,8 @@ Sem problema, só não evita o restart inicial:
 1. Ache o nome real do volume: `docker volume ls | grep sygnal-config`.
 2. Popule-o com o mesmo comando do passo 2 acima, usando esse nome.
 3. Force o serviço a reler (Sygnal só lê a config na inicialização):
-   `docker service update --force <stack>_sygnal` (Swarm) ou
-   `docker compose restart sygnal` (standalone).
+   `docker service update --force <stack>_push` (Swarm) ou
+   `docker compose restart push` (standalone).
 
 ### Atualizar depois (mudar app_id/project_id/credencial)
 Repita os 3 passos de popular + reiniciar acima — sobrescreve os arquivos no volume,

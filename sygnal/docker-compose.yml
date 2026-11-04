@@ -24,7 +24,7 @@
 # Hardware (1 replica): minimo 0.25 vCPU · 128 MB RAM · 1 GB disco
 
 services:
-  sygnal:
+  push:
     image: matrixdotorg/sygnal:${SYGNAL_IMAGE_TAG:-v0.17.0}
     environment:
       # Os 2 arquivos OBRIGATORIOS dentro do volume sygnal-config (ver Uso no README).
