@@ -52,7 +52,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 
 | Porte | RAM (mín → ideal) | Stacks |
 |---|---|---|
-| **Leve** | 64 MB → 512 MB | `error-pages`, `cloudflared`, `caddy`, `socat`, `redirect`, `onedrive`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis`, `grafana`, `claude-code-organizer`, `ai-memory`, `zabbix-status-page`, `uptime-kuma`, `backrest`, `deep-research`, `financial-coach`, `mcp-apps-showcase`, `gen-ui-starter`, `dashboard-canvas`, `shadcn-generator`, `mcp-app-builder`, `orquestrator4proxmox`, `headscale`, `sygnal` |
+| **Leve** | 64 MB → 512 MB | `error-pages`, `cloudflared`, `caddy`, `socat`, `redirect`, `onedrive`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis`, `grafana`, `claude-code-organizer`, `ai-memory`, `zabbix-status-page`, `uptime-kuma`, `backrest`, `deep-research`, `financial-coach`, `mcp-apps-showcase`, `gen-ui-starter`, `dashboard-canvas`, `shadcn-generator`, `mcp-app-builder`, `orquestrator4proxmox`, `headscale`, `sygnal`, `ansible-semaphore` |
 | **Médio** | 512 MB → 2 GB | `account`, `keycloak`, `zabbix`, `mariadb`, `postgres-pgvector`, `mongodb`, `chromadb`, `qdrant`, `minio`, `workflows`, `evolution-api`, `wa-akg`, `joomla`, `wordpress`, `wikijs`, `espocrm`, `typebot`, `stirlingpdf`, `flowise`, `litellm`, `omniroute`, `open-webui`, `element`, `home-assistant` |
 | **Pesado** | 2 GB → 4–8 GB | `swarmprom`, `elasticsearch`, `drive`, `rocketchat`, `moodle`, `twenty`, `botpress`, `langfuse`, `librechat`, `anythingllm`, `chatwoot`, `ligerosmart`, `dify`, `supabase` |
 | **GPU / ML** | 8 GB+ (GPU recomendada) | `ollama`, `comfyui`, `ragflow` |
@@ -79,6 +79,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 | [`redirect`](redirect/) | Redirecionador HTTP (301/302) — 1 ou vários domínios numa stack | [README](redirect/README.md) |
 | [`ssh-server`](ssh-server/) | Servidor OpenSSH/SFTP | [README](ssh-server/README.md) |
 | [`docker-service-update`](docker-service-update/) | Webhook de deploy (re-deploy de serviços Swarm via CI/CD) — roda no manager | [README](docker-service-update/README.md) |
+| [`ansible-semaphore`](ansible-semaphore/) | Semaphore UI: rodar/agendar playbooks Ansible (e Terraform/PowerShell) pela web + PostgreSQL | [README](ansible-semaphore/README.md) |
 | [`orquestrator4proxmox`](orquestrator4proxmox/) | Painel de VMs Proxmox para operadores N1 (clone, ciclo de vida, console noVNC) — auth LLDAP | [README](orquestrator4proxmox/README.md) |
 
 ### Identidade / acesso

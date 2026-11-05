@@ -4026,6 +4026,86 @@
           "default": "web"
         }
       ]
+    },
+    {
+      "type": 2,
+      "title": "ansible-semaphore — Semaphore UI (Ansible)",
+      "name": "ansible-semaphore",
+      "description": "Semaphore UI: interface web e API para rodar Ansible (e Terraform/OpenTofu, PowerShell, Bash) com projetos, inventários, chaves, agendamentos e histórico. Via Traefik v3, com PostgreSQL embarcado.",
+      "note": "PRÉ-REQUISITO: rede <code>web</code> (e <code>data</code>, se for usar pgadmin4). O banco sobe junto. Gere a chave de cifra com <code>head -c32 /dev/urandom | base64</code> e <b>não a troque depois</b>. <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/ansible-semaphore/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
+      "categories": [
+        "devops",
+        "automation",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/semaphore.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "ansible-semaphore/docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "SEMAPHORE_FQDN",
+          "label": "Domínio (FQDN)",
+          "description": "Ex.: semaphore.exemplo.com"
+        },
+        {
+          "name": "SEMAPHORE_DB_PASSWORD",
+          "label": "Senha do banco",
+          "description": "Senha do PostgreSQL embarcado (app e db)"
+        },
+        {
+          "name": "SEMAPHORE_ADMIN_PASSWORD",
+          "label": "Senha do admin",
+          "description": "Admin criado na 1ª subida"
+        },
+        {
+          "name": "SEMAPHORE_ADMIN_EMAIL",
+          "label": "E-mail do admin",
+          "description": "Ex.: admin@exemplo.com"
+        },
+        {
+          "name": "SEMAPHORE_ACCESS_KEY_ENCRYPTION",
+          "label": "Chave de cifra",
+          "description": "Gere com: head -c32 /dev/urandom | base64 — não troque depois"
+        },
+        {
+          "name": "SEMAPHORE_ADMIN",
+          "label": "Login do admin",
+          "default": "admin"
+        },
+        {
+          "name": "SEMAPHORE_ADMIN_NAME",
+          "label": "Nome do admin",
+          "default": "Admin"
+        },
+        {
+          "name": "SEMAPHORE_DB_USER",
+          "label": "Usuário do banco",
+          "default": "semaphore"
+        },
+        {
+          "name": "SEMAPHORE_DB_NAME",
+          "label": "Banco",
+          "default": "semaphore"
+        },
+        {
+          "name": "TZ",
+          "label": "Fuso horário",
+          "default": "America/Sao_Paulo"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        },
+        {
+          "name": "DATA_NET",
+          "label": "Rede de dados",
+          "default": "data"
+        }
+      ]
     }
   ]
 }

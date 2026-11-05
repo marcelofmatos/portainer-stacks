@@ -1,0 +1,96 @@
+# ┌───────────────────────────────────────────────────────────────────────────┐
+# │ Stack "ansible-semaphore" — Semaphore UI + PostgreSQL embarcado (Swarm)   │
+# └───────────────────────────────────────────────────────────────────────────┘
+# Semaphore UI: interface web + API para rodar Ansible (e Terraform/OpenTofu, PowerShell, Bash)
+# com projetos, inventários, chaves, agendamentos e histórico de execuções.
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+#
+# Obrigatórias: SEMAPHORE_FQDN, SEMAPHORE_DB_PASSWORD, SEMAPHORE_ADMIN_PASSWORD,
+#               SEMAPHORE_ADMIN_EMAIL, SEMAPHORE_ACCESS_KEY_ENCRYPTION (gere: head -c32 /dev/urandom | base64).
+# O admin é criado na 1ª subida a partir das envs SEMAPHORE_ADMIN*.
+#
+# COMO FUNCIONA:
+#   - `semaphore` (app) é publicado pelo Traefik na rede `web`; fala com o banco pela `default`.
+#   - `db` (PostgreSQL) é o banco PRÓPRIO desta stack (fica fora da `web`); entra na `data` só se
+#     quiser administrá-lo pelo pgadmin4 (host `ansible-semaphore_db`).
+#
+# VOLUME EM SWARM: volumes são locais ao nó. Em cluster com +1 worker, fixe os serviços no nó
+# definindo WORKER_HOSTNAME e descomentando o constraint `node.hostname` abaixo.
+# Porte: Leve (256 MB → 1 GB RAM)
+# Hardware (1 réplica): mínimo 1 vCPU · 512 MB RAM · 5 GB disco · ideal 2 vCPU · 1 GB RAM · 20 GB disco
+services:
+  semaphore:
+    image: semaphoreui/semaphore:${SEMAPHORE_IMAGE_TAG:-v2.19.17}
+    networks:
+      - default # conversa com o banco `db` internamente
+      - web # exposto pelo Traefik
+    environment:
+      - SEMAPHORE_DB_DIALECT=postgres
+      - SEMAPHORE_DB_HOST=${SEMAPHORE_DB_HOST:-db}
+      - SEMAPHORE_DB_PORT=${SEMAPHORE_DB_PORT:-5432}
+      - SEMAPHORE_DB_USER=${SEMAPHORE_DB_USER:-semaphore}
+      - SEMAPHORE_DB_PASS=${SEMAPHORE_DB_PASSWORD} # OBRIGATÓRIA (mesma senha do serviço db)
+      - SEMAPHORE_DB=${SEMAPHORE_DB_NAME:-semaphore}
+      - SEMAPHORE_ADMIN=${SEMAPHORE_ADMIN:-admin}
+      - SEMAPHORE_ADMIN_NAME=${SEMAPHORE_ADMIN_NAME:-Admin}
+      - SEMAPHORE_ADMIN_EMAIL=${SEMAPHORE_ADMIN_EMAIL} # OBRIGATÓRIA
+      - SEMAPHORE_ADMIN_PASSWORD=${SEMAPHORE_ADMIN_PASSWORD} # OBRIGATÓRIA
+      - SEMAPHORE_ACCESS_KEY_ENCRYPTION=${SEMAPHORE_ACCESS_KEY_ENCRYPTION} # OBRIGATÓRIA — não troque depois (cifra as chaves salvas)
+      - SEMAPHORE_WEB_ROOT=https://${SEMAPHORE_FQDN}
+      - SEMAPHORE_PLAYBOOK_PATH=/tmp/semaphore
+      - SEMAPHORE_SCHEDULE_TIMEZONE=${TZ:-America/Sao_Paulo}
+      - TZ=${TZ:-America/Sao_Paulo}
+    volumes:
+      - semaphore-data:/tmp/semaphore # clones dos repositórios e arquivos temporários das tasks
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # fixe o nó em cluster multi-worker (volume local ao nó):
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.semaphore.rule=Host(`${SEMAPHORE_FQDN}`)
+        - traefik.http.routers.semaphore.entrypoints=websecure
+        - traefik.http.routers.semaphore.tls=true
+        - traefik.http.routers.semaphore.tls.certresolver=letsencryptresolver
+        - traefik.http.services.semaphore.loadbalancer.server.port=3000
+        - caddy=${SEMAPHORE_FQDN}
+        - caddy.reverse_proxy={{upstreams 3000}}
+
+  # Banco de dados PRÓPRIO da stack (não compartilhe com outras stacks).
+  db:
+    image: postgres:${SEMAPHORE_DB_IMAGE_TAG:-16-alpine}
+    networks:
+      - default # acesso do app
+      #- data # SÓ para ferramentas de admin (pgadmin4) via host `ansible-semaphore_db`
+    environment:
+      - POSTGRES_DB=${SEMAPHORE_DB_NAME:-semaphore}
+      - POSTGRES_USER=${SEMAPHORE_DB_USER:-semaphore}
+      - POSTGRES_PASSWORD=${SEMAPHORE_DB_PASSWORD} # OBRIGATÓRIA
+    volumes:
+      - semaphore-postgres-data:/var/lib/postgresql/data # ← copie este volume para migrar de host
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          # fixe o db no nó em cluster multi-worker:
+          # - node.hostname == ${WORKER_HOSTNAME:-}
+
+networks:
+  web: # externa: criada pela stack balancer (Traefik)
+    external: true
+    name: ${PROXY_NET:-web}
+  data: # externa: liga o banco às ferramentas de admin (pgadmin4 etc.)
+    external: true
+    name: ${DATA_NET:-data}
+  default: # interna desta stack: app <-> db
+    driver: overlay
+
+volumes:
+  semaphore-data:
+    driver: local
+  semaphore-postgres-data:
+    driver: local
