@@ -19,7 +19,7 @@
 # Porte: Leve (256 MB → 1 GB RAM)
 # Hardware (1 réplica): mínimo 1 vCPU · 512 MB RAM · 5 GB disco · ideal 2 vCPU · 1 GB RAM · 20 GB disco
 services:
-  semaphore:
+  app:
     image: semaphoreui/semaphore:${SEMAPHORE_IMAGE_TAG:-v2.19.17}
     networks:
       - default # conversa com o banco `db` internamente

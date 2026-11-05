@@ -2,7 +2,7 @@
 # standalone). Variáveis, portas e uso no README.
 # Pré-requisito: crie a rede externa do proxy (docker network create web; e data se for usar pgadmin4).
 services:
-  semaphore:
+  app:
     image: semaphoreui/semaphore:${SEMAPHORE_IMAGE_TAG:-v2.19.17}
     restart: unless-stopped
     depends_on:

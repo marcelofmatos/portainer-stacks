@@ -7,7 +7,7 @@ tarefa, agendamentos (cron) e histórico de execuções com log. Publicado via T
 
 | Serviço | Imagem | Função |
 |---|---|---|
-| `semaphore` | `semaphoreui/semaphore` | UI/API web (porta 3000) + runner das tasks (Ansible já incluso na imagem) |
+| `app` | `semaphoreui/semaphore` | UI/API web (porta 3000) + runner das tasks (Ansible já incluso na imagem) |
 | `db` | `postgres:16-alpine` | banco próprio da stack (projetos, usuários, histórico, chaves cifradas) |
 
 ## Arquitetura
@@ -15,7 +15,7 @@ tarefa, agendamentos (cron) e histórico de execuções com log. Publicado via T
 ```mermaid
 flowchart LR
     usuario((Usuário)) -->|HTTPS SEMAPHORE_FQDN| traefik[Traefik · web]
-    traefik -->|3000 · web| sem[semaphore]
+    traefik -->|3000 · web| sem[app]
     sem -->|5432 · default| db[(db · PostgreSQL)]
     sem -->|HTTPS/SSH| git[(Repositórios Git)]
     sem -->|SSH| hosts[Hosts gerenciados]
@@ -27,7 +27,7 @@ flowchart LR
 ```mermaid
 sequenceDiagram
     actor U as Usuário
-    participant S as semaphore
+    participant S as app
     participant D as db
     participant G as Repositório Git
     participant H as Hosts
@@ -67,7 +67,7 @@ sequenceDiagram
 - Rede `data` (`docker network create --driver overlay --attachable data`) — só é usada se você
   descomentar `- data` no `db` para administrá-lo pelo `pgadmin4`.
 - **Não** precisa da stack `postgres-pgvector`: o banco sobe junto.
-- Os hosts gerenciados precisam ser alcançáveis por SSH **a partir do nó** onde o `semaphore` roda.
+- Os hosts gerenciados precisam ser alcançáveis por SSH **a partir do nó** onde o `app` roda.
 
 ## Uso
 1. Gere a chave de cifra: `head -c32 /dev/urandom | base64`.
@@ -91,7 +91,7 @@ nome de stack reaproveita os volumes existentes.
 ## Troubleshooting
 | Sintoma | Causa | Ação |
 |---|---|---|
-| `semaphore` reinicia com erro de conexão ao banco | `db` ainda subindo / senha divergente | aguardar o `db`; conferir `SEMAPHORE_DB_PASSWORD` igual no app e no banco |
+| `app` reinicia com erro de conexão ao banco | `db` ainda subindo / senha divergente | aguardar o `db`; conferir `SEMAPHORE_DB_PASSWORD` igual no app e no banco |
 | Login do admin não funciona após mudar a env | o admin só é criado na 1ª subida | trocar a senha pela UI (ou `semaphore user change-by-login` dentro do container) |
 | Chaves salvas não decifram / tasks falham ao usar a key | `SEMAPHORE_ACCESS_KEY_ENCRYPTION` trocada | voltar a chave original (ela não pode mudar depois do 1º uso) |
 | Links dos e-mails/notificações apontam para `localhost` | `SEMAPHORE_WEB_ROOT` errado | conferir `SEMAPHORE_FQDN` |
