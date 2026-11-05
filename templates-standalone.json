@@ -4080,6 +4080,119 @@
           "default": "data"
         }
       ]
+    },
+    {
+      "type": 3,
+      "title": "ldap-self-signup — autocadastro LDAP com aprovação",
+      "name": "ldap-self-signup",
+      "description": "Autocadastro de contas num OpenLDAP (posixAccount) com aprovação: formulário público com confirmação de e-mail e consentimento (LGPD), painel do admin, convites, área do usuário (minha conta, trocar e esqueci a senha).",
+      "note": "Senhas viram secrets do Compose (Compose 2.23+); o tema vem de SIGNUP_TEMPLATE_DIR. No Swarm, os Docker secrets são <code>ldap_self_signup_ldap_bind_pw</code>, <code>ldap_self_signup_secret_key</code> e <code>ldap_self_signup_smtp_password</code> e os configs <code>ldap_self_signup_privacidade_v1</code> (aviso de privacidade, obrigatório) e <code>ldap_self_signup_tema_v1</code> (tema.toml). Precisa das redes externas <code>web</code> e <code>ldap</code> (ex.: stack <code>account</code>). 1 réplica (SQLite). <a href=\"https://github.com/marcelofmatos/portainer-stacks/blob/main/ldap-self-signup/README.md\" target=\"_blank\">📖 Documentação da stack</a>",
+      "categories": [
+        "authentication",
+        "ldap",
+        "Porte: Leve"
+      ],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/openldap.png",
+      "repository": {
+        "url": "https://github.com/marcelofmatos/portainer-stacks",
+        "stackfile": "ldap-self-signup/docker-compose.standalone.yml"
+      },
+      "env": [
+        {
+          "name": "SIGNUP_FQDN",
+          "label": "Domínio do cadastro",
+          "description": "Ex.: acesso.exemplo.org"
+        },
+        {
+          "name": "LDAP_BIND_DN",
+          "label": "DN de bind",
+          "description": "Ex.: cn=admin,dc=exemplo,dc=org (cria contas e altera grupos)"
+        },
+        {
+          "name": "LDAP_USERS_BASE",
+          "label": "Base das contas",
+          "description": "Ex.: ou=Users,dc=exemplo,dc=org"
+        },
+        {
+          "name": "LDAP_DEFAULT_GROUP_DN",
+          "label": "Grupo padrão",
+          "description": "Ex.: cn=Usuario,ou=Groups,dc=exemplo,dc=org"
+        },
+        {
+          "name": "ADMIN_GROUP_DN",
+          "label": "Grupo dos admins",
+          "description": "Membros (memberUid) entram no painel. Preencha este ou ADMIN_UIDS",
+          "default": ""
+        },
+        {
+          "name": "ADMIN_UIDS",
+          "label": "Uids admin",
+          "description": "Separados por vírgula. Preencha este ou ADMIN_GROUP_DN",
+          "default": ""
+        },
+        {
+          "name": "SMTP_HOST",
+          "label": "Servidor SMTP",
+          "description": "Ex.: smtp-relay.brevo.com"
+        },
+        {
+          "name": "SMTP_USER",
+          "label": "Usuário SMTP",
+          "default": ""
+        },
+        {
+          "name": "SMTP_FROM",
+          "label": "Remetente",
+          "description": "Ex.: acesso@exemplo.org"
+        },
+        {
+          "name": "ADMIN_NOTIFY_EMAIL",
+          "label": "E-mail dos avisos ao admin",
+          "description": "Recebe as novas solicitações"
+        },
+        {
+          "name": "LDAP_BIND_PW",
+          "label": "Senha do bind LDAP",
+          "description": "Vira secret do Compose"
+        },
+        {
+          "name": "SECRET_KEY",
+          "label": "Chave da sessão",
+          "description": "openssl rand -hex 32"
+        },
+        {
+          "name": "SMTP_PASSWORD",
+          "label": "Senha SMTP",
+          "default": ""
+        },
+        {
+          "name": "SIGNUP_TEMPLATE_DIR",
+          "label": "Pasta do tema",
+          "description": "Com privacidade.md (obrigatório)",
+          "default": "./template"
+        },
+        {
+          "name": "LDAP_URL",
+          "label": "Servidor LDAP",
+          "default": "ldap://ldap:389"
+        },
+        {
+          "name": "APP_IMAGE_TAG",
+          "label": "Versão da imagem",
+          "default": "latest"
+        },
+        {
+          "name": "PROXY_NET",
+          "label": "Rede do proxy",
+          "default": "web"
+        },
+        {
+          "name": "LDAP_NET",
+          "label": "Rede compartilhada LDAP",
+          "default": "ldap"
+        }
+      ]
     }
   ]
 }

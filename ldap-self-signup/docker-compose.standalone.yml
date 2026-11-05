@@ -1,0 +1,82 @@
+# Stack "ldap-self-signup" — autocadastro de contas num OpenLDAP com aprovação (variante Docker Compose)
+# App: https://github.com/marcelofmatos/ldap-self-signup
+# Pré-req: redes externas `web` (Traefik) e `ldap` (docker network create web; docker network create ldap).
+# Segredos: o app só lê segredos de ARQUIVO (*_FILE). Aqui eles viram secrets do Compose a partir das variáveis
+# LDAP_BIND_PW, SECRET_KEY e SMTP_PASSWORD (Docker Compose 2.23+). O tema vem de uma pasta local montada em
+# /template (SIGNUP_TEMPLATE_DIR, default ./template) com pelo menos privacidade.md (ver config/).
+# Obrigatórias: SIGNUP_FQDN, LDAP_BIND_DN, LDAP_BIND_PW, LDAP_USERS_BASE, LDAP_DEFAULT_GROUP_DN, SECRET_KEY,
+#               SMTP_HOST, SMTP_FROM, ADMIN_NOTIFY_EMAIL e ADMIN_GROUP_DN ou ADMIN_UIDS.
+# Porte: Leve (64 MB → 512 MB RAM)
+
+services:
+
+  app:
+    image: ghcr.io/marcelofmatos/ldap-self-signup:${APP_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    networks:
+      - default
+      - web
+      - ldap
+    environment:
+      - PUBLIC_URL=https://${SIGNUP_FQDN}
+      - LDAP_URL=${LDAP_URL:-ldap://ldap:389}
+      - LDAP_BIND_DN=${LDAP_BIND_DN}
+      - LDAP_BIND_PW_FILE=/run/secrets/ldap_bind_pw
+      - LDAP_USERS_BASE=${LDAP_USERS_BASE}
+      - LDAP_DEFAULT_GROUP_DN=${LDAP_DEFAULT_GROUP_DN}
+      - LDAP_DEFAULT_GID=${LDAP_DEFAULT_GID:-10000}
+      - ADMIN_GROUP_DN=${ADMIN_GROUP_DN:-}
+      - ADMIN_UIDS=${ADMIN_UIDS:-}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_STARTTLS=${SMTP_STARTTLS:-true}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD_FILE=/run/secrets/smtp_password
+      - SMTP_FROM=${SMTP_FROM}
+      - ADMIN_NOTIFY_EMAIL=${ADMIN_NOTIFY_EMAIL}
+      - SECRET_KEY_FILE=/run/secrets/secret_key
+      - TRUSTED_PROXIES=${TRUSTED_PROXIES:-1}
+      - COOKIE_SECURE=true
+      - TIMEZONE_EXIBICAO=${TIMEZONE_EXIBICAO:-America/Sao_Paulo}
+      - TOKEN_TTL_HOURS=${TOKEN_TTL_HOURS:-24}
+      - CONVITE_TTL_DIAS=${CONVITE_TTL_DIAS:-7}
+      - RATE_LIMIT_FORM=${RATE_LIMIT_FORM:-10/hora}
+      - RATE_LIMIT_LOGIN=${RATE_LIMIT_LOGIN:-10/15min}
+    secrets:
+      - ldap_bind_pw
+      - secret_key
+      - smtp_password
+    volumes:
+      - signup-data:/data
+      # tema: pasta local com privacidade.md (obrigatório) e, opcionalmente, tema.toml, logo.png, favicon.*
+      - ${SIGNUP_TEMPLATE_DIR:-./template}:/template:ro
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${PROXY_NET:-web}
+      - traefik.http.routers.ldap-self-signup.rule=Host(`${SIGNUP_FQDN}`)
+      - traefik.http.routers.ldap-self-signup.entrypoints=websecure
+      - traefik.http.routers.ldap-self-signup.tls=true
+      - traefik.http.routers.ldap-self-signup.tls.certresolver=letsencryptresolver
+      - traefik.http.services.ldap-self-signup.loadbalancer.server.port=8000
+
+secrets:
+  ldap_bind_pw:
+    environment: LDAP_BIND_PW
+  secret_key:
+    environment: SECRET_KEY
+  smtp_password:
+    environment: SMTP_PASSWORD
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  ldap:
+    external: true
+    name: ${LDAP_NET:-ldap}
+  default:
+    driver: bridge
+
+volumes:
+  signup-data:
+    driver: local

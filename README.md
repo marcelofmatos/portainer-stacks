@@ -52,7 +52,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 
 | Porte | RAM (mín → ideal) | Stacks |
 |---|---|---|
-| **Leve** | 64 MB → 512 MB | `error-pages`, `cloudflared`, `caddy`, `socat`, `redirect`, `onedrive`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis`, `grafana`, `claude-code-organizer`, `ai-memory`, `zabbix-status-page`, `uptime-kuma`, `backrest`, `deep-research`, `financial-coach`, `mcp-apps-showcase`, `gen-ui-starter`, `dashboard-canvas`, `shadcn-generator`, `mcp-app-builder`, `orquestrator4proxmox`, `headscale`, `sygnal`, `ansible-semaphore` |
+| **Leve** | 64 MB → 512 MB | `error-pages`, `cloudflared`, `caddy`, `socat`, `redirect`, `onedrive`, `docker-service-update`, `haproxy`, `lldap`, `ssh-server`, `balancer`, `phpmyadmin`, `pgadmin4`, `mongo-express`, `redisinsight`, `excalidraw`, `openspeedtest`, `mailtester`, `protonmail-bridge`, `searxng`, `authelia`, `phpnetmap`, `redis`, `grafana`, `claude-code-organizer`, `ai-memory`, `zabbix-status-page`, `uptime-kuma`, `backrest`, `deep-research`, `financial-coach`, `mcp-apps-showcase`, `gen-ui-starter`, `dashboard-canvas`, `shadcn-generator`, `mcp-app-builder`, `orquestrator4proxmox`, `headscale`, `sygnal`, `ansible-semaphore`, `ldap-self-signup` |
 | **Médio** | 512 MB → 2 GB | `account`, `keycloak`, `zabbix`, `mariadb`, `postgres-pgvector`, `mongodb`, `chromadb`, `qdrant`, `minio`, `workflows`, `evolution-api`, `wa-akg`, `joomla`, `wordpress`, `wikijs`, `espocrm`, `typebot`, `stirlingpdf`, `flowise`, `litellm`, `omniroute`, `open-webui`, `element`, `home-assistant` |
 | **Pesado** | 2 GB → 4–8 GB | `swarmprom`, `elasticsearch`, `drive`, `rocketchat`, `moodle`, `twenty`, `botpress`, `langfuse`, `librechat`, `anythingllm`, `chatwoot`, `ligerosmart`, `dify`, `supabase` |
 | **GPU / ML** | 8 GB+ (GPU recomendada) | `ollama`, `comfyui`, `ragflow` |
@@ -87,6 +87,7 @@ Porte das stacks (por RAM, do mínimo ao ideal):
 |---|---|---|
 | [`account`](account/) | OpenLDAP + LAM + self-service-password | [README](account/README.md) |
 | [`lldap`](lldap/) | LDAP leve (usuários + grupos) + UI web | [README](lldap/README.md) |
+| [`ldap-self-signup`](ldap-self-signup/) | Autocadastro de contas LDAP com aprovação, convites e área do usuário | [README](ldap-self-signup/README.md) |
 | [`keycloak`](keycloak/) | IAM/SSO (OIDC/SAML) + PostgreSQL | [README](keycloak/README.md) |
 | [`authelia`](authelia/) | Autenticação/2FA (forward-auth) + Redis | [README](authelia/README.md) |
 

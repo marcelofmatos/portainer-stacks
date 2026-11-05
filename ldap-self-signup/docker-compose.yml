@@ -1,0 +1,113 @@
+# Stack "ldap-self-signup" — autocadastro de contas num OpenLDAP (posixAccount) com aprovação (Docker Swarm)
+# App: https://github.com/marcelofmatos/ldap-self-signup — formulário público com confirmação de e-mail e
+# consentimento (LGPD), painel de aprovação, convites, área do usuário (minha conta, trocar/esqueci a senha).
+# Proxy: Traefik v3 na rede externa `web`, TLS Let's Encrypt (certresolver=letsencryptresolver).
+# LDAP: rede externa `ldap` (ex.: stack `account`, host account_ldap:389).
+#
+# Pré-requisitos (criar ANTES do deploy, ver README):
+#   secrets  ${SECRET_LDAP_BIND_PW}, ${SECRET_SECRET_KEY}, ${SECRET_SMTP_PASSWORD}
+#   configs  ${PRIVACIDADE_CONFIG_NAME} -> /template/privacidade.md  (aviso de privacidade, obrigatório)
+#            ${TEMA_CONFIG_NAME}        -> /template/tema.toml       (nome, cores, rodapé, links)
+# Obrigatórias: SIGNUP_FQDN, LDAP_BIND_DN, LDAP_USERS_BASE, LDAP_DEFAULT_GROUP_DN, SMTP_HOST, SMTP_FROM,
+#               ADMIN_NOTIFY_EMAIL e ADMIN_GROUP_DN ou ADMIN_UIDS.
+#
+# NOTA: 1 réplica (banco SQLite e limite de taxa em memória). O volume é local ao nó: em cluster com mais de
+# um worker, fixe o serviço com WORKER_HOSTNAME (descomente o constraint).
+# Porte: Leve (64 MB → 512 MB RAM)
+# Hardware (1 réplica): mínimo 0.25 vCPU · 128 MB RAM · 1 GB disco · ideal 0.5 vCPU · 256 MB RAM · 2 GB disco
+
+services:
+
+  app:
+    image: ghcr.io/marcelofmatos/ldap-self-signup:${APP_IMAGE_TAG:-latest}
+    networks:
+      - default
+      - web
+      - ldap
+    environment:
+      - PUBLIC_URL=https://${SIGNUP_FQDN}
+      - LDAP_URL=${LDAP_URL:-ldap://account_ldap:389}
+      - LDAP_BIND_DN=${LDAP_BIND_DN}
+      - LDAP_BIND_PW_FILE=/run/secrets/ldap_bind_pw
+      - LDAP_USERS_BASE=${LDAP_USERS_BASE}
+      - LDAP_DEFAULT_GROUP_DN=${LDAP_DEFAULT_GROUP_DN}
+      - LDAP_DEFAULT_GID=${LDAP_DEFAULT_GID:-10000}
+      - ADMIN_GROUP_DN=${ADMIN_GROUP_DN:-}
+      - ADMIN_UIDS=${ADMIN_UIDS:-}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_STARTTLS=${SMTP_STARTTLS:-true}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD_FILE=/run/secrets/smtp_password
+      - SMTP_FROM=${SMTP_FROM}
+      - ADMIN_NOTIFY_EMAIL=${ADMIN_NOTIFY_EMAIL}
+      - SECRET_KEY_FILE=/run/secrets/secret_key
+      - TRUSTED_PROXIES=${TRUSTED_PROXIES:-1}
+      - COOKIE_SECURE=true
+      - TIMEZONE_EXIBICAO=${TIMEZONE_EXIBICAO:-America/Sao_Paulo}
+      - TOKEN_TTL_HOURS=${TOKEN_TTL_HOURS:-24}
+      - CONVITE_TTL_DIAS=${CONVITE_TTL_DIAS:-7}
+      - RATE_LIMIT_FORM=${RATE_LIMIT_FORM:-10/hora}
+      - RATE_LIMIT_LOGIN=${RATE_LIMIT_LOGIN:-10/15min}
+    secrets:
+      - source: ldap_bind_pw
+        target: ldap_bind_pw
+      - source: secret_key
+        target: secret_key
+      - source: smtp_password
+        target: smtp_password
+    configs:
+      - source: privacidade
+        target: /template/privacidade.md
+      - source: tema
+        target: /template/tema.toml
+    volumes:
+      # SQLite: solicitações, consentimentos (LGPD), tokens e auditoria
+      - signup-data:/data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+          # - node.hostname == ${WORKER_HOSTNAME:-}   # fixe em cluster multi-worker (volume local ao nó)
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.ldap-self-signup.rule=Host(`${SIGNUP_FQDN}`)
+        - traefik.http.routers.ldap-self-signup.entrypoints=websecure
+        - traefik.http.routers.ldap-self-signup.tls=true
+        - traefik.http.routers.ldap-self-signup.tls.certresolver=letsencryptresolver
+        - traefik.http.services.ldap-self-signup.loadbalancer.server.port=8000
+
+secrets:
+  ldap_bind_pw:
+    external: true
+    name: ${SECRET_LDAP_BIND_PW:-ldap_self_signup_ldap_bind_pw}
+  secret_key:
+    external: true
+    name: ${SECRET_SECRET_KEY:-ldap_self_signup_secret_key}
+  smtp_password:
+    external: true
+    name: ${SECRET_SMTP_PASSWORD:-ldap_self_signup_smtp_password}
+
+configs:
+  privacidade:
+    external: true
+    name: ${PRIVACIDADE_CONFIG_NAME:-ldap_self_signup_privacidade_v1}
+  tema:
+    external: true
+    name: ${TEMA_CONFIG_NAME:-ldap_self_signup_tema_v1}
+
+networks:
+  web:
+    external: true
+    name: ${PROXY_NET:-web}
+  ldap:
+    external: true
+    name: ${LDAP_NET:-ldap}
+  default:
+    driver: overlay
+
+volumes:
+  signup-data:
+    driver: local
